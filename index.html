@@ -137,6 +137,7 @@ const DEFAULT_SETTINGS = {
   lat: 48.7996, lon: 2.0667, locationLabel: "Saint-Cyr-l'École (78210)",
   tempUnit: 'C',
   syncUrl: '', syncToken: '',
+  feedGapEnabled: false, feedGapDayH: 3, feedGapNightH: 5,
 };
 function loadJSON(key, fallback){ try{ const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }catch(e){ return fallback; } }
 function saveJSON(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
@@ -431,6 +432,17 @@ function viewHome(){
   const list=todays(); const s=daySummary(list);
   const lastFeed=lastOfType('breastfeed');
   const lastSide=lastFeed?lastFeed.data.side:null;
+  const lastFeedAny=events.filter(e=>e.type==='breastfeed'||e.type==='bottle').sort((a,b)=>b.at-a.at)[0];
+  let feedGapBanner='';
+  if(settings.feedGapEnabled && lastFeedAny){
+    const hrs=(Date.now()-lastFeedAny.at)/3600000;
+    const hr=new Date().getHours();
+    const night=(hr>=22 || hr<7);
+    const thr=night?settings.feedGapNightH:settings.feedGapDayH;
+    if(hrs>=thr){
+      feedGapBanner=`<div class="banner warn" style="margin-top:12px">🍼 It's been <b>${hrs.toFixed(1)}h</b> since the last feed (${night?'night':'day'} guide ${thr}h). Newborns usually shouldn't go much longer — consider offering a feed.</div>`;
+    }
+  }
   const sug=nextSide(lastSide);
   const bf=getTimer('breastfeed'); const sl=getTimer('sleep');
   const now=Date.now();
@@ -498,6 +510,7 @@ function viewHome(){
         <div class="card pad-s stat"><div class="label" style="margin:0">Feeds</div><div class="v">${s.feeds}</div>${lastFeed?`<div class="tiny muted">last ${relTime(lastFeed.at)}</div>`:''}</div>
         <div class="card pad-s stat"><div class="label" style="margin:0">Sleep</div><div class="v">${fmtDur(s.sleepSec)}</div></div>
       </div>
+      ${feedGapBanner}
       ${lastFeed?`<div class="banner pink" style="margin-top:12px">🤱 Next feed: start on the <b>${sug}</b> (last started ${lastSide}).</div>`:''}
     </div>
 
@@ -615,6 +628,18 @@ function viewSettings(){
           <li>Tap <b>Sync now</b>. Paste the same URL on the other phone.</li>
         </ol>
       </details>
+    </div>
+    <div class="card pad">
+      <h2 style="margin-bottom:4px">Feeding</h2>
+      <div class="tiny muted" style="margin-bottom:12px">Feeding is on demand. Optionally show a gentle nudge only when an unusually long gap passes — a safety floor, not a schedule.</div>
+      <div class="between" style="margin-bottom:${settings.feedGapEnabled?'12px':'0'}">
+        <span class="small">Long-gap nudge</span>
+        <button class="chip ${settings.feedGapEnabled?'on':''}" data-act="toggle-feedgap">${settings.feedGapEnabled?'On':'Off'}</button>
+      </div>
+      ${settings.feedGapEnabled?`<div class="grid g2">
+        <div class="field" style="margin:0"><label class="label">Day max (h)</label><input type="number" step="0.5" inputmode="decimal" data-setnum="feedGapDayH" value="${settings.feedGapDayH}"></div>
+        <div class="field" style="margin:0"><label class="label">Night max (h)</label><input type="number" step="0.5" inputmode="decimal" data-setnum="feedGapNightH" value="${settings.feedGapNightH}"></div>
+      </div><div class="tiny muted" style="margin-top:8px">Night counted as 10pm–7am. Typical guides: ~3h day, ~5h night in the early weeks.</div>`:''}
     </div>
     <div class="card pad">
       <h2 style="margin-bottom:12px">Caregivers</h2>
@@ -809,6 +834,7 @@ document.addEventListener('click', (ev)=>{
   if(act==='export-json') return download('baby-care-backup-'+dateKey(Date.now())+'.json', JSON.stringify({app:'baby-care-tracker',version:1,exportedAt:Date.now(),events:events},null,2), 'application/json');
   if(act==='import'){ const fi=document.createElement('input'); fi.type='file'; fi.accept='application/json,.json'; fi.onchange=()=>{ if(fi.files[0]) importBackup(fi.files[0]); }; fi.click(); return; }
   if(act==='sync-now') return syncNow();
+  if(act==='toggle-feedgap') return saveSettings({ feedGapEnabled: !settings.feedGapEnabled });
 });
 
 // text / number / datetime inputs (no full re-render to preserve focus)
@@ -823,6 +849,7 @@ document.addEventListener('input', (ev)=>{
     saveJSON(LS.settings, settings);
     return;
   }
+  if(el.dataset && el.dataset.setnum){ settings[el.dataset.setnum]=parseFloat(el.value)||0; saveJSON(LS.settings, settings); return; }
   if(!state.sheet) return;
   const s=state.sheet;
   if(el.dataset.num!=null){ const mul=el.dataset.mul?+el.dataset.mul:1; s.draft[el.dataset.num]= el.value===''?(el.dataset.num==='leftSec'||el.dataset.num==='rightSec'?0:undefined):(parseFloat(el.value)*mul);
