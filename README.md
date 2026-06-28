@@ -1,90 +1,82 @@
 # 🍼 Baby Care Tracker
 
-A private, **local-first** PWA for two parents to track newborn care together —
-diapers, feeding, sleep, temperature, growth and more. Built mobile-first for
-one-handed logging at 3am.
+A private app for two parents to track newborn care together — diapers, feeding,
+sleep, temperature, growth and more. Built mobile-first for one-handed logging at
+3am.
+
+There are **two versions** in this repo:
+
+| Version | Where | Needs a server / build? | Best for |
+| --- | --- | --- | --- |
+| **Single HTML file** ⭐ | [`index.html`](index.html) | **No** — just open it | The simplest way to use it |
+| React PWA | [`react-app/`](react-app/) | Yes (`npm`, build step) | Future cloud sync, app-store-style PWA |
 
 > ⚠️ The guidance in this app (fever thresholds, stool-color flags, diaper
 > targets) reflects **general newborn-care standards** and is **not a
 > substitute for medical advice**. When in doubt, call your doctor.
 
-## Features
+## ⭐ The simple version — `index.html`
 
-- **Quick logging** — one tap from the home screen for every event type.
-- **Diapers** — pee / poop / both, amount (little / average / full), **stool
-  color with danger flags** (white/clay, red, black-after-meconium prompt you to
-  call a doctor), and texture.
-- **Breastfeeding** — two-sided session timer that records **time on each breast
-  separately** (start a side, *Switch*, *Stop*), suggests **which side to start
-  next**, and logs the **feeding position** (cradle, cross-cradle, football,
-  laid-back, side-lying).
-- **Bottle** — formula / expressed / mixed, volume in ml with quick presets.
-- **Temperature** — records measurement method and shows an **automatic fever
-  assessment**; a fever in a baby **under 3 months is flagged as an emergency**.
-- **Sleep** — live timer or manual entry; daily totals.
-- **Cry, pump, medication / vitamin D, growth, notes.**
-- **Weather** — current outdoor conditions for your location (default:
-  Saint-Cyr-l'École 78210) via the keyless Open-Meteo API, plus a **safe-sleep
-  nursery temperature** reminder (16–20 °C).
-- **Dashboard** — today's wet/dirty diaper counts (vs. age-based target), feeds,
-  sleep, last-feed time and next-side suggestion.
-- **Trends** — diapers, feeds and sleep per day, plus a weight curve.
-- **Multi-caregiver** — every entry records who logged it (Papa / Maman / …).
-- **Offline-first PWA** — installable on iPhone & Android, works with no network.
-- **Backup & share** — CSV export for your pediatrician, JSON backup/restore to
-  move data between phones.
+One self-contained file. **No server, no build, no install.** Everything (HTML,
+CSS, JavaScript) is inside it, and your data is saved privately in the browser
+(`localStorage`).
 
-## Tech stack
+**To use it, pick either:**
 
-- React 18 + TypeScript + Vite
-- Tailwind CSS (mobile-first)
-- Dexie (IndexedDB) for local-first storage
-- Recharts for trends
-- `vite-plugin-pwa` (Workbox) for offline + installability
-- Open-Meteo for weather (no API key)
+1. **Just open the file** — download `index.html` and double-click it (opens as
+   `file://…`). Works fully offline. *(The only thing that needs internet is the
+   outdoor-weather widget.)*
+2. **Host it** (recommended for using it on two phones) — put `index.html` on any
+   static host (Netlify drop, GitHub Pages, Cloudflare Pages, a USB-synced
+   folder…), open the URL on each phone, and **"Add to Home Screen"** to get an
+   app icon.
 
-## Getting started
-
-```bash
-npm install
-npm run dev      # http://localhost:5173
-```
-
-Build for production / self-hosting:
-
-```bash
-npm run build
-npm run preview
-```
-
-Then deploy the `dist/` folder to any static host (Netlify, Vercel, GitHub
-Pages, Cloudflare Pages…). On your phone, open the URL and **"Add to Home
-Screen"** to install it as an app.
+> Note: data lives **per device/browser**. Use **Settings → Export / Import
+> backup** to copy entries between phones (imports are de-duplicated, so
+> re-importing is safe).
 
 ### First run
 
-Open **Settings** and set your baby's **name** and **date of birth** — the DOB
-powers age-based fever alerts and diaper targets. Add/rename caregivers there too.
+Open **Settings** → set the baby's **name** and **date of birth**. The DOB powers
+the age-based fever alerts (a fever under 3 months is flagged as an emergency) and
+the daily wet-diaper target.
 
-## Sharing data between two phones
+## Features (both versions)
 
-This version stores data **on each device**. To keep two phones in sync today:
-**Settings → Export backup (JSON)** on one phone, send the file to the other,
-then **Import backup** (imports are de-duplicated, so re-importing is safe).
+- **Quick logging** — one tap from the home screen for every event type.
+- **Diapers** — pee / poop / both, amount, **stool color with danger flags**
+  (white/clay, red, black-after-meconium prompt you to call a doctor), texture.
+- **Breastfeeding** — two-sided session timer that records **time on each breast
+  separately** (start a side → *Switch* → *Stop*), suggests **which side to start
+  next**, and logs the **feeding position** (cradle, cross-cradle, football,
+  laid-back, side-lying).
+- **Bottle** — formula / expressed / mixed, volume with quick presets.
+- **Temperature** — measurement method + **automatic fever assessment**; under
+  3 months a fever is flagged as an **emergency**.
+- **Sleep** — live timer or manual entry; daily totals.
+- **Cry, pump, medication / vitamin D, growth, notes.**
+- **Weather** — current outdoor conditions for your location (default
+  Saint-Cyr-l'École 78210) via the keyless Open-Meteo API, plus a **safe-sleep
+  nursery temperature** reminder (16–20 °C).
+- **Dashboard** — today's wet/dirty counts vs. age target, feeds, sleep, last-feed
+  time and next-side suggestion.
+- **Trends** — diapers, feeds and sleep per day, plus a weight curve.
+- **Multi-caregiver** — every entry records who logged it (Papa / Maman / …).
+- **Backup & share** — CSV export for your pediatrician + JSON backup/restore.
 
-### Future: live cloud sync
+## The React version — `react-app/`
 
-The whole app reads/writes through a single data layer (`src/db/`), so a cloud
-backend (e.g. Supabase) can be added later for real-time multi-device sync
-without rewriting the UI.
+A full Vite + React + TypeScript PWA (Tailwind, Dexie/IndexedDB, Recharts,
+installable/offline service worker). Same features, plus a clean data layer
+(`react-app/src/db/`) so a cloud backend (e.g. Supabase) can be added later for
+live multi-device sync.
 
-## Project structure
-
+```bash
+cd react-app
+npm install
+npm run dev      # http://localhost:5173
+npm run build    # outputs to react-app/dist
 ```
-src/
-  db/        types, Dexie schema, event CRUD
-  lib/       clinical rules, weather, time, CSV/JSON export, event display
-  state/     settings context, running timers
-  components/ UI primitives, event card, log sheet (all forms), weather card
-  pages/     Home (dashboard), Timeline, Trends, Settings
-```
+
+If you decide you only want the simple single-file version, you can safely delete
+the `react-app/` folder.

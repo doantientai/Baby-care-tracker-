@@ -1,17 +1,731 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1" />
-    <meta name="theme-color" content="#0ea5e9" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="BabyCare" />
-    <title>Baby Care Tracker</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#0ea5e9" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="BabyCare" />
+<title>Baby Care Tracker</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230ea5e9'/%3E%3Ctext x='50' y='70' font-size='58' text-anchor='middle'%3E%F0%9F%8D%BC%3C/text%3E%3C/svg%3E" />
+<style>
+  :root{
+    --brand:#0ea5e9; --brand-d:#0284c7; --bg:#f8fafc; --ink:#0f172a; --muted:#64748b;
+    --line:#e2e8f0; --card:#fff; --pink:#ec4899; --pink-l:#fce7f3; --indigo:#6366f1; --indigo-l:#e0e7ff;
+    --good:#059669; --good-l:#ecfdf5; --warn:#d97706; --warn-l:#fffbeb; --bad:#dc2626; --bad-l:#fef2f2;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;overflow-x:hidden}
+  #app{max-width:480px;margin:0 auto;min-height:100%;padding:env(safe-area-inset-top) 0 96px}
+  .grid>*{min-width:0}
+  svg{max-width:100%}
+  .between>.small{flex:0 1 auto;text-align:right}
+  h1{font-size:1.6rem;margin:0}
+  h2{font-size:.95rem;margin:0}
+  button{font-family:inherit;cursor:pointer}
+  .wrap{padding:16px}
+  .row{display:flex;align-items:center;gap:8px}
+  .between{display:flex;align-items:center;justify-content:space-between}
+  .muted{color:var(--muted)}
+  .small{font-size:.8rem}
+  .tiny{font-size:.7rem}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr 1fr}
+  .card{background:var(--card);border:1px solid #eef2f7;border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  .pad{padding:16px}
+  .pad-s{padding:12px}
+  .section-title{font-size:.85rem;font-weight:600;color:var(--muted);margin:0 0 8px}
+  .tabular{font-variant-numeric:tabular-nums}
+  .label{display:block;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#94a3b8;margin-bottom:6px}
+  .field{margin-bottom:16px}
+  input,textarea,select{width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;
+    padding:11px 12px;font-size:16px;outline:none;color:var(--ink)}
+  input:focus,textarea:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px #bae6fd66}
+  textarea{min-height:60px;resize:vertical}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:12px;
+    padding:11px 16px;font-weight:600;font-size:.95rem;transition:transform .05s,background .15s}
+  .btn:active{transform:scale(.98)}
+  .btn-primary{background:var(--brand);color:#fff}
+  .btn-primary:active{background:var(--brand-d)}
+  .btn-ghost{background:#f1f5f9;color:#334155}
+  .btn-block{width:100%}
+  .chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;border:1px solid var(--line);
+    background:#fff;color:#475569;padding:9px 14px;font-size:.88rem;font-weight:600;transition:transform .05s}
+  .chip:active{transform:scale(.95)}
+  .chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .swatch{width:14px;height:14px;border-radius:999px;border:1px solid rgba(0,0,0,.1)}
+  .quick{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 6px;border:1px solid #eef2f7;
+    background:#fff;border-radius:16px}
+  .quick .emoji{font-size:1.6rem}
+  .quick .t{font-size:.78rem;font-weight:600;color:#475569}
+  .stat .v{font-size:1.6rem;font-weight:800;line-height:1.1;margin-top:2px}
+  .stat.good{background:var(--good-l);border-color:#a7f3d0}
+  .stat.warn{background:var(--warn-l);border-color:#fde68a}
+  .banner{border-radius:12px;padding:9px 12px;font-size:.85rem}
+  .banner.info{background:#e0f2fe;color:#075985}
+  .banner.pink{background:var(--pink-l);color:#9d174d}
+  .banner.good{background:var(--good-l);color:#065f46;font-weight:600}
+  .banner.warn{background:var(--warn-l);color:#92400e;font-weight:600}
+  .banner.bad{background:var(--bad-l);color:#991b1b;font-weight:700}
+  .ev{display:flex;align-items:center;gap:12px;padding:10px 12px;width:100%;text-align:left;border:none;background:none;border-radius:12px}
+  .ev:active{background:#f8fafc}
+  .ev+.ev{border-top:1px solid #f1f5f9}
+  .ev .ic{width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex:0 0 auto}
+  .ev .mid{min-width:0;flex:1}
+  .ev .ttl{font-weight:700}
+  .ev .sub{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ev .rt{text-align:right;flex:0 0 auto}
+  .ev.warn{background:var(--bad-l)}
+  .nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);
+    border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+  .nav .inner{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+  .nav button{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;
+    padding:9px 0;color:#94a3b8;font-size:.7rem;font-weight:600}
+  .nav button .ne{font-size:1.25rem}
+  .nav button.on{color:var(--brand-d)}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;max-width:480px;margin:0 auto;background:#fff;
+    border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow-y:auto;
+    animation:up .2s ease-out}
+  @keyframes up{from{transform:translateY(14px);opacity:.7}to{transform:translateY(0);opacity:1}}
+  .sheet .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .x{border:none;background:#f1f5f9;color:#64748b;border-radius:999px;width:32px;height:32px;font-size:1rem}
+  .pillrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .hidden{display:none!important}
+  .center{text-align:center}
+  .daycap{position:sticky;top:0;background:linear-gradient(#f8fafc,#f8fafcdd);padding:6px 2px;z-index:5}
+  .filterbar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin:0 -16px 14px;padding-left:16px;padding-right:16px}
+  .filterbar .chip{flex:0 0 auto}
+  svg.chart{width:100%;height:auto;display:block}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.75rem;color:var(--muted);margin-top:6px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  .side{border-radius:10px;padding:6px 4px;text-align:center}
+  .side.on{background:var(--pink);color:#fff}
+  .side.off{background:var(--pink-l);color:#9d174d}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<nav class="nav">
+  <div class="inner" id="nav"></div>
+</nav>
+<div id="sheet-root"></div>
+
+<script>
+"use strict";
+/* ============================================================ Baby Care Tracker
+   Single-file app. No build, no server. Data is stored in this browser
+   (localStorage). General newborn-care guidance — not medical advice.
+============================================================================== */
+
+/* ----------------------------------------------------------------- storage -- */
+const LS = {
+  settings: 'bct.settings',
+  events: 'bct.events',
+  timers: 'bct.timers',
+};
+const DEFAULT_SETTINGS = {
+  babyName: 'Baby', babyDob: null,
+  caregivers: ['Papa', 'Maman'], currentCaregiver: 'Papa',
+  lat: 48.7996, lon: 2.0667, locationLabel: "Saint-Cyr-l'École (78210)",
+  tempUnit: 'C',
+};
+function loadJSON(key, fallback){ try{ const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }catch(e){ return fallback; } }
+function saveJSON(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
+
+let settings = Object.assign({}, DEFAULT_SETTINGS, loadJSON(LS.settings, {}));
+let events = loadJSON(LS.events, []);
+
+function saveSettings(patch){ settings = Object.assign({}, settings, patch); saveJSON(LS.settings, settings); render(); }
+function persistEvents(){ saveJSON(LS.events, events); }
+
+function newId(){ return (events.reduce((m,e)=>Math.max(m, e.id||0), 0) + 1); }
+function addEvent(ev){
+  const ts = Date.now();
+  events.push(Object.assign({ id:newId(), createdAt:ts, updatedAt:ts }, ev));
+  persistEvents();
+}
+function updateEvent(id, patch){
+  const i = events.findIndex(e=>e.id===id);
+  if(i>=0){ events[i] = Object.assign({}, events[i], patch, { updatedAt:Date.now() }); persistEvents(); }
+}
+function deleteEvent(id){ events = events.filter(e=>e.id!==id); persistEvents(); }
+
+/* ------------------------------------------------------- clinical reference -- */
+const DAY = 86400000;
+function ageInDays(ref=Date.now()){ return settings.babyDob==null ? null : Math.floor((ref - settings.babyDob)/DAY); }
+function ageInMonths(ref=Date.now()){ return settings.babyDob==null ? null : (ref - settings.babyDob)/(DAY*30.4375); }
+
+const FEVER_C = { rectal:38.0, ear:38.0, forehead:38.0, oral:37.8, axillary:37.5 };
+function assessTemperature(c, method){
+  const th = FEVER_C[method] ?? 38.0;
+  const months = ageInMonths();
+  if(c < 36.0) return { level:'bad', urgent:c<35.5, msg: c<35.5 ? 'Low temperature — warm the baby and contact a doctor.' : 'Slightly low — warm the baby and recheck soon.' };
+  if(c >= th && months!=null && months < 3) return { level:'bad', urgent:true, msg:'🚨 Fever in a baby under 3 months is an emergency — call your doctor or emergency services now.' };
+  if(c >= th) return { level:'bad', urgent:c>=39, msg: c>=39 ? 'High fever — contact your doctor.' : 'Fever detected — monitor closely and consider contacting your doctor.' };
+  if(c >= th-0.4) return { level:'warn', urgent:false, msg:'Slightly elevated — keep an eye on it.' };
+  return { level:'good', urgent:false, msg:'Temperature in the normal range.' };
+}
+const STOOL = {
+  yellow:{label:'Yellow',sw:'#f5c542',danger:false,note:'Typical for breastfed babies.'},
+  green:{label:'Green',sw:'#5a8f3c',danger:false,note:'Usually normal.'},
+  brown:{label:'Brown',sw:'#8a5a2b',danger:false,note:'Normal, common with formula.'},
+  orange:{label:'Orange',sw:'#e07b2e',danger:false,note:'Usually normal.'},
+  black:{label:'Black',sw:'#1f2937',danger:true,note:'Normal as meconium in the first days. After that, black can mean blood — call a doctor.'},
+  red:{label:'Red',sw:'#c0392b',danger:true,note:'Red may indicate blood — contact your doctor.'},
+  white:{label:'White / clay',sw:'#e5e7eb',danger:true,note:'Pale/white stool can signal a liver problem — contact your doctor.'},
+};
+function stoolConcerning(color){
+  if(color==='black'){ const d=ageInDays(); return d==null ? true : d>3; }
+  return STOOL[color] ? STOOL[color].danger : false;
+}
+function expectedWet(){ const d=ageInDays(); if(d==null) return 6; if(d<=0) return 1; if(d<=5) return Math.min(d+1,6); return 6; }
+const ROOM = { min:16, max:20, ideal:18 };
+function nextSide(last){ return last==='left' ? 'right' : last==='right' ? 'left' : 'left'; }
+
+/* ----------------------------------------------------------------- time ----- */
+function pad(n){ return String(n).padStart(2,'0'); }
+function clock(ts){ const d=new Date(ts); return pad(d.getHours())+':'+pad(d.getMinutes()); }
+function dateKey(ts){ const d=new Date(ts); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function sameDay(a,b){ return dateKey(a)===dateKey(b); }
+function dayLabel(ts){
+  const now=Date.now();
+  if(sameDay(ts,now)) return 'Today';
+  if(sameDay(ts, now-DAY)) return 'Yesterday';
+  return new Date(ts).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
+}
+function fmtDur(sec){
+  if(sec==null || sec<0 || isNaN(sec)) return '—';
+  sec=Math.round(sec); const m=Math.floor(sec/60), s=sec%60;
+  if(m<1) return s+'s';
+  if(m<60) return (s>0 && m<10) ? m+'m '+s+'s' : m+'m';
+  const h=Math.floor(m/60); return h+'h '+(m%60)+'m';
+}
+function relTime(ts){
+  const diff=Math.round((Date.now()-ts)/1000);
+  if(diff<60) return 'just now';
+  if(diff<3600) return Math.floor(diff/60)+'m ago';
+  if(diff<DAY/1000) return Math.floor(diff/3600)+'h ago';
+  return Math.floor(diff/86400)+'d ago';
+}
+function toLocalInput(ts){ const d=new Date(ts); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes()); }
+function fromLocalInput(v){ return new Date(v).getTime(); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ----------------------------------------------------------- event display -- */
+const META = {
+  diaper:{label:'Diaper',emoji:'🧷',color:'#f59e0b'},
+  breastfeed:{label:'Breastfeed',emoji:'🤱',color:'#ec4899'},
+  bottle:{label:'Bottle',emoji:'🍼',color:'#3b82f6'},
+  temperature:{label:'Temperature',emoji:'🌡️',color:'#ef4444'},
+  sleep:{label:'Sleep',emoji:'😴',color:'#6366f1'},
+  cry:{label:'Cry',emoji:'😢',color:'#8b5cf6'},
+  pump:{label:'Pump',emoji:'🥛',color:'#14b8a6'},
+  medication:{label:'Medication',emoji:'💊',color:'#10b981'},
+  growth:{label:'Growth',emoji:'📏',color:'#0ea5e9'},
+  note:{label:'Note',emoji:'📝',color:'#64748b'},
+};
+const POSITIONS = [
+  {v:'cradle',l:'Cradle'},{v:'cross-cradle',l:'Cross-cradle'},{v:'football',l:'Football / rugby'},
+  {v:'laid-back',l:'Laid-back'},{v:'side-lying',l:'Side-lying'},
+];
+function fmtTemp(c){ return settings.tempUnit==='F' ? ((c*9/5)+32).toFixed(1)+'°F' : c.toFixed(1)+'°C'; }
+function summarize(e){
+  const d=e.data||{};
+  switch(e.type){
+    case 'diaper':{ const p=[]; p.push(d.kind==='both'?'pee + poop':d.kind); if(d.amount)p.push(d.amount);
+      if(d.color)p.push((STOOL[d.color]||{}).label?.toLowerCase()||d.color); if(d.texture)p.push(d.texture); return p.join(' · '); }
+    case 'breastfeed':{ const hs=(d.leftSec>0||d.rightSec>0); const core=hs?('L '+fmtDur(d.leftSec)+' · R '+fmtDur(d.rightSec)):((d.side==='left'?'Left':'Right')+' · '+fmtDur(d.durationSec)); return d.position?core+' · '+d.position:core; }
+    case 'bottle': return (d.volumeMl||0)+' ml · '+(d.content||'');
+    case 'temperature': return fmtTemp(d.celsius)+' · '+d.method;
+    case 'sleep': return fmtDur(d.durationSec);
+    case 'cry': return (d.intensity||'')+(d.durationSec?' · '+fmtDur(d.durationSec):'');
+    case 'pump': return (d.volumeMl||0)+' ml · '+(d.side||'');
+    case 'medication': return (d.name||'')+(d.dose?' · '+d.dose:'');
+    case 'growth':{ const p=[]; if(d.weightKg!=null)p.push(d.weightKg+' kg'); if(d.heightCm!=null)p.push(d.heightCm+' cm'); if(d.headCircumferenceCm!=null)p.push('head '+d.headCircumferenceCm+' cm'); return p.join(' · ')||'measurement'; }
+    default: return e.note||'';
+  }
+}
+function eventConcerning(e){
+  if(e.type==='diaper' && e.data && e.data.color) return stoolConcerning(e.data.color);
+  if(e.type==='temperature' && e.data){ const a=assessTemperature(e.data.celsius,e.data.method); return a.level==='bad'; }
+  return false;
+}
+
+/* ---------------------------------------------------------------- timers ---- */
+function readTimers(){ return loadJSON(LS.timers, []); }
+function writeTimers(t){ saveJSON(LS.timers, t); }
+function getTimer(kind){ return readTimers().find(t=>t.kind===kind); }
+function startSleep(){ const t=readTimers().filter(x=>x.kind!=='sleep'); t.push({kind:'sleep',startedAt:Date.now()}); writeTimers(t); render(); }
+function startBreastfeed(side){
+  const now=Date.now();
+  const t=readTimers().filter(x=>x.kind!=='breastfeed');
+  t.push({kind:'breastfeed',startedAt:now,startSide:side,currentSide:side,leftSec:0,rightSec:0,lastSwitchAt:now});
+  writeTimers(t); render();
+}
+function bank(t, at){
+  if(!t.currentSide||t.lastSwitchAt==null) return t;
+  const el=Math.max(0,Math.round((at-t.lastSwitchAt)/1000));
+  return Object.assign({},t,{ leftSec:(t.leftSec||0)+(t.currentSide==='left'?el:0), rightSec:(t.rightSec||0)+(t.currentSide==='right'?el:0), lastSwitchAt:at });
+}
+function switchBreast(){
+  const all=readTimers(); const t=all.find(x=>x.kind==='breastfeed'); if(!t) return;
+  const b=bank(t,Date.now()); b.currentSide = b.currentSide==='left'?'right':'left';
+  writeTimers(all.filter(x=>x.kind!=='breastfeed').concat(b)); render();
+}
+function stopTimer(kind){
+  const all=readTimers(); const f=all.find(x=>x.kind===kind);
+  writeTimers(all.filter(x=>x.kind!==kind));
+  if(!f) return undefined;
+  return kind==='breastfeed' ? bank(f,Date.now()) : f;
+}
+function stopSleep(){ const t=stopTimer('sleep'); if(t) openSheet('sleep',null,{at:t.startedAt,endAt:Date.now()}); }
+function stopBreast(){ const t=stopTimer('breastfeed'); if(t) openSheet('breastfeed',null,{at:t.startedAt,endAt:Date.now(),data:{side:t.startSide||'left',leftSec:t.leftSec||0,rightSec:t.rightSec||0}}); }
+
+/* ----------------------------------------------------------------- weather -- */
+let weatherCache = null, weatherErr = false;
+const WMO = {0:['Clear','☀️'],1:['Mainly clear','🌤️'],2:['Partly cloudy','⛅'],3:['Overcast','☁️'],45:['Fog','🌫️'],48:['Rime fog','🌫️'],51:['Light drizzle','🌦️'],53:['Drizzle','🌦️'],55:['Heavy drizzle','🌧️'],61:['Light rain','🌦️'],63:['Rain','🌧️'],65:['Heavy rain','🌧️'],71:['Light snow','🌨️'],73:['Snow','🌨️'],75:['Heavy snow','❄️'],80:['Showers','🌦️'],81:['Showers','🌧️'],82:['Violent showers','⛈️'],95:['Thunderstorm','⛈️'],96:['Thunderstorm','⛈️'],99:['Thunderstorm','⛈️']};
+function fetchWeather(){
+  weatherErr=false;
+  const url='https://api.open-meteo.com/v1/forecast?latitude='+settings.lat+'&longitude='+settings.lon+'&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,weather_code&timezone=auto';
+  fetch(url).then(r=>{ if(!r.ok) throw 0; return r.json(); }).then(j=>{
+    const c=j.current; weatherCache={t:Math.round(c.temperature_2m),app:Math.round(c.apparent_temperature),hum:c.relative_humidity_2m,code:c.weather_code,at:Date.now()};
+    if(state.tab==='home') render();
+  }).catch(()=>{ weatherErr=true; if(state.tab==='home') render(); });
+}
+
+/* ------------------------------------------------------------------ state --- */
+const state = { tab:'home', filter:'all', sheet:null /* {type, editing, initial, draft} */ };
+
+/* --------------------------------------------------------------- rendering -- */
+const app = document.getElementById('app');
+const sheetRoot = document.getElementById('sheet-root');
+
+function render(){
+  if(state.tab==='home') app.innerHTML = viewHome();
+  else if(state.tab==='timeline') app.innerHTML = viewTimeline();
+  else if(state.tab==='trends') app.innerHTML = viewTrends();
+  else if(state.tab==='settings') app.innerHTML = viewSettings();
+  renderNav();
+  renderSheet();
+}
+function renderNav(){
+  const tabs=[['home','Home','🏠'],['timeline','Timeline','📜'],['trends','Trends','📈'],['settings','Settings','⚙️']];
+  document.getElementById('nav').innerHTML = tabs.map(([id,l,e])=>
+    `<button class="${state.tab===id?'on':''}" data-tab="${id}"><span class="ne">${e}</span>${l}</button>`).join('');
+}
+
+/* ---- HOME ---- */
+function todays(){ const k=dateKey(Date.now()); return events.filter(e=>dateKey(e.at)===k); }
+function lastOfType(type){ const a=events.filter(e=>e.type===type).sort((x,y)=>y.at-x.at); return a[0]; }
+function daySummary(list){
+  let wet=0,dirty=0,feeds=0,sleepSec=0;
+  for(const e of list){
+    if(e.type==='diaper'){ const k=e.data.kind; if(k==='pee'||k==='both')wet++; if(k==='poop'||k==='both')dirty++; }
+    else if(e.type==='breastfeed'||e.type==='bottle') feeds++;
+    else if(e.type==='sleep') sleepSec += (e.data.durationSec!=null?e.data.durationSec:(e.endAt?(e.endAt-e.at)/1000:0));
+  }
+  return {wet,dirty,feeds,sleepSec};
+}
+function viewHome(){
+  const days=ageInDays();
+  const list=todays(); const s=daySummary(list);
+  const lastFeed=lastOfType('breastfeed');
+  const lastSide=lastFeed?lastFeed.data.side:null;
+  const sug=nextSide(lastSide);
+  const bf=getTimer('breastfeed'); const sl=getTimer('sleep');
+  const now=Date.now();
+  const target=expectedWet();
+
+  let bfCard;
+  if(bf){
+    const liveL=(bf.leftSec||0)+(bf.currentSide==='left'?(now-(bf.lastSwitchAt||now))/1000:0);
+    const liveR=(bf.rightSec||0)+(bf.currentSide==='right'?(now-(bf.lastSwitchAt||now))/1000:0);
+    bfCard=`<div class="grid g2" style="gap:6px">
+        <div class="side ${bf.currentSide==='left'?'on':'off'}"><div class="tiny" style="text-transform:uppercase;opacity:.85">Left${bf.currentSide==='left'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveL)}</div></div>
+        <div class="side ${bf.currentSide==='right'?'on':'off'}"><div class="tiny" style="text-transform:uppercase;opacity:.85">Right${bf.currentSide==='right'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveR)}</div></div>
+      </div>
+      <div class="grid g2" style="gap:8px;margin-top:8px">
+        <button class="btn" style="background:var(--pink-l);color:#9d174d" data-act="bf-switch">⇄ Switch</button>
+        <button class="btn" style="background:var(--pink);color:#fff" data-act="bf-stop">■ Stop</button>
+      </div>`;
+  } else {
+    bfCard=`<div class="grid g2" style="gap:8px;margin-top:8px">
+        <button class="btn" data-act="bf-start" data-side="left" style="background:${sug==='left'?'var(--pink)':'var(--pink-l)'};color:${sug==='left'?'#fff':'#9d174d'}">Start L${sug==='left'?' ✦':''}</button>
+        <button class="btn" data-act="bf-start" data-side="right" style="background:${sug==='right'?'var(--pink)':'var(--pink-l)'};color:${sug==='right'?'#fff':'#9d174d'}">Start R${sug==='right'?' ✦':''}</button>
+      </div>`;
+  }
+  const slCard = sl
+    ? `<button class="btn btn-block" data-act="sleep-stop" style="background:var(--indigo);color:#fff;margin-top:8px;flex-direction:column;padding:12px"><span class="tabular" style="font-weight:800;font-size:1.05rem">${fmtDur((now-sl.startedAt)/1000)}</span><span class="tiny" style="opacity:.9">tap to stop</span></button>`
+    : `<button class="btn btn-block" data-act="sleep-start" style="background:var(--indigo-l);color:#3730a3;margin-top:8px;padding:14px">😴 Start sleep</button>`;
+
+  const weatherHtml = weatherCache
+    ? `<div class="rt" style="text-align:right"><div style="font-size:1.6rem;font-weight:800">${WMO[weatherCache.code]?WMO[weatherCache.code][1]:'🌡️'} ${weatherCache.t}°</div><div class="tiny muted">${WMO[weatherCache.code]?WMO[weatherCache.code][0]:''} · feels ${weatherCache.app}° · ${weatherCache.hum}%</div></div>`
+    : `<div class="small muted">${weatherErr?'Weather unavailable':'Loading…'}</div>`;
+
+  const quick=['diaper','breastfeed','bottle','temperature','sleep','cry','pump','medication','growth'];
+
+  return `<div class="wrap grid" style="gap:16px">
+    <div class="between">
+      <div><h1>${esc(settings.babyName)}</h1><div class="small muted">${days!=null?(days+' day'+(days===1?'':'s')+' old'):'Set date of birth in Settings'}</div></div>
+      <div class="small muted">${new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'short'})}</div>
+    </div>
+
+    <div class="card pad">
+      <div class="between">
+        <div><div class="label" style="margin:0">Outside</div><div class="small muted">${esc(settings.locationLabel)}</div></div>
+        ${weatherHtml}
+      </div>
+      <div class="banner info" style="margin-top:12px">🛏️ Keep the nursery at <b>${ROOM.min}–${ROOM.max}°C</b> for safe sleep (ideal ~${ROOM.ideal}°C).</div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card pad-s"><div class="label" style="margin:0">Breastfeeding</div>${bfCard}</div>
+      <div class="card pad-s"><div class="label" style="margin:0">Sleep</div>${slCard}</div>
+    </div>
+
+    <div>
+      <div class="section-title">Quick log</div>
+      <div class="grid g3">
+        ${quick.map(t=>`<button class="quick" data-log="${t}"><span class="emoji">${META[t].emoji}</span><span class="t">${META[t].label}</span></button>`).join('')}
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Today</div>
+      <div class="grid g2">
+        <div class="card pad-s stat ${s.wet>=target?'good':''}"><div class="label" style="margin:0">Wet diapers</div><div class="v">${s.wet}</div><div class="tiny muted">target ≥ ${target}/day</div></div>
+        <div class="card pad-s stat"><div class="label" style="margin:0">Dirty diapers</div><div class="v">${s.dirty}</div></div>
+        <div class="card pad-s stat"><div class="label" style="margin:0">Feeds</div><div class="v">${s.feeds}</div>${lastFeed?`<div class="tiny muted">last ${relTime(lastFeed.at)}</div>`:''}</div>
+        <div class="card pad-s stat"><div class="label" style="margin:0">Sleep</div><div class="v">${fmtDur(s.sleepSec)}</div></div>
+      </div>
+      ${lastFeed?`<div class="banner pink" style="margin-top:12px">🤱 Next feed: start on the <b>${sug}</b> (last started ${lastSide}).</div>`:''}
+    </div>
+
+    <div>
+      <div class="between" style="margin-bottom:8px"><div class="section-title" style="margin:0">Recent</div><button class="btn" style="background:none;color:var(--brand-d);padding:0" data-tab="timeline">See all →</button></div>
+      <div class="card" style="padding:4px">
+        ${list.length===0?'<div class="center muted small" style="padding:18px">No entries yet today.</div>':
+          list.slice().sort((a,b)=>b.at-a.at).slice(0,6).map(eventRow).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+function eventRow(e){
+  const m=META[e.type]; const warn=eventConcerning(e);
+  return `<button class="ev ${warn?'warn':''}" data-edit="${e.id}">
+    <span class="ic" style="background:${m.color}22">${m.emoji}</span>
+    <span class="mid"><span class="ttl">${m.label}${warn?' <span class="tiny" style="color:#dc2626;font-weight:800">⚠ check</span>':''}</span><span class="sub">${esc(summarize(e))}${e.note?' — '+esc(e.note):''}</span></span>
+    <span class="rt"><div class="small tabular" style="font-weight:600">${clock(e.at)}</div><div class="tiny muted">${esc(e.caregiver)}</div></span>
+  </button>`;
+}
+
+/* ---- TIMELINE ---- */
+function viewTimeline(){
+  const filters=[['all','All','🗂️'],['diaper','Diaper','🧷'],['breastfeed','Feed','🤱'],['bottle','Bottle','🍼'],['sleep','Sleep','😴'],['temperature','Temp','🌡️'],['cry','Cry','😢']];
+  const sorted=events.slice().sort((a,b)=>b.at-a.at).filter(e=>state.filter==='all'||e.type===state.filter);
+  const groups=[]; const idx={};
+  for(const e of sorted){ const k=dateKey(e.at); if(!idx[k]){ idx[k]=[]; groups.push([k,idx[k]]); } idx[k].push(e); }
+  return `<div class="wrap">
+    <h1 style="margin-bottom:12px">Timeline</h1>
+    <div class="filterbar">${filters.map(([v,l,e])=>`<button class="chip ${state.filter===v?'on':''}" data-filter="${v}">${e} ${l}</button>`).join('')}</div>
+    ${groups.length===0?'<div class="card pad center muted">No entries yet.</div>':
+      groups.map(([k,items])=>`<div style="margin-bottom:18px"><div class="daycap section-title">${dayLabel(items[0].at)}</div><div class="card" style="padding:4px">${items.map(eventRow).join('')}</div></div>`).join('')}
+  </div>`;
+}
+
+/* ---- TRENDS ---- */
+function buildDaily(n){
+  const rows=[]; const idx={};
+  const start=new Date(); start.setHours(0,0,0,0);
+  for(let i=n-1;i>=0;i--){ const d=new Date(start.getTime()-i*DAY); const k=dateKey(d.getTime());
+    const row={k,label:(d.getDate())+'/'+(d.getMonth()+1),wet:0,dirty:0,feeds:0,sleepH:0,_sleep:0}; idx[k]=row; rows.push(row); }
+  for(const e of events){ const r=idx[dateKey(e.at)]; if(!r) continue;
+    if(e.type==='diaper'){ const k=e.data.kind; if(k==='pee'||k==='both')r.wet++; if(k==='poop'||k==='both')r.dirty++; }
+    else if(e.type==='breastfeed'||e.type==='bottle') r.feeds++;
+    else if(e.type==='sleep') r._sleep += (e.data.durationSec!=null?e.data.durationSec:(e.endAt?(e.endAt-e.at)/1000:0));
+  }
+  rows.forEach(r=>r.sleepH=Math.round(r._sleep/360)/10);
+  return rows;
+}
+function barChart(rows, series){
+  const W=440,H=180,padL=24,padB=22,padT=8;
+  const max=Math.max(1,...rows.map(r=>series.reduce((s,se)=>s+(r[se.key]||0),0)));
+  const bw=(W-padL)/rows.length;
+  let bars='';
+  rows.forEach((r,i)=>{
+    let y=H-padB; const x=padL+i*bw+bw*0.18; const w=bw*0.64;
+    series.forEach(se=>{ const v=r[se.key]||0; const h=(v/max)*(H-padB-padT); y-=h;
+      if(h>0) bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${se.color}" rx="2"></rect>`; });
+    if(i%2===0||rows.length<=7) bars+=`<text x="${(padL+i*bw+bw/2).toFixed(1)}" y="${H-6}" font-size="9" fill="#94a3b8" text-anchor="middle">${r.label}</text>`;
+  });
+  const ticks=[0,Math.ceil(max/2),max].filter((v,i,a)=>a.indexOf(v)===i);
+  const grid=ticks.map(t=>{ const y=H-padB-(t/max)*(H-padB-padT); return `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W}" y2="${y.toFixed(1)}" stroke="#eef2f7"></line><text x="0" y="${(y+3).toFixed(1)}" font-size="9" fill="#cbd5e1">${t}</text>`; }).join('');
+  const legend=`<div class="legend">${series.map(se=>`<span><i style="background:${se.color}"></i>${se.name}</span>`).join('')}</div>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${grid}${bars}</svg>${legend}`;
+}
+function lineChart(points){
+  const W=440,H=180,padL=30,padB=22,padT=10;
+  if(points.length<2) return '<div class="center muted small" style="padding:24px">Log at least two weight measurements to see a curve.</div>';
+  const xs=points.map((p,i)=>i), ys=points.map(p=>p.v);
+  const minY=Math.min(...ys), maxY=Math.max(...ys), span=(maxY-minY)||1;
+  const X=i=>padL+(i/(points.length-1))*(W-padL-6);
+  const Y=v=>H-padB-((v-minY)/span)*(H-padB-padT);
+  let d=''; points.forEach((p,i)=>{ d+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.v).toFixed(1)+' '; });
+  const dots=points.map((p,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="3" fill="#0ea5e9"></circle>`).join('');
+  const labels=points.map((p,i)=> (i===0||i===points.length-1)?`<text x="${X(i).toFixed(1)}" y="${H-6}" font-size="9" fill="#94a3b8" text-anchor="middle">${p.label}</text>`:'').join('');
+  const yl=[minY,maxY].map(v=>`<text x="0" y="${(Y(v)+3).toFixed(1)}" font-size="9" fill="#cbd5e1">${v}</text>`).join('');
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${yl}<path d="${d}" fill="none" stroke="#0ea5e9" stroke-width="2"></path>${dots}${labels}</svg>`;
+}
+function viewTrends(){
+  const rows=buildDaily(14);
+  const weights=events.filter(e=>e.type==='growth'&&e.data.weightKg!=null).sort((a,b)=>a.at-b.at).map(e=>({label:(new Date(e.at).getDate())+'/'+(new Date(e.at).getMonth()+1),v:e.data.weightKg}));
+  return `<div class="wrap grid" style="gap:16px">
+    <h1>Trends</h1>
+    <div class="card pad"><h2>Diapers per day</h2><div class="tiny muted" style="margin-bottom:4px">Wet vs dirty — last 14 days</div>${barChart(rows,[{key:'wet',name:'Wet',color:'#0ea5e9'},{key:'dirty',name:'Dirty',color:'#f59e0b'}])}</div>
+    <div class="card pad"><h2>Feeds per day</h2><div class="tiny muted" style="margin-bottom:4px">Breast + bottle — last 14 days</div>${barChart(rows,[{key:'feeds',name:'Feeds',color:'#ec4899'}])}</div>
+    <div class="card pad"><h2>Sleep per day</h2><div class="tiny muted" style="margin-bottom:4px">Total hours — last 14 days</div>${barChart(rows,[{key:'sleepH',name:'Sleep (h)',color:'#6366f1'}])}</div>
+    <div class="card pad"><h2>Weight</h2><div class="tiny muted" style="margin-bottom:4px">kg over time</div>${lineChart(weights)}</div>
+  </div>`;
+}
+
+/* ---- SETTINGS ---- */
+function viewSettings(){
+  return `<div class="wrap grid" style="gap:16px">
+    <h1>Settings</h1>
+    <div class="card pad">
+      <h2 style="margin-bottom:12px">Baby</h2>
+      <div class="field"><label class="label">Name</label><input data-set="babyName" value="${esc(settings.babyName)}"></div>
+      <div class="field"><label class="label">Date of birth</label><input type="datetime-local" data-set="babyDob" value="${settings.babyDob?toLocalInput(settings.babyDob):''}"><div class="tiny muted" style="margin-top:4px">Used for age-based fever alerts and diaper targets.</div></div>
+    </div>
+    <div class="card pad">
+      <h2 style="margin-bottom:12px">Caregivers</h2>
+      <div class="chips" style="margin-bottom:12px">${settings.caregivers.map(c=>`<span class="chip">${esc(c)}${settings.caregivers.length>1?` <button data-rm-care="${esc(c)}" style="border:none;background:none;color:#94a3b8;padding:0 0 0 2px">✕</button>`:''}</span>`).join('')}</div>
+      <div class="row"><input id="newCare" placeholder="Add caregiver…"><button class="btn btn-ghost" data-act="add-care">Add</button></div>
+    </div>
+    <div class="card pad">
+      <h2 style="margin-bottom:12px">Location & units</h2>
+      <div class="field"><label class="label">Location label</label><input data-set="locationLabel" value="${esc(settings.locationLabel)}"></div>
+      <div class="grid g2"><div class="field"><label class="label">Latitude</label><input type="number" step="0.0001" data-set="lat" value="${settings.lat}"></div><div class="field"><label class="label">Longitude</label><input type="number" step="0.0001" data-set="lon" value="${settings.lon}"></div></div>
+      <div class="field"><label class="label">Temperature unit</label><div class="chips"><button class="chip ${settings.tempUnit==='C'?'on':''}" data-unit="C">°C</button><button class="chip ${settings.tempUnit==='F'?'on':''}" data-unit="F">°F</button></div></div>
+    </div>
+    <div class="card pad">
+      <h2>Backup & share</h2>
+      <div class="tiny muted" style="margin:4px 0 12px">Export a CSV for your pediatrician, or a JSON backup to move data to the other parent's phone (imports are de-duplicated).</div>
+      <div class="chips">
+        <button class="btn btn-ghost" data-act="export-csv">⬇ Export CSV</button>
+        <button class="btn btn-ghost" data-act="export-json">⬇ Export backup</button>
+        <button class="btn btn-ghost" data-act="import">⬆ Import backup</button>
+      </div>
+      <div id="ioMsg" class="small" style="color:var(--brand-d);margin-top:10px"></div>
+    </div>
+    <div class="center tiny muted" style="padding:0 8px">Baby Care Tracker · stored privately in this browser. Guidance is general and not a substitute for medical advice.</div>
+  </div>`;
+}
+
+/* ----------------------------------------------------------------- sheet ---- */
+function defaultData(type){
+  switch(type){
+    case 'diaper': return {kind:'pee'};
+    case 'breastfeed': return {side:'left',leftSec:0,rightSec:0};
+    case 'bottle': return {content:'formula',volumeMl:60};
+    case 'temperature': return {celsius:37.0,method:'axillary'};
+    case 'cry': return {intensity:'crying'};
+    case 'pump': return {side:'both',volumeMl:0};
+    case 'medication': return {name:''};
+    default: return {};
+  }
+}
+function openSheet(type, editing, initial){
+  let draft, at, endAt, caregiver, note;
+  if(editing){ draft=Object.assign({},editing.data); at=editing.at; endAt=editing.endAt; caregiver=editing.caregiver; note=editing.note||''; type=editing.type; }
+  else { draft=Object.assign(defaultData(type),(initial&&initial.data)||{}); at=(initial&&initial.at)||Date.now(); endAt=initial&&initial.endAt; caregiver=settings.currentCaregiver; note=(initial&&initial.note)||''; }
+  state.sheet={type,editing:editing||null,draft,at,endAt,caregiver,note};
+  renderSheet();
+}
+function closeSheet(){ state.sheet=null; renderSheet(); }
+function hasRange(t){ return t==='breastfeed'||t==='sleep'||t==='pump'||t==='cry'; }
+
+function renderSheet(){
+  const s=state.sheet;
+  if(!s){ sheetRoot.innerHTML=''; return; }
+  const m=META[s.type];
+  sheetRoot.innerHTML=`<div class="scrim" data-act="close"></div><div class="sheet" role="dialog">
+    <div class="head"><h2>${m.emoji} ${s.editing?'Edit':'Log'} ${m.label.toLowerCase()}</h2><button class="x" data-act="close">✕</button></div>
+    <div id="sheetBody">${sheetBody(s)}</div>
+    <div class="row" style="margin-top:8px">
+      ${s.editing?`<button class="btn btn-ghost" style="color:#dc2626" data-act="delete">Delete</button>`:''}
+      <button class="btn btn-primary" style="flex:1" data-act="save">${s.editing?'Save changes':'Save'}</button>
+    </div>
+  </div>`;
+}
+function chipgroup(name, opts, val){
+  return `<div class="chips" data-chip="${name}">${opts.map(o=>`<button class="chip ${val===o.v?'on':''}" data-v="${o.v}">${o.e?o.e+' ':''}${o.l}</button>`).join('')}</div>`;
+}
+function sheetBody(s){
+  const d=s.draft; let html='';
+  if(s.type==='diaper'){
+    html+=`<div class="field"><label class="label">What's in the diaper?</label>${chipgroup('kind',[{v:'pee',l:'Pee',e:'💧'},{v:'poop',l:'Poop',e:'💩'},{v:'both',l:'Both',e:'💧💩'}],d.kind)}</div>`;
+    html+=`<div class="field"><label class="label">Amount</label>${chipgroup('amount',[{v:'little',l:'Little'},{v:'average',l:'Average'},{v:'full',l:'Full'}],d.amount)}</div>`;
+    if(d.kind==='poop'||d.kind==='both'){
+      html+=`<div class="field"><label class="label">Stool color</label><div class="chips" data-chip="color">${Object.keys(STOOL).map(c=>`<button class="chip ${d.color===c?'on':''}" data-v="${c}"><span class="swatch" style="background:${STOOL[c].sw}"></span>${STOOL[c].label}</button>`).join('')}</div></div>`;
+      if(d.color){ const con=stoolConcerning(d.color); html+=`<div class="banner ${con?'bad':''}" style="${con?'':'background:#f1f5f9;color:#64748b'};margin-bottom:16px">${con?'⚠ ':''}${STOOL[d.color].note}</div>`; }
+      html+=`<div class="field"><label class="label">Texture</label>${chipgroup('texture',[{v:'liquid',l:'Liquid'},{v:'seedy',l:'Seedy'},{v:'soft',l:'Soft'},{v:'formed',l:'Formed'},{v:'hard',l:'Hard'},{v:'mucousy',l:'Mucousy'}],d.texture)}</div>`;
+    }
+  } else if(s.type==='breastfeed'){
+    const total=(d.leftSec||0)+(d.rightSec||0);
+    html+=`<div class="field"><label class="label">Started on</label>${chipgroup('side',[{v:'left',l:'Left'},{v:'right',l:'Right'}],d.side)}</div>`;
+    html+=`<div class="grid g2"><div class="field"><label class="label">Left (min)</label><input type="number" inputmode="numeric" data-num="leftSec" data-mul="60" value="${d.leftSec?Math.round(d.leftSec/60):''}" placeholder="0"></div>
+      <div class="field"><label class="label">Right (min)</label><input type="number" inputmode="numeric" data-num="rightSec" data-mul="60" value="${d.rightSec?Math.round(d.rightSec/60):''}" placeholder="0"></div></div>`;
+    html+=`<div class="small muted" id="bfTotal" style="margin:-8px 0 14px">${total>0?('Total '+fmtDur(total)+' · L '+fmtDur(d.leftSec)+' / R '+fmtDur(d.rightSec)):''}</div>`;
+    html+=`<div class="field"><label class="label">Position</label>${chipgroup('position',POSITIONS.map(p=>({v:p.v,l:p.l})),d.position)}</div>`;
+  } else if(s.type==='bottle'){
+    html+=`<div class="field"><label class="label">Content</label>${chipgroup('content',[{v:'formula',l:'Formula'},{v:'expressed',l:'Expressed milk'},{v:'mixed',l:'Mixed'}],d.content)}</div>`;
+    html+=`<div class="field"><label class="label">Volume (ml)</label><input type="number" inputmode="numeric" data-num="volumeMl" value="${d.volumeMl}"><div class="pillrow">${[30,60,90,120,150,180].map(v=>`<button class="chip" data-preset="volumeMl" data-pv="${v}">${v}</button>`).join('')}</div></div>`;
+  } else if(s.type==='temperature'){
+    const a=assessTemperature(d.celsius,d.method);
+    html+=`<div class="field"><label class="label">Temperature (°C)</label><input type="number" step="0.1" inputmode="decimal" data-num="celsius" data-live="temp" value="${d.celsius}" style="font-size:1.4rem;font-weight:800"></div>`;
+    html+=`<div class="field"><label class="label">Method</label>${chipgroup('method',[{v:'axillary',l:'Armpit'},{v:'rectal',l:'Rectal'},{v:'ear',l:'Ear'},{v:'forehead',l:'Forehead'},{v:'oral',l:'Oral'}],d.method)}</div>`;
+    html+=`<div class="banner ${a.level}" id="tempMsg" style="margin-bottom:16px">${a.msg}</div>`;
+  } else if(s.type==='cry'){
+    html+=`<div class="field"><label class="label">Intensity</label>${chipgroup('intensity',[{v:'fussy',l:'Fussy'},{v:'crying',l:'Crying'},{v:'inconsolable',l:'Inconsolable'}],d.intensity)}</div>`;
+  } else if(s.type==='pump'){
+    html+=`<div class="field"><label class="label">Side</label>${chipgroup('side',[{v:'left',l:'Left'},{v:'right',l:'Right'},{v:'both',l:'Both'}],d.side)}</div>`;
+    html+=`<div class="field"><label class="label">Volume (ml)</label><input type="number" inputmode="numeric" data-num="volumeMl" value="${d.volumeMl}"></div>`;
+  } else if(s.type==='medication'){
+    html+=`<div class="field"><label class="label">Medication / supplement</label><input data-str="name" value="${esc(d.name||'')}" placeholder="e.g. Vitamin D"><div class="pillrow">${['Vitamin D','Paracetamol','Probiotics'].map(n=>`<button class="chip" data-preset-str="name" data-pv="${n}">${n}</button>`).join('')}</div></div>`;
+    html+=`<div class="field"><label class="label">Dose (optional)</label><input data-str="dose" value="${esc(d.dose||'')}" placeholder="e.g. 400 IU"></div>`;
+  } else if(s.type==='growth'){
+    html+=`<div class="field"><label class="label">Weight (kg)</label><input type="number" step="0.01" inputmode="decimal" data-num="weightKg" value="${d.weightKg??''}"></div>`;
+    html+=`<div class="field"><label class="label">Height (cm)</label><input type="number" step="0.1" inputmode="decimal" data-num="heightCm" value="${d.heightCm??''}"></div>`;
+    html+=`<div class="field"><label class="label">Head circumference (cm)</label><input type="number" step="0.1" inputmode="decimal" data-num="headCircumferenceCm" value="${d.headCircumferenceCm??''}"></div>`;
+  }
+  // common time + caregiver + note
+  html+=`<div class="field"><label class="label">${hasRange(s.type)?'Start':'Time'}</label><input type="datetime-local" data-when="at" value="${toLocalInput(s.at)}"></div>`;
+  if(hasRange(s.type)){
+    html+=`<div class="field"><label class="label">End (optional)</label><input type="datetime-local" data-when="endAt" value="${s.endAt?toLocalInput(s.endAt):''}"></div>`;
+  }
+  html+=`<div class="field"><label class="label">Logged by</label>${chipgroup('caregiver',settings.caregivers.map(c=>({v:c,l:c})),s.caregiver)}</div>`;
+  html+=`<div class="field"><label class="label">Note</label><textarea data-note placeholder="Anything to remember…">${esc(s.note)}</textarea></div>`;
+  return html;
+}
+function saveSheet(){
+  const s=state.sheet; if(!s) return;
+  const d=Object.assign({},s.draft);
+  let durationSec = (s.endAt && s.endAt>s.at) ? Math.round((s.endAt-s.at)/1000) : undefined;
+  if(s.type==='breastfeed'){ const tot=(d.leftSec||0)+(d.rightSec||0); d.durationSec = tot>0?tot:durationSec; }
+  else if(s.type==='sleep'||s.type==='cry'||s.type==='pump'){ if(durationSec!=null) d.durationSec=durationSec; }
+  const payload={ type:s.type, at:s.at, endAt:s.endAt, caregiver:s.caregiver, note:s.note||undefined, data:d };
+  if(s.editing) updateEvent(s.editing.id, payload); else addEvent(payload);
+  closeSheet(); render();
+}
+
+/* ----------------------------------------------------------- import/export -- */
+function csvCell(v){ if(v==null) return ''; const sx=String(v); return /[",\n]/.test(sx)?'"'+sx.replace(/"/g,'""')+'"':sx; }
+function exportCsv(){
+  const header=['date','time','type','caregiver','details','note'];
+  const rows=events.slice().sort((a,b)=>a.at-b.at).map(e=>{
+    const det=Object.entries(e.data||{}).map(([k,v])=>k+'='+v).join('; ')+(e.endAt?(' (ended '+clock(e.endAt)+')'):'');
+    return [dateKey(e.at),clock(e.at),e.type,e.caregiver,det,e.note||''];
+  });
+  return [header].concat(rows).map(r=>r.map(csvCell).join(',')).join('\n');
+}
+function download(name, content, mime){
+  const b=new Blob([content],{type:mime}); const u=URL.createObjectURL(b);
+  const a=document.createElement('a'); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
+}
+function importBackup(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const j=JSON.parse(reader.result);
+      if(j.app!=='baby-care-tracker'||!Array.isArray(j.events)) throw new Error('Not a valid backup file.');
+      const seen=new Set(events.map(e=>e.type+'|'+e.at+'|'+e.caregiver)); let added=0;
+      for(const ev of j.events){ const k=ev.type+'|'+ev.at+'|'+ev.caregiver; if(seen.has(k))continue; seen.add(k);
+        events.push(Object.assign({},ev,{id:newId()})); added++; }
+      persistEvents(); render();
+      const el=document.getElementById('ioMsg'); if(el) el.textContent='Imported '+added+' new entr'+(added===1?'y':'ies')+'.';
+    }catch(err){ const el=document.getElementById('ioMsg'); if(el) el.textContent=err.message||'Import failed.'; }
+  };
+  reader.readAsText(file);
+}
+
+/* --------------------------------------------------------------- listeners -- */
+document.addEventListener('click', (ev)=>{
+  const t=ev.target.closest('[data-tab],[data-log],[data-edit],[data-filter],[data-act],[data-unit],[data-rm-care],[data-chip] [data-v],[data-preset],[data-preset-str]');
+  if(!t) return;
+
+  if(t.dataset.tab){ state.tab=t.dataset.tab; render(); if(t.dataset.tab==='home' && !weatherCache) fetchWeather(); return; }
+  if(t.dataset.log){ openSheet(t.dataset.log,null,null); return; }
+  if(t.dataset.edit){ const e=events.find(x=>x.id===+t.dataset.edit); if(e) openSheet(null,e,null); return; }
+  if(t.dataset.filter){ state.filter=t.dataset.filter; render(); return; }
+  if(t.dataset.unit){ saveSettings({tempUnit:t.dataset.unit}); return; }
+  if(t.dataset.rmCare){ if(settings.caregivers.length>1){ const cs=settings.caregivers.filter(c=>c!==t.dataset.rmCare); saveSettings({caregivers:cs, currentCaregiver: cs.includes(settings.currentCaregiver)?settings.currentCaregiver:cs[0]}); } return; }
+
+  // chip selection inside sheet / caregiver
+  const chipWrap=t.closest('[data-chip]');
+  if(chipWrap && t.dataset.v!=null){
+    const field=chipWrap.dataset.chip; const val=t.dataset.v;
+    if(state.sheet){
+      if(field==='caregiver'){ state.sheet.caregiver=val; }
+      else { state.sheet.draft[field]=val; }
+      renderSheet();
+    }
+    return;
+  }
+  if(t.dataset.preset && state.sheet){ state.sheet.draft[t.dataset.preset]=+t.dataset.pv; renderSheet(); return; }
+  if(t.dataset.presetStr && state.sheet){ state.sheet.draft[t.dataset.presetStr]=t.dataset.pv; renderSheet(); return; }
+
+  const act=t.dataset.act;
+  if(!act) return;
+  if(act==='close') return closeSheet();
+  if(act==='save') return saveSheet();
+  if(act==='delete'){ if(state.sheet&&state.sheet.editing&&confirm('Delete this entry?')){ deleteEvent(state.sheet.editing.id); closeSheet(); render(); } return; }
+  if(act==='bf-start') return startBreastfeed(t.dataset.side);
+  if(act==='bf-switch') return switchBreast();
+  if(act==='bf-stop') return stopBreast();
+  if(act==='sleep-start') return startSleep();
+  if(act==='sleep-stop') return stopSleep();
+  if(act==='add-care'){ const inp=document.getElementById('newCare'); const n=(inp.value||'').trim(); if(n&&!settings.caregivers.includes(n)) saveSettings({caregivers:settings.caregivers.concat(n)}); return; }
+  if(act==='export-csv') return download('baby-care-'+dateKey(Date.now())+'.csv', exportCsv(), 'text/csv');
+  if(act==='export-json') return download('baby-care-backup-'+dateKey(Date.now())+'.json', JSON.stringify({app:'baby-care-tracker',version:1,exportedAt:Date.now(),events:events},null,2), 'application/json');
+  if(act==='import'){ const fi=document.createElement('input'); fi.type='file'; fi.accept='application/json,.json'; fi.onchange=()=>{ if(fi.files[0]) importBackup(fi.files[0]); }; fi.click(); return; }
+});
+
+// text / number / datetime inputs (no full re-render to preserve focus)
+document.addEventListener('input', (ev)=>{
+  const el=ev.target;
+  // settings live edit
+  if(el.dataset && el.dataset.set){
+    const key=el.dataset.set;
+    if(key==='babyDob'){ settings.babyDob = el.value?fromLocalInput(el.value):null; }
+    else if(key==='lat'||key==='lon'){ settings[key]=parseFloat(el.value); }
+    else { settings[key]=el.value; }
+    saveJSON(LS.settings, settings);
+    return;
+  }
+  if(!state.sheet) return;
+  const s=state.sheet;
+  if(el.dataset.num!=null){ const mul=el.dataset.mul?+el.dataset.mul:1; s.draft[el.dataset.num]= el.value===''?(el.dataset.num==='leftSec'||el.dataset.num==='rightSec'?0:undefined):(parseFloat(el.value)*mul);
+    if(el.dataset.live==='temp'){ const a=assessTemperature(s.draft.celsius,s.draft.method); const mEl=document.getElementById('tempMsg'); if(mEl){ mEl.className='banner '+a.level; mEl.innerHTML=a.msg; } }
+    if(el.dataset.num==='leftSec'||el.dataset.num==='rightSec'){ const tot=(s.draft.leftSec||0)+(s.draft.rightSec||0); const bt=document.getElementById('bfTotal'); if(bt) bt.textContent=tot>0?('Total '+fmtDur(tot)+' · L '+fmtDur(s.draft.leftSec)+' / R '+fmtDur(s.draft.rightSec)):''; }
+    return; }
+  if(el.dataset.str!=null){ s.draft[el.dataset.str]=el.value; return; }
+  if(el.dataset.when!=null){ s[el.dataset.when]= el.value?fromLocalInput(el.value):undefined; return; }
+  if(el.dataset.note!=null){ s.note=el.value; return; }
+});
+
+// live tick for running timers on Home
+setInterval(()=>{ if(state.tab==='home' && !state.sheet && (getTimer('breastfeed')||getTimer('sleep'))) render(); }, 1000);
+
+/* ------------------------------------------------------------------- boot --- */
+render();
+fetchWeather();
+</script>
+</body>
 </html>
