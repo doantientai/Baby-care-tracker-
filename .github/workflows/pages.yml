@@ -1,11 +1,12 @@
 name: Deploy to GitHub Pages
 
 # Publishes the single-file app (index.html at repo root) to GitHub Pages.
-# Runs on every push to the default branch, and can be run manually.
+#
+# NOTE: this is only needed if you set Settings → Pages → Source = "GitHub
+# Actions". The simpler route is Source = "Deploy from a branch" (root), which
+# needs no workflow. Manual-only so it never spams failed runs on push.
 
 on:
-  push:
-    branches: ["claude/baby-care-tracker-v4wzt7"]
   workflow_dispatch:
 
 permissions:
