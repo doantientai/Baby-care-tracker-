@@ -128,12 +128,15 @@ const LS = {
   settings: 'bct.settings',
   events: 'bct.events',
   timers: 'bct.timers',
+  outbox: 'bct.outbox',
+  lastSync: 'bct.lastsync',
 };
 const DEFAULT_SETTINGS = {
   babyName: 'Baby', babyDob: null,
   caregivers: ['Papa', 'Maman'], currentCaregiver: 'Papa',
   lat: 48.7996, lon: 2.0667, locationLabel: "Saint-Cyr-l'École (78210)",
   tempUnit: 'C',
+  syncUrl: '', syncToken: '',
 };
 function loadJSON(key, fallback){ try{ const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }catch(e){ return fallback; } }
 function saveJSON(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
@@ -144,17 +147,108 @@ let events = loadJSON(LS.events, []);
 function saveSettings(patch){ settings = Object.assign({}, settings, patch); saveJSON(LS.settings, settings); render(); }
 function persistEvents(){ saveJSON(LS.events, events); }
 
-function newId(){ return (events.reduce((m,e)=>Math.max(m, e.id||0), 0) + 1); }
+// IDs are unique strings so two phones never collide when offline.
+function newId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function findEvent(id){ return events.find(e=>String(e.id)===String(id)); }
 function addEvent(ev){
   const ts = Date.now();
-  events.push(Object.assign({ id:newId(), createdAt:ts, updatedAt:ts }, ev));
-  persistEvents();
+  const e = Object.assign({ id:newId(), createdAt:ts, updatedAt:ts }, ev);
+  events.push(e); persistEvents(); queueUpsert(e); return e;
 }
 function updateEvent(id, patch){
-  const i = events.findIndex(e=>e.id===id);
-  if(i>=0){ events[i] = Object.assign({}, events[i], patch, { updatedAt:Date.now() }); persistEvents(); }
+  const i = events.findIndex(e=>String(e.id)===String(id));
+  if(i>=0){ events[i] = Object.assign({}, events[i], patch, { updatedAt:Date.now() }); persistEvents(); queueUpsert(events[i]); }
 }
-function deleteEvent(id){ events = events.filter(e=>e.id!==id); persistEvents(); }
+function deleteEvent(id){
+  const e = findEvent(id);
+  events = events.filter(x=>String(x.id)!==String(id)); persistEvents();
+  if(e) queueDelete(id);
+}
+
+/* -------------------------------------------------- Google Sheet sync ------ */
+// Persists the log to a shared Google Sheet via an Apps Script web app, so both
+// parents see the same data. Fully optional: with no URL set the app is local.
+let syncState = { syncing:false, last: loadJSON(LS.lastSync, null), error:null };
+function syncReady(){ return !!(settings.syncUrl && /^https?:\/\//.test(settings.syncUrl)); }
+function loadOutbox(){ return loadJSON(LS.outbox, []); }
+function saveOutbox(b){ saveJSON(LS.outbox, b); }
+function queueUpsert(e){ const b=loadOutbox(); b.push({op:'upsert', payload:e}); saveOutbox(b); pushSoon(); }
+function queueDelete(id){ const b=loadOutbox(); b.push({op:'delete', id:String(id), updatedAt:Date.now()}); saveOutbox(b); pushSoon(); }
+
+function apiUrl(params){
+  const u = new URL(settings.syncUrl);
+  Object.keys(params).forEach(k=>u.searchParams.set(k, params[k]));
+  if(settings.syncToken) u.searchParams.set('token', settings.syncToken);
+  u.searchParams.set('_', Date.now());
+  return u.toString();
+}
+async function apiCall(params){
+  const res = await fetch(apiUrl(params), { redirect:'follow' });
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  const j = await res.json();
+  if(!j.ok) throw new Error(j.error || 'sync failed');
+  return j;
+}
+async function flushOutbox(){
+  if(!syncReady()) return;
+  let box = loadOutbox();
+  while(box.length){
+    const item = box[0];
+    if(item.op==='upsert') await apiCall({ action:'upsert', event: JSON.stringify(item.payload) });
+    else if(item.op==='delete') await apiCall({ action:'delete', id:item.id, updatedAt:item.updatedAt });
+    box.shift(); saveOutbox(box);
+  }
+}
+function mergeRemote(remote){
+  const byId = {}; events.forEach(e=>byId[String(e.id)] = e);
+  let changed = false;
+  remote.forEach(r=>{
+    const id = String(r.id); const local = byId[id];
+    if(r.deleted){ if(local && (r.updatedAt||0) >= (local.updatedAt||0)){ delete byId[id]; changed=true; } return; }
+    if(!local || (r.updatedAt||0) > (local.updatedAt||0)){ byId[id] = r; changed=true; }
+  });
+  if(changed){ events = Object.values(byId).filter(e=>!e.deleted); persistEvents(); }
+}
+async function pull(){ if(!syncReady()) return; const j = await apiCall({ action:'list' }); mergeRemote(j.events || []); }
+let pushTimer = null;
+function pushSoon(){
+  if(!syncReady()){ updateSyncUI(); return; }
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(()=>{
+    syncState.syncing = true; updateSyncUI();
+    flushOutbox()
+      .then(()=>{ syncState.last = Date.now(); saveJSON(LS.lastSync, syncState.last); syncState.error = null; })
+      .catch(e=>{ syncState.error = e.message; })
+      .finally(()=>{ syncState.syncing = false; updateSyncUI(); });
+  }, 400);
+}
+async function syncNow(){
+  if(!syncReady()){ updateSyncUI(); return; }
+  syncState.syncing = true; syncState.error = null; updateSyncUI();
+  try{
+    await flushOutbox();
+    await pull();
+    syncState.last = Date.now(); saveJSON(LS.lastSync, syncState.last);
+  }catch(e){ syncState.error = e.message || 'sync error'; }
+  syncState.syncing = false; updateSyncUI(); render();
+}
+function syncStatusHtml(){
+  if(!syncReady()) return '<span class="muted">Not connected — paste your Google Sheet web-app URL above, then Sync.</span>';
+  const p = loadOutbox().length;
+  if(syncState.syncing) return '⟳ Syncing…';
+  if(syncState.error) return '<span style="color:#dc2626">⚠ '+esc(syncState.error)+'</span>'+(p?(' · '+p+' pending'):'');
+  return '<span style="color:var(--good)">✓ Synced</span>'+(syncState.last?(' · '+relTime(syncState.last)):'')+(p?(' · '+p+' pending'):'');
+}
+function syncPillHtml(){
+  if(!syncReady()) return '';
+  if(syncState.syncing) return '⟳ syncing';
+  if(syncState.error) return '<span style="color:#dc2626">⚠ sync error</span>';
+  return '<span style="color:var(--good)">✓ Sheet synced</span>';
+}
+function updateSyncUI(){
+  const s = document.getElementById('syncStatus'); if(s) s.innerHTML = syncStatusHtml();
+  const p = document.getElementById('syncPill'); if(p) p.innerHTML = syncPillHtml();
+}
 
 /* ------------------------------------------------------- clinical reference -- */
 const DAY = 86400000;
@@ -373,7 +467,7 @@ function viewHome(){
   return `<div class="wrap grid" style="gap:16px">
     <div class="between">
       <div><h1>${esc(settings.babyName)}</h1><div class="small muted">${days!=null?(days+' day'+(days===1?'':'s')+' old'):'Set date of birth in Settings'}</div></div>
-      <div class="small muted">${new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'short'})}</div>
+      <div class="small muted">${new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'short'})}<div id="syncPill" class="tiny" style="margin-top:2px">${syncPillHtml()}</div></div>
     </div>
 
     <div class="card pad">
@@ -502,6 +596,25 @@ function viewSettings(){
       <h2 style="margin-bottom:12px">Baby</h2>
       <div class="field"><label class="label">Name</label><input data-set="babyName" value="${esc(settings.babyName)}"></div>
       <div class="field"><label class="label">Date of birth</label><input type="datetime-local" data-set="babyDob" value="${settings.babyDob?toLocalInput(settings.babyDob):''}"><div class="tiny muted" style="margin-top:4px">Used for age-based fever alerts and diaper targets.</div></div>
+    </div>
+    <div class="card pad">
+      <h2>Cloud sync (Google Sheet)</h2>
+      <div class="tiny muted" style="margin:4px 0 12px">Save the log to a shared Google Sheet so you and your wife see the same data on both phones. The app still works offline and syncs when online.</div>
+      <div class="field"><label class="label">Web app URL</label><input data-set="syncUrl" value="${esc(settings.syncUrl||'')}" placeholder="https://script.google.com/macros/s/…/exec"></div>
+      <div class="field"><label class="label">Shared secret (optional)</label><input data-set="syncToken" value="${esc(settings.syncToken||'')}" placeholder="must match SECRET in the script"></div>
+      <button class="btn btn-primary" data-act="sync-now">⟳ Sync now</button>
+      <div id="syncStatus" class="small" style="margin-top:10px">${syncStatusHtml()}</div>
+      <details style="margin-top:12px">
+        <summary class="small" style="cursor:pointer;color:var(--brand-d)">How to set this up (5 min)</summary>
+        <ol class="small muted" style="padding-left:18px;line-height:1.5">
+          <li>Create a new Google Sheet.</li>
+          <li>In it: <b>Extensions → Apps Script</b>.</li>
+          <li>Delete the sample code, paste the contents of <b>google-apps-script.gs</b> from this project, and Save.</li>
+          <li><b>Deploy → New deployment → Web app</b>. Set <i>Execute as: Me</i> and <i>Who has access: Anyone</i>. Authorize when asked.</li>
+          <li>Copy the <b>Web app URL</b> (ends in <code>/exec</code>) and paste it above. Optionally set a shared secret in the script and here.</li>
+          <li>Tap <b>Sync now</b>. Paste the same URL on the other phone.</li>
+        </ol>
+      </details>
     </div>
     <div class="card pad">
       <h2 style="margin-bottom:12px">Caregivers</h2>
@@ -647,7 +760,7 @@ function importBackup(file){
       if(j.app!=='baby-care-tracker'||!Array.isArray(j.events)) throw new Error('Not a valid backup file.');
       const seen=new Set(events.map(e=>e.type+'|'+e.at+'|'+e.caregiver)); let added=0;
       for(const ev of j.events){ const k=ev.type+'|'+ev.at+'|'+ev.caregiver; if(seen.has(k))continue; seen.add(k);
-        events.push(Object.assign({},ev,{id:newId()})); added++; }
+        const ne=Object.assign({},ev,{id:newId()}); events.push(ne); queueUpsert(ne); added++; }
       persistEvents(); render();
       const el=document.getElementById('ioMsg'); if(el) el.textContent='Imported '+added+' new entr'+(added===1?'y':'ies')+'.';
     }catch(err){ const el=document.getElementById('ioMsg'); if(el) el.textContent=err.message||'Import failed.'; }
@@ -662,7 +775,7 @@ document.addEventListener('click', (ev)=>{
 
   if(t.dataset.tab){ state.tab=t.dataset.tab; render(); if(t.dataset.tab==='home' && !weatherCache) fetchWeather(); return; }
   if(t.dataset.log){ openSheet(t.dataset.log,null,null); return; }
-  if(t.dataset.edit){ const e=events.find(x=>x.id===+t.dataset.edit); if(e) openSheet(null,e,null); return; }
+  if(t.dataset.edit){ const e=findEvent(t.dataset.edit); if(e) openSheet(null,e,null); return; }
   if(t.dataset.filter){ state.filter=t.dataset.filter; render(); return; }
   if(t.dataset.unit){ saveSettings({tempUnit:t.dataset.unit}); return; }
   if(t.dataset.rmCare){ if(settings.caregivers.length>1){ const cs=settings.caregivers.filter(c=>c!==t.dataset.rmCare); saveSettings({caregivers:cs, currentCaregiver: cs.includes(settings.currentCaregiver)?settings.currentCaregiver:cs[0]}); } return; }
@@ -695,6 +808,7 @@ document.addEventListener('click', (ev)=>{
   if(act==='export-csv') return download('baby-care-'+dateKey(Date.now())+'.csv', exportCsv(), 'text/csv');
   if(act==='export-json') return download('baby-care-backup-'+dateKey(Date.now())+'.json', JSON.stringify({app:'baby-care-tracker',version:1,exportedAt:Date.now(),events:events},null,2), 'application/json');
   if(act==='import'){ const fi=document.createElement('input'); fi.type='file'; fi.accept='application/json,.json'; fi.onchange=()=>{ if(fi.files[0]) importBackup(fi.files[0]); }; fi.click(); return; }
+  if(act==='sync-now') return syncNow();
 });
 
 // text / number / datetime inputs (no full re-render to preserve focus)
@@ -726,6 +840,9 @@ setInterval(()=>{ if(state.tab==='home' && !state.sheet && (getTimer('breastfeed
 /* ------------------------------------------------------------------- boot --- */
 render();
 fetchWeather();
+if(syncReady()) syncNow();
+// keep two phones fresh: pull when the tab regains focus
+window.addEventListener('focus', ()=>{ if(syncReady() && !syncState.syncing) syncNow(); });
 </script>
 </body>
 </html>

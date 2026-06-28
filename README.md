@@ -23,8 +23,34 @@ Pick either:
    static host (Netlify drop, GitHub Pages, Cloudflare Pages…), open the URL on
    each phone, and **"Add to Home Screen"** to get an app icon.
 
-> Data lives **per device/browser**. Use **Settings → Export / Import backup** to
-> copy entries between phones (imports are de-duplicated, so re-importing is safe).
+> By default data lives **per device/browser**. To share one live log between
+> both phones, connect a **Google Sheet** (see below). Without it, you can still
+> copy data with **Settings → Export / Import backup** (imports are de-duplicated).
+
+## Share data between two phones (Google Sheet)
+
+The app can save every entry to a **shared Google Sheet** so you and your wife
+always see the same log — still no server of your own. It uses a small Google
+Apps Script (included as [`google-apps-script.gs`](google-apps-script.gs)) that
+turns your Sheet into a private API. The app keeps working offline and syncs when
+back online (last edit wins; deletes propagate).
+
+**One-time setup (~5 min):**
+
+1. Create a new **Google Sheet**.
+2. **Extensions → Apps Script**.
+3. Delete the sample code, paste the contents of `google-apps-script.gs`, **Save**.
+   *(Optional: set a `SECRET` string at the top to lock down access.)*
+4. **Deploy → New deployment → Web app** — *Execute as: Me*, *Who has access:
+   Anyone*. Authorize when prompted.
+5. Copy the **Web app URL** (ends in `/exec`).
+6. In the app: **Settings → Cloud sync** → paste the URL (and the secret, if set)
+   → **Sync now**.
+7. Paste the **same URL** in the app on the other phone. Done — both stay in sync.
+
+> The sync uses simple `GET` requests to avoid browser CORS issues. If your
+> browser blocks cross-origin requests from a `file://` page, **host `index.html`**
+> (e.g. GitHub Pages) and open it from there — then sync works everywhere.
 
 ### First run
 
@@ -58,5 +84,6 @@ the daily wet-diaper target.
 ## Tech
 
 Plain HTML + CSS + vanilla JavaScript in a single file. No dependencies, no build
-step. Storage via `localStorage`; charts are hand-drawn SVG; weather via the
-keyless [Open-Meteo](https://open-meteo.com) API.
+step. Local storage via `localStorage`; optional shared storage via a Google Sheet
+(Apps Script web app); charts are hand-drawn SVG; weather via the keyless
+[Open-Meteo](https://open-meteo.com) API.
