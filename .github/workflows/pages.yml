@@ -1,0 +1,44 @@
+name: Deploy to GitHub Pages
+
+# Publishes the single-file app (index.html at repo root) to GitHub Pages.
+# Runs on every push to the default branch, and can be run manually.
+
+on:
+  push:
+    branches: ["claude/baby-care-tracker-v4wzt7"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; newer pushes supersede in-progress ones.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          # Auto-enable Pages (works once the repo is public or on a paid plan).
+          enablement: true
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
