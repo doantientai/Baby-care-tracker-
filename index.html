@@ -961,7 +961,7 @@ function renderSheet(){
   if(!s){ sheetRoot.innerHTML=''; return; }
   const m=META[s.type];
   const info=infoText(s.type);
-  sheetRoot.innerHTML=`<div class="scrim" data-act="close"></div><div class="sheet" role="dialog">
+  sheetRoot.innerHTML=`<div class="scrim"></div><div class="sheet" role="dialog">
     <div class="head"><h2>${m.emoji} ${t(s.editing?'Edit':'Log')} ${t(m.label).toLowerCase()}</h2>
       <div class="row" style="gap:6px">
         <button class="x" data-act="info-toggle" title="${t('Info')}" style="${s.showInfo?'background:var(--brand);color:#fff':''}">ⓘ</button>
