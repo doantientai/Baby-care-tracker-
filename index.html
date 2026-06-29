@@ -320,6 +320,7 @@ const FR = {
   'Set date of birth in Settings':'Renseignez la date de naissance dans Réglages',
   'Outside':'Dehors','Weather unavailable':'Météo indisponible','Loading…':'Chargement…','feels':'ressenti',
   'Breastfeeding':'Allaitement','Sleep':'Sommeil','Switch':'Changer','Stop':'Arrêter',
+  'Pause':'Pause','Resume':'Reprendre','paused':'en pause',
   'Start L':'Début G','Start R':'Début D','Start sleep':'Démarrer le sommeil','tap to stop':'toucher pour arrêter',
   'Quick log':'Saisie rapide','Today':"Aujourd'hui",'Wet diapers':'Couches mouillées','Dirty diapers':'Couches sales',
   'Feeds':'Repas','Recent':'Récent','See all →':'Tout voir →','No entries yet today.':"Aucune entrée aujourd'hui.",
@@ -590,12 +591,19 @@ function startBreastfeed(side){
 }
 function bank(t, at){
   if(!t.currentSide||t.lastSwitchAt==null) return t;
-  const el=Math.max(0,Math.round((at-t.lastSwitchAt)/1000));
+  const el = t.paused ? 0 : Math.max(0,Math.round((at-t.lastSwitchAt)/1000)); // don't accrue while paused
   return Object.assign({},t,{ leftSec:(t.leftSec||0)+(t.currentSide==='left'?el:0), rightSec:(t.rightSec||0)+(t.currentSide==='right'?el:0), lastSwitchAt:at });
 }
 function switchBreast(){
   const all=readTimers(); const t=all.find(x=>x.kind==='breastfeed'); if(!t) return;
   const b=bank(t,Date.now()); b.currentSide = b.currentSide==='left'?'right':'left';
+  writeTimers(all.filter(x=>x.kind!=='breastfeed').concat(b)); render();
+}
+function pauseBreast(){
+  const all=readTimers(); const t=all.find(x=>x.kind==='breastfeed'); if(!t) return;
+  let b;
+  if(t.paused){ b=Object.assign({},t,{paused:false,lastSwitchAt:Date.now()}); }   // resume
+  else { b=bank(t,Date.now()); b.paused=true; }                                    // bank elapsed, then pause
   writeTimers(all.filter(x=>x.kind!=='breastfeed').concat(b)); render();
 }
 function stopTimer(kind){
@@ -675,16 +683,19 @@ function viewHome(){
 
   let bfCard;
   if(bf){
-    const liveL=(bf.leftSec||0)+(bf.currentSide==='left'?(now-(bf.lastSwitchAt||now))/1000:0);
-    const liveR=(bf.rightSec||0)+(bf.currentSide==='right'?(now-(bf.lastSwitchAt||now))/1000:0);
+    const accr = bf.paused ? 0 : 1;
+    const liveL=(bf.leftSec||0)+(accr && bf.currentSide==='left'?(now-(bf.lastSwitchAt||now))/1000:0);
+    const liveR=(bf.rightSec||0)+(accr && bf.currentSide==='right'?(now-(bf.lastSwitchAt||now))/1000:0);
     bfCard=`<div class="grid g2" style="gap:6px">
-        <div class="side ${bf.currentSide==='left'?'on':'off'}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Left')}${bf.currentSide==='left'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveL)}</div></div>
-        <div class="side ${bf.currentSide==='right'?'on':'off'}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Right')}${bf.currentSide==='right'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveR)}</div></div>
+        <div class="side ${bf.currentSide==='left'?'on':'off'}" style="${bf.paused?'opacity:.6':''}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Left')}${bf.currentSide==='left'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveL)}</div></div>
+        <div class="side ${bf.currentSide==='right'?'on':'off'}" style="${bf.paused?'opacity:.6':''}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Right')}${bf.currentSide==='right'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveR)}</div></div>
       </div>
+      ${bf.paused?`<div class="tiny center" style="color:var(--pink-ink);margin-top:6px;font-weight:700">⏸ ${t('paused')}</div>`:''}
       <div class="grid g2" style="gap:8px;margin-top:8px">
+        <button class="btn" style="background:var(--pink-l);color:var(--pink-ink)" data-act="bf-pause">${bf.paused?'▶ '+t('Resume'):'⏸ '+t('Pause')}</button>
         <button class="btn" style="background:var(--pink-l);color:var(--pink-ink)" data-act="bf-switch">⇄ ${t('Switch')}</button>
-        <button class="btn" style="background:var(--pink);color:#fff" data-act="bf-stop">■ ${t('Stop')}</button>
-      </div>`;
+      </div>
+      <button class="btn btn-block" style="background:var(--pink);color:#fff;margin-top:8px" data-act="bf-stop">■ ${t('Stop')}</button>`;
   } else {
     bfCard=`<div class="grid g2" style="gap:8px;margin-top:8px">
         <button class="btn" data-act="bf-start" data-side="left" style="background:${sug==='left'?'var(--pink)':'var(--pink-l)'};color:${sug==='left'?'#fff':'var(--pink-ink)'}">${t('Start L')}${sug==='left'?' ✦':''}</button>
@@ -1102,6 +1113,7 @@ document.addEventListener('click', (ev)=>{
   if(act==='delete'){ if(state.sheet&&state.sheet.editing&&confirm(t('Delete this entry?'))){ deleteEvent(state.sheet.editing.id); closeSheet(); render(); } return; }
   if(act==='bf-start') return startBreastfeed(el.dataset.side);
   if(act==='bf-switch') return switchBreast();
+  if(act==='bf-pause') return pauseBreast();
   if(act==='bf-stop') return stopBreast();
   if(act==='sleep-start') return startSleep();
   if(act==='sleep-stop') return stopSleep();

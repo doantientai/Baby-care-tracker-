@@ -69,7 +69,8 @@ the daily wet-diaper target.
 - **Breastfeeding** — two-sided session timer that records **time on each breast
   separately** (start a side → *Switch* → *Stop*), suggests **which side to start
   next**, and logs the **feeding position** (cradle, cross-cradle, football,
-  laid-back, side-lying).
+  laid-back, side-lying). The timer can be **paused/resumed** mid-feed (burping,
+  re-latching) so interruptions don't inflate the time.
 - **Bottle** — formula / expressed / mixed, volume with quick presets.
 - **Temperature** — measurement method + **automatic fever assessment**; under
   3 months a fever is flagged as an **emergency**.
