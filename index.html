@@ -10,9 +10,26 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230ea5e9'/%3E%3Ctext x='50' y='70' font-size='58' text-anchor='middle'%3E%F0%9F%8D%BC%3C/text%3E%3C/svg%3E" />
 <style>
   :root{
+    color-scheme: light;
     --brand:#0ea5e9; --brand-d:#0284c7; --bg:#f8fafc; --ink:#0f172a; --muted:#64748b;
-    --line:#e2e8f0; --card:#fff; --pink:#ec4899; --pink-l:#fce7f3; --indigo:#6366f1; --indigo-l:#e0e7ff;
-    --good:#059669; --good-l:#ecfdf5; --warn:#d97706; --warn-l:#fffbeb; --bad:#dc2626; --bad-l:#fef2f2;
+    --line:#e2e8f0; --card:#fff; --card-border:#eef2f7; --pink:#ec4899; --pink-l:#fce7f3; --pink-ink:#9d174d;
+    --indigo:#6366f1; --indigo-l:#e0e7ff; --indigo-ink:#3730a3;
+    --good:#059669; --good-l:#ecfdf5; --good-ink:#065f46; --warn:#d97706; --warn-l:#fffbeb; --warn-ink:#92400e;
+    --bad:#dc2626; --bad-l:#fef2f2; --bad-ink:#991b1b;
+    --field-bg:#fff; --ghost-bg:#f1f5f9; --ghost-ink:#334155; --chip-bg:#fff; --chip-ink:#475569;
+    --label:#94a3b8; --info-bg:#e0f2fe; --info-ink:#075985; --ev-active:#f8fafc;
+    --nav-bg:rgba(255,255,255,.96); --daycap:linear-gradient(#f8fafc,#f8fafcdd);
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --brand:#38bdf8; --brand-d:#7dd3fc; --bg:#0b1220; --ink:#e7ecf3; --muted:#94a3b8;
+    --line:#2a3650; --card:#151d2e; --card-border:#243049; --pink:#ec4899; --pink-l:#3a2230; --pink-ink:#f9a8d4;
+    --indigo:#818cf8; --indigo-l:#262b48; --indigo-ink:#c7d2fe;
+    --good:#34d399; --good-l:#0f2a22; --good-ink:#86efac; --warn:#fbbf24; --warn-l:#2c2410; --warn-ink:#fcd34d;
+    --bad:#f87171; --bad-l:#33181b; --bad-ink:#fca5a5;
+    --field-bg:#0f1626; --ghost-bg:#222c43; --ghost-ink:#dbe3f0; --chip-bg:#172033; --chip-ink:#cbd5e1;
+    --label:#7c8aa3; --info-bg:#0e2a3a; --info-ink:#bae6fd; --ev-active:#1b2436;
+    --nav-bg:rgba(17,24,39,.96); --daycap:linear-gradient(#0b1220,#0b1220dd);
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -35,14 +52,14 @@
   .grid{display:grid;gap:12px}
   .g2{grid-template-columns:1fr 1fr}
   .g3{grid-template-columns:1fr 1fr 1fr}
-  .card{background:var(--card);border:1px solid #eef2f7;border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  .card{background:var(--card);border:1px solid var(--card-border);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
   .pad{padding:16px}
   .pad-s{padding:12px}
   .section-title{font-size:.85rem;font-weight:600;color:var(--muted);margin:0 0 8px}
   .tabular{font-variant-numeric:tabular-nums}
-  .label{display:block;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#94a3b8;margin-bottom:6px}
+  .label{display:block;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--label);margin-bottom:6px}
   .field{margin-bottom:16px}
-  input,textarea,select{width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;
+  input,textarea,select{width:100%;border:1px solid var(--line);background:var(--field-bg);border-radius:12px;
     padding:11px 12px;font-size:16px;outline:none;color:var(--ink)}
   input:focus,textarea:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px #bae6fd66}
   textarea{min-height:60px;resize:vertical}
@@ -51,54 +68,54 @@
   .btn:active{transform:scale(.98)}
   .btn-primary{background:var(--brand);color:#fff}
   .btn-primary:active{background:var(--brand-d)}
-  .btn-ghost{background:#f1f5f9;color:#334155}
+  .btn-ghost{background:var(--ghost-bg);color:var(--ghost-ink)}
   .btn-block{width:100%}
   .chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;border:1px solid var(--line);
-    background:#fff;color:#475569;padding:9px 14px;font-size:.88rem;font-weight:600;transition:transform .05s}
+    background:var(--chip-bg);color:var(--chip-ink);padding:9px 14px;font-size:.88rem;font-weight:600;transition:transform .05s}
   .chip:active{transform:scale(.95)}
   .chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
   .chips{display:flex;flex-wrap:wrap;gap:8px}
   .swatch{width:14px;height:14px;border-radius:999px;border:1px solid rgba(0,0,0,.1)}
-  .quick{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 6px;border:1px solid #eef2f7;
-    background:#fff;border-radius:16px}
+  .quick{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 6px;border:1px solid var(--card-border);
+    background:var(--card);border-radius:16px}
   .quick .emoji{font-size:1.6rem}
-  .quick .t{font-size:.78rem;font-weight:600;color:#475569}
+  .quick .t{font-size:.78rem;font-weight:600;color:var(--chip-ink)}
   .stat .v{font-size:1.6rem;font-weight:800;line-height:1.1;margin-top:2px}
   .stat.good{background:var(--good-l);border-color:#a7f3d0}
   .stat.warn{background:var(--warn-l);border-color:#fde68a}
   .banner{border-radius:12px;padding:9px 12px;font-size:.85rem}
-  .banner.info{background:#e0f2fe;color:#075985}
-  .banner.pink{background:var(--pink-l);color:#9d174d}
-  .banner.good{background:var(--good-l);color:#065f46;font-weight:600}
-  .banner.warn{background:var(--warn-l);color:#92400e;font-weight:600}
-  .banner.bad{background:var(--bad-l);color:#991b1b;font-weight:700}
+  .banner.info{background:var(--info-bg);color:var(--info-ink)}
+  .banner.pink{background:var(--pink-l);color:var(--pink-ink)}
+  .banner.good{background:var(--good-l);color:var(--good-ink);font-weight:600}
+  .banner.warn{background:var(--warn-l);color:var(--warn-ink);font-weight:600}
+  .banner.bad{background:var(--bad-l);color:var(--bad-ink);font-weight:700}
   .ev{display:flex;align-items:center;gap:12px;padding:10px 12px;width:100%;text-align:left;border:none;background:none;border-radius:12px}
-  .ev:active{background:#f8fafc}
-  .ev+.ev{border-top:1px solid #f1f5f9}
+  .ev:active{background:var(--ev-active)}
+  .ev+.ev{border-top:1px solid var(--card-border)}
   .ev .ic{width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex:0 0 auto}
   .ev .mid{min-width:0;flex:1}
   .ev .ttl{font-weight:700}
   .ev .sub{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ev .rt{text-align:right;flex:0 0 auto}
   .ev.warn{background:var(--bad-l)}
-  .nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);
+  .nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--nav-bg);backdrop-filter:blur(8px);
     border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
   .nav .inner{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
   .nav button{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:2px;
-    padding:9px 0;color:#94a3b8;font-size:.7rem;font-weight:600}
+    padding:9px 0;color:var(--label);font-size:.7rem;font-weight:600}
   .nav button .ne{font-size:1.25rem}
   .nav button.on{color:var(--brand-d)}
   .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40}
-  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;max-width:480px;margin:0 auto;background:#fff;
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;max-width:480px;margin:0 auto;background:var(--card);
     border-radius:22px 22px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow-y:auto;
     animation:up .2s ease-out}
   @keyframes up{from{transform:translateY(14px);opacity:.7}to{transform:translateY(0);opacity:1}}
   .sheet .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-  .x{border:none;background:#f1f5f9;color:#64748b;border-radius:999px;width:32px;height:32px;font-size:1rem}
+  .x{border:none;background:var(--ghost-bg);color:var(--muted);border-radius:999px;width:32px;height:32px;font-size:1rem}
   .pillrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
   .hidden{display:none!important}
   .center{text-align:center}
-  .daycap{position:sticky;top:0;background:linear-gradient(#f8fafc,#f8fafcdd);padding:6px 2px;z-index:5}
+  .daycap{position:sticky;top:0;background:var(--daycap);padding:6px 2px;z-index:5}
   .filterbar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin:0 -16px 14px;padding-left:16px;padding-right:16px}
   .filterbar .chip{flex:0 0 auto}
   svg.chart{width:100%;height:auto;display:block}
@@ -106,7 +123,7 @@
   .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
   .side{border-radius:10px;padding:6px 4px;text-align:center}
   .side.on{background:var(--pink);color:#fff}
-  .side.off{background:var(--pink-l);color:#9d174d}
+  .side.off{background:var(--pink-l);color:var(--pink-ink)}
 </style>
 </head>
 <body>
@@ -138,7 +155,7 @@ const DEFAULT_SETTINGS = {
   tempUnit: 'C',
   syncUrl: '', syncToken: '',
   feedGapEnabled: false, feedGapDayH: 3, feedGapNightH: 5,
-  lang: 'en',
+  lang: 'en', theme: 'system',
 };
 function loadJSON(key, fallback){ try{ const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }catch(e){ return fallback; } }
 function saveJSON(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
@@ -146,7 +163,22 @@ function saveJSON(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
 let settings = Object.assign({}, DEFAULT_SETTINGS, loadJSON(LS.settings, {}));
 let events = loadJSON(LS.events, []);
 
-function saveSettings(patch){ settings = Object.assign({}, settings, patch); saveJSON(LS.settings, settings); render(); }
+function saveSettings(patch){ settings = Object.assign({}, settings, patch); saveJSON(LS.settings, settings); applyTheme(); render(); }
+
+// Theme: 'system' follows the OS; 'light'/'dark' force it.
+function resolvedTheme(){
+  if(settings.theme==='light'||settings.theme==='dark') return settings.theme;
+  return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+}
+function applyTheme(){
+  const r = resolvedTheme();
+  document.documentElement.setAttribute('data-theme', r);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content', r==='dark' ? '#0b1220' : '#0ea5e9');
+}
+if(window.matchMedia){
+  try{ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>{ if(settings.theme==='system') applyTheme(); }); }catch(e){}
+}
 function persistEvents(){ saveJSON(LS.events, events); }
 
 // IDs are unique strings so two phones never collide when offline.
@@ -299,7 +331,8 @@ const FR = {
   'Wet':'Mouillées','Dirty':'Sales','Sleep (h)':'Sommeil (h)',
   'Log at least two weight measurements to see a curve.':'Enregistrez au moins deux pesées pour voir une courbe.',
   // settings
-  'Language':'Langue','Baby':'Bébé','Name':'Nom','Date of birth':'Date de naissance',
+  'Language':'Langue','Appearance':'Apparence','Auto':'Auto','Light':'Clair','Dark':'Sombre',
+  'Baby':'Bébé','Name':'Nom','Date of birth':'Date de naissance',
   'Used for age-based fever alerts and diaper targets.':"Utilisée pour les alertes de fièvre selon l'âge et les objectifs de couches.",
   'Cloud sync (Google Sheet)':'Synchronisation (Google Sheet)',
   'Save the log to a shared Google Sheet so you and your wife see the same data on both phones. The app still works offline and syncs when online.':"Enregistrez le journal dans un Google Sheet partagé pour voir les mêmes données sur les deux téléphones. L'app fonctionne hors ligne et se synchronise une fois en ligne.",
@@ -615,18 +648,18 @@ function viewHome(){
         <div class="side ${bf.currentSide==='right'?'on':'off'}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Right')}${bf.currentSide==='right'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveR)}</div></div>
       </div>
       <div class="grid g2" style="gap:8px;margin-top:8px">
-        <button class="btn" style="background:var(--pink-l);color:#9d174d" data-act="bf-switch">⇄ ${t('Switch')}</button>
+        <button class="btn" style="background:var(--pink-l);color:var(--pink-ink)" data-act="bf-switch">⇄ ${t('Switch')}</button>
         <button class="btn" style="background:var(--pink);color:#fff" data-act="bf-stop">■ ${t('Stop')}</button>
       </div>`;
   } else {
     bfCard=`<div class="grid g2" style="gap:8px;margin-top:8px">
-        <button class="btn" data-act="bf-start" data-side="left" style="background:${sug==='left'?'var(--pink)':'var(--pink-l)'};color:${sug==='left'?'#fff':'#9d174d'}">${t('Start L')}${sug==='left'?' ✦':''}</button>
-        <button class="btn" data-act="bf-start" data-side="right" style="background:${sug==='right'?'var(--pink)':'var(--pink-l)'};color:${sug==='right'?'#fff':'#9d174d'}">${t('Start R')}${sug==='right'?' ✦':''}</button>
+        <button class="btn" data-act="bf-start" data-side="left" style="background:${sug==='left'?'var(--pink)':'var(--pink-l)'};color:${sug==='left'?'#fff':'var(--pink-ink)'}">${t('Start L')}${sug==='left'?' ✦':''}</button>
+        <button class="btn" data-act="bf-start" data-side="right" style="background:${sug==='right'?'var(--pink)':'var(--pink-l)'};color:${sug==='right'?'#fff':'var(--pink-ink)'}">${t('Start R')}${sug==='right'?' ✦':''}</button>
       </div>`;
   }
   const slCard = sl
     ? `<button class="btn btn-block" data-act="sleep-stop" style="background:var(--indigo);color:#fff;margin-top:8px;flex-direction:column;padding:12px"><span class="tabular" style="font-weight:800;font-size:1.05rem">${fmtDur((now-sl.startedAt)/1000)}</span><span class="tiny" style="opacity:.9">${t('tap to stop')}</span></button>`
-    : `<button class="btn btn-block" data-act="sleep-start" style="background:var(--indigo-l);color:#3730a3;margin-top:8px;padding:14px">😴 ${t('Start sleep')}</button>`;
+    : `<button class="btn btn-block" data-act="sleep-start" style="background:var(--indigo-l);color:var(--indigo-ink);margin-top:8px;padding:14px">😴 ${t('Start sleep')}</button>`;
 
   const weatherHtml = weatherCache
     ? `<div class="rt" style="text-align:right"><div style="font-size:1.6rem;font-weight:800">${WMO[weatherCache.code]?WMO[weatherCache.code][1]:'🌡️'} ${weatherCache.t}°</div><div class="tiny muted">${WMO[weatherCache.code]?t(WMO[weatherCache.code][0]):''} · ${t('feels')} ${weatherCache.app}° · ${weatherCache.hum}%</div></div>`
@@ -769,6 +802,15 @@ function viewSettings(){
       </div>
     </div>
     <div class="card pad">
+      <div class="between"><h2>${t('Appearance')}</h2>
+        <div class="chips">
+          <button class="chip ${settings.theme==='system'?'on':''}" data-themeset="system">${t('Auto')}</button>
+          <button class="chip ${settings.theme==='light'?'on':''}" data-themeset="light">☀️ ${t('Light')}</button>
+          <button class="chip ${settings.theme==='dark'?'on':''}" data-themeset="dark">🌙 ${t('Dark')}</button>
+        </div>
+      </div>
+    </div>
+    <div class="card pad">
       <h2 style="margin-bottom:12px">${t('Baby')}</h2>
       <div class="field"><label class="label">${t('Name')}</label><input data-set="babyName" value="${esc(settings.babyName)}"></div>
       <div class="field"><label class="label">${t('Date of birth')}</label><input type="datetime-local" data-set="babyDob" value="${settings.babyDob?toLocalInput(settings.babyDob):''}"><div class="tiny muted" style="margin-top:4px">${t('Used for age-based fever alerts and diaper targets.')}</div></div>
@@ -882,7 +924,7 @@ function sheetBody(s){
     html+=`<div class="field"><label class="label">${t('Amount')}</label>${chipgroup('amount',[{v:'little',l:'Little'},{v:'average',l:'Average'},{v:'full',l:'Full'}],d.amount)}</div>`;
     if(d.kind==='poop'||d.kind==='both'){
       html+=`<div class="field"><label class="label">${t('Stool color')}</label><div class="chips" data-chip="color">${Object.keys(STOOL).map(c=>`<button class="chip ${d.color===c?'on':''}" data-v="${c}"><span class="swatch" style="background:${STOOL[c].sw}"></span>${t(STOOL[c].label)}</button>`).join('')}</div></div>`;
-      if(d.color){ const con=stoolConcerning(d.color); html+=`<div class="banner ${con?'bad':''}" style="${con?'':'background:#f1f5f9;color:#64748b'};margin-bottom:16px">${con?'⚠ ':''}${t(STOOL[d.color].note)}</div>`; }
+      if(d.color){ const con=stoolConcerning(d.color); html+=`<div class="banner ${con?'bad':''}" style="${con?'':'background:var(--ghost-bg);color:var(--muted)'};margin-bottom:16px">${con?'⚠ ':''}${t(STOOL[d.color].note)}</div>`; }
       html+=`<div class="field"><label class="label">${t('Texture')}</label>${chipgroup('texture',[{v:'liquid',l:'Liquid'},{v:'seedy',l:'Seedy'},{v:'soft',l:'Soft'},{v:'formed',l:'Formed'},{v:'hard',l:'Hard'},{v:'mucousy',l:'Mucousy'}],d.texture)}</div>`;
     }
   } else if(s.type==='breastfeed'){
@@ -967,7 +1009,7 @@ function importBackup(file){
 
 /* --------------------------------------------------------------- listeners -- */
 document.addEventListener('click', (ev)=>{
-  const el=ev.target.closest('[data-tab],[data-log],[data-edit],[data-filter],[data-act],[data-unit],[data-lang],[data-rm-care],[data-chip] [data-v],[data-preset],[data-preset-str],[data-tadj]');
+  const el=ev.target.closest('[data-tab],[data-log],[data-edit],[data-filter],[data-act],[data-unit],[data-lang],[data-themeset],[data-rm-care],[data-chip] [data-v],[data-preset],[data-preset-str],[data-tadj]');
   if(!el) return;
   if(el.dataset.tadj!=null && state.sheet){ state.sheet.at = Date.now() - (+el.dataset.tadj)*60000; renderSheet(); return; }
 
@@ -977,6 +1019,7 @@ document.addEventListener('click', (ev)=>{
   if(el.dataset.filter){ state.filter=el.dataset.filter; render(); return; }
   if(el.dataset.unit){ saveSettings({tempUnit:el.dataset.unit}); return; }
   if(el.dataset.lang){ saveSettings({lang:el.dataset.lang}); return; }
+  if(el.dataset.themeset){ saveSettings({theme:el.dataset.themeset}); return; }
   if(el.dataset.rmCare){ if(settings.caregivers.length>1){ const cs=settings.caregivers.filter(c=>c!==el.dataset.rmCare); saveSettings({caregivers:cs, currentCaregiver: cs.includes(settings.currentCaregiver)?settings.currentCaregiver:cs[0]}); } return; }
 
   // chip selection inside sheet / caregiver
@@ -1040,6 +1083,7 @@ document.addEventListener('input', (ev)=>{
 setInterval(()=>{ if(state.tab==='home' && !state.sheet && (getTimer('breastfeed')||getTimer('sleep'))) render(); }, 1000);
 
 /* ------------------------------------------------------------------- boot --- */
+applyTheme();
 render();
 fetchWeather();
 if(syncReady()) syncNow();

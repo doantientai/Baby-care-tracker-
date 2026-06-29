@@ -60,6 +60,7 @@ the daily wet-diaper target.
 
 ## Features
 
+- **Dark mode** — Light, Dark, or Auto (follows your phone); easy on the eyes at 3am.
 - **English & French** — switch language any time in Settings (Réglages).
 - **Built-in help** — an ⓘ button on every log type explains it with brief newborn-care guidance.
 - **Quick logging** — one tap from the home screen for every event type.
