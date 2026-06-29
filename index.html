@@ -939,7 +939,7 @@ function openSheet(type, editing, initial){
   state.sheet={type,editing:editing||null,draft,at,endAt,caregiver,note};
   renderSheet();
 }
-function closeSheet(){ state.sheet=null; renderSheet(); }
+function closeSheet(){ state.sheet=null; render(); }
 function hasRange(t){ return t==='breastfeed'||t==='sleep'||t==='pump'||t==='cry'; }
 
 function renderSheet(){
