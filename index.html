@@ -284,7 +284,7 @@ const FR = {
   'Start L':'Début G','Start R':'Début D','Start sleep':'Démarrer le sommeil','tap to stop':'toucher pour arrêter',
   'Quick log':'Saisie rapide','Today':"Aujourd'hui",'Wet diapers':'Couches mouillées','Dirty diapers':'Couches sales',
   'Feeds':'Repas','Recent':'Récent','See all →':'Tout voir →','No entries yet today.':"Aucune entrée aujourd'hui.",
-  'check':'vérifier','day':'jour','night':'nuit',
+  'check':'vérifier','day':'jour','night':'nuit','Now':'Maintenant',
   // event types
   'Diaper':'Couche','Breastfeed':'Allaitement','Bottle':'Biberon','Temperature':'Température',
   'Cry':'Pleurs','Pump':'Tire-lait','Medication':'Médicament','Growth':'Croissance','Note':'Note',
@@ -914,7 +914,9 @@ function sheetBody(s){
     html+=`<div class="field"><label class="label">${t('Head circumference (cm)')}</label><input type="number" step="0.1" inputmode="decimal" data-num="headCircumferenceCm" value="${d.headCircumferenceCm??''}"></div>`;
   }
   // common time + caregiver + note
-  html+=`<div class="field"><label class="label">${hasRange(s.type)?t('Start'):t('Time')}</label><input type="datetime-local" data-when="at" value="${toLocalInput(s.at)}"></div>`;
+  const tadj=[['Now',0],['-5m',5],['-15m',15],['-30m',30],['-1h',60],['-2h',120]];
+  html+=`<div class="field"><label class="label">${hasRange(s.type)?t('Start'):t('Time')}</label><input type="datetime-local" data-when="at" value="${toLocalInput(s.at)}">
+    <div class="pillrow">${tadj.map(([l,m])=>`<button class="chip" data-tadj="${m}">${l==='Now'?t('Now'):l}</button>`).join('')}</div></div>`;
   if(hasRange(s.type)){
     html+=`<div class="field"><label class="label">${t('End (optional)')}</label><input type="datetime-local" data-when="endAt" value="${s.endAt?toLocalInput(s.endAt):''}"></div>`;
   }
@@ -965,8 +967,9 @@ function importBackup(file){
 
 /* --------------------------------------------------------------- listeners -- */
 document.addEventListener('click', (ev)=>{
-  const el=ev.target.closest('[data-tab],[data-log],[data-edit],[data-filter],[data-act],[data-unit],[data-lang],[data-rm-care],[data-chip] [data-v],[data-preset],[data-preset-str]');
+  const el=ev.target.closest('[data-tab],[data-log],[data-edit],[data-filter],[data-act],[data-unit],[data-lang],[data-rm-care],[data-chip] [data-v],[data-preset],[data-preset-str],[data-tadj]');
   if(!el) return;
+  if(el.dataset.tadj!=null && state.sheet){ state.sheet.at = Date.now() - (+el.dataset.tadj)*60000; renderSheet(); return; }
 
   if(el.dataset.tab){ state.tab=el.dataset.tab; render(); if(el.dataset.tab==='home' && !weatherCache) fetchWeather(); return; }
   if(el.dataset.log){ openSheet(el.dataset.log,null,null); return; }
