@@ -29,7 +29,7 @@ Pick either:
 
 ## Share data between two phones (Google Sheet)
 
-The app can save every entry to a **shared Google Sheet** so you and your wife
+The app can save every entry to a **shared Google Sheet** so both parents
 always see the same log — still no server of your own. It uses a small Google
 Apps Script (included as [`google-apps-script.gs`](google-apps-script.gs)) that
 turns your Sheet into a private API. The app keeps working offline and syncs when
@@ -54,9 +54,11 @@ back online (last edit wins; deletes propagate).
 
 ### First run
 
-Open **Settings** → set the baby's **name** and **date of birth**. The DOB powers
-the age-based fever alerts (a fever under 3 months is flagged as an emergency) and
-the daily wet-diaper target.
+Open **Settings** → set the baby's **name** and **date of birth**, and your
+**location** (for the weather widget; it defaults to Paris). The DOB powers the
+age-based fever alerts (a fever under 3 months is flagged as an emergency) and the
+daily wet-diaper target. Each device starts blank — there's no preset baby,
+location, or personal data in the app.
 
 ## Features
 
@@ -76,16 +78,22 @@ the daily wet-diaper target.
   3 months a fever is flagged as an **emergency**.
 - **Sleep** — live timer or manual entry; daily totals.
 - **Cry, pump, medication / vitamin D, growth, notes.**
+- **Log after the fact** — every entry's time is editable, with one-tap shortcuts
+  (Now, −5m, −15m, −30m, −1h, −2h) for when you log a bit late.
 - **Vitamin D reminder** — a Home-screen prompt from your set time (default 7am) until you log it that day, with one-tap "Log it" (Settings → Reminders).
 - **What-to-wear advice** — outfit suggestion based on the current outdoor temperature ("one layer more than an adult"), shown in the weather card.
-- **Weather** — current outdoor conditions for your location (default
-  Saint-Cyr-l'École 78210) via the keyless Open-Meteo API, plus a **safe-sleep
-  nursery temperature** reminder (16–20 °C).
+- **Weather** — current outdoor conditions for your location (set it in Settings;
+  defaults to Paris) via the keyless Open-Meteo API, plus a **safe-sleep nursery
+  temperature** reminder (16–20 °C).
 - **Dashboard** — today's wet/dirty counts vs. age target, feeds, sleep, last-feed
   time and next-side suggestion.
 - **Trends** — diapers, feeds and sleep per day, plus a weight curve.
-- **Multi-caregiver** — every entry records who logged it (Papa / Maman / …).
-- **Backup & share** — CSV export for your pediatrician + JSON backup/restore.
+- **"Done by"** — each entry records who *performed* the care; breastfeeding and
+  pumping default to mom, diapers to dad (editable; configure caregivers in Settings).
+- **Backup & share** — CSV export for your pediatrician + JSON backup/restore
+  (a backup can also carry the baby profile).
+- **Auto-update** — when a new version is deployed, the app shows a one-tap
+  "Update available" refresh.
 
 ## Tech
 

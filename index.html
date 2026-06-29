@@ -136,7 +136,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.1';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.2';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -153,7 +153,7 @@ const LS = {
 const DEFAULT_SETTINGS = {
   babyName: 'Baby', babyDob: null,
   caregivers: ['Papa', 'Maman'], currentCaregiver: 'Papa',
-  lat: 48.7996, lon: 2.0667, locationLabel: "Saint-Cyr-l'École (78210)",
+  lat: 48.8566, lon: 2.3522, locationLabel: 'Paris',  // neutral default — change in Settings
   tempUnit: 'C',
   syncUrl: '', syncToken: '',
   feedGapEnabled: false, feedGapDayH: 3, feedGapNightH: 5,
