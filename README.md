@@ -75,6 +75,8 @@ the daily wet-diaper target.
   3 months a fever is flagged as an **emergency**.
 - **Sleep** — live timer or manual entry; daily totals.
 - **Cry, pump, medication / vitamin D, growth, notes.**
+- **Vitamin D reminder** — a Home-screen prompt from your set time (default 7am) until you log it that day, with one-tap "Log it" (Settings → Reminders).
+- **What-to-wear advice** — outfit suggestion based on the current outdoor temperature ("one layer more than an adult"), shown in the weather card.
 - **Weather** — current outdoor conditions for your location (default
   Saint-Cyr-l'École 78210) via the keyless Open-Meteo API, plus a **safe-sleep
   nursery temperature** reminder (16–20 °C).

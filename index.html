@@ -156,6 +156,7 @@ const DEFAULT_SETTINGS = {
   syncUrl: '', syncToken: '',
   feedGapEnabled: false, feedGapDayH: 3, feedGapNightH: 5,
   lang: 'en', theme: 'system',
+  vitDEnabled: true, vitDTime: '07:00',
 };
 function loadJSON(key, fallback){ try{ const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }catch(e){ return fallback; } }
 function saveJSON(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
@@ -296,6 +297,12 @@ const EN = {
   feedGap:"🍼 It's been <b>{h}h</b> since the last feed ({when} guide {thr}h). Newborns usually shouldn't go much longer — consider offering a feed.",
   relMin:'{n}m ago', relHour:'{n}h ago', relDay:'{n}d ago',
   imported:'Imported {n} {label}.',
+  outfitVeryWarm:'Very warm — one light layer (short-sleeve bodysuit), sun hat outside, no blanket. Watch for overheating.',
+  outfitWarm:'Warm — short-sleeve bodysuit + light trousers or a light sleepsuit; sun hat outside.',
+  outfitMild:'Mild — long-sleeve bodysuit + sleepsuit; light hat and socks.',
+  outfitCool:'Cool — bodysuit + sleepsuit + a cardigan or jacket; hat, socks, pram blanket.',
+  outfitCold:'Cold — add a warm layer (fleece/snowsuit), hat, mittens, socks, blanket.',
+  outfitVeryCold:'Very cold — snowsuit, hat, mittens, booties, blanket; keep outings short. Remove the bulky snowsuit in the car seat.',
 };
 const FR = {
   // templated
@@ -317,6 +324,16 @@ const FR = {
   'Quick log':'Saisie rapide','Today':"Aujourd'hui",'Wet diapers':'Couches mouillées','Dirty diapers':'Couches sales',
   'Feeds':'Repas','Recent':'Récent','See all →':'Tout voir →','No entries yet today.':"Aucune entrée aujourd'hui.",
   'check':'vérifier','day':'jour','night':'nuit','Now':'Maintenant',
+  // reminders + outfit
+  'Reminders':'Rappels','Vitamin D reminder':'Rappel Vitamine D','From':'À partir de',
+  'Vitamin D — give this morning’s dose':'Vitamine D — donnez la dose du matin','Log it':'Noter','Vitamin D given today ✓':'Vitamine D donnée ✓',
+  'Going out':'Sortie','What to wear':'Comment habiller bébé',
+  outfitVeryWarm:'Très chaud — une couche légère (body manches courtes), chapeau au soleil, pas de couverture. Attention à la surchauffe.',
+  outfitWarm:'Chaud — body manches courtes + pantalon léger ou pyjama léger ; chapeau au soleil.',
+  outfitMild:'Doux — body manches longues + pyjama ; bonnet léger et chaussettes.',
+  outfitCool:'Frais — body + pyjama + gilet ou veste ; bonnet, chaussettes, couverture.',
+  outfitCold:'Froid — ajoutez une couche chaude (polaire/combinaison), bonnet, moufles, chaussettes, couverture.',
+  outfitVeryCold:'Très froid — combinaison, bonnet, moufles, chaussons, couverture ; sorties courtes. Retirez la combinaison épaisse dans le siège-auto.',
   // event types
   'Diaper':'Couche','Breastfeed':'Allaitement','Bottle':'Biberon','Temperature':'Température',
   'Cry':'Pleurs','Pump':'Tire-lait','Medication':'Médicament','Growth':'Croissance','Note':'Note',
@@ -473,6 +490,23 @@ function stoolConcerning(color){
 function expectedWet(){ const d=ageInDays(); if(d==null) return 6; if(d<=0) return 1; if(d<=5) return Math.min(d+1,6); return 6; }
 const ROOM = { min:16, max:20, ideal:18 };
 function nextSide(last){ return last==='left' ? 'right' : last==='right' ? 'left' : 'left'; }
+// Outfit guidance for going outside, by outdoor °C ("one layer more than an adult").
+function outfitAdvice(c){
+  if(c>=28) return {e:'🥵', key:'outfitVeryWarm'};
+  if(c>=22) return {e:'☀️', key:'outfitWarm'};
+  if(c>=16) return {e:'🌤️', key:'outfitMild'};
+  if(c>=10) return {e:'🧥', key:'outfitCool'};
+  if(c>=4)  return {e:'🧣', key:'outfitCold'};
+  return {e:'❄️', key:'outfitVeryCold'};
+}
+// Vitamin D reminder helpers
+function vitDDoneToday(){ const now=Date.now(); return events.some(e=>e.type==='medication' && sameDay(e.at,now) && /vitamin/i.test((e.data&&e.data.name)||'')); }
+function vitDDue(){
+  if(!settings.vitDEnabled) return false;
+  const [h,m]=(settings.vitDTime||'07:00').split(':').map(Number);
+  const d=new Date(); const mins=d.getHours()*60+d.getMinutes();
+  return mins >= (h*60+(m||0)) && !vitDDoneToday();
+}
 
 /* ----------------------------------------------------------------- time ----- */
 function pad(n){ return String(n).padStart(2,'0'); }
@@ -673,12 +707,18 @@ function viewHome(){
       <div class="small muted">${new Date().toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'short'})}<div id="syncPill" class="tiny" style="margin-top:2px">${syncPillHtml()}</div></div>
     </div>
 
+    ${vitDDue()?`<div class="banner warn" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <span>💊 ${t('Vitamin D — give this morning’s dose')}</span>
+      <button class="btn" style="background:var(--brand);color:#fff;padding:7px 14px;flex:0 0 auto" data-act="log-vitd">${t('Log it')}</button>
+    </div>`:''}
+
     <div class="card pad">
       <div class="between">
         <div><div class="label" style="margin:0">${t('Outside')}</div><div class="small muted">${esc(settings.locationLabel)}</div></div>
         ${weatherHtml}
       </div>
       <div class="banner info" style="margin-top:12px">${t('nursery',{min:ROOM.min,max:ROOM.max,ideal:ROOM.ideal})}</div>
+      ${weatherCache?`<div class="banner info" style="margin-top:8px">${(()=>{const o=outfitAdvice(weatherCache.t);return o.e+' '+t('Going out')+' : '+t(o.key);})()}</div>`:''}
     </div>
 
     <div class="grid g2">
@@ -845,6 +885,14 @@ function viewSettings(){
         <div class="field" style="margin:0"><label class="label">${t('Day max (h)')}</label><input type="number" step="0.5" inputmode="decimal" data-setnum="feedGapDayH" value="${settings.feedGapDayH}"></div>
         <div class="field" style="margin:0"><label class="label">${t('Night max (h)')}</label><input type="number" step="0.5" inputmode="decimal" data-setnum="feedGapNightH" value="${settings.feedGapNightH}"></div>
       </div><div class="tiny muted" style="margin-top:8px">${t('Night counted as 10pm–7am. Typical guides: ~3h day, ~5h night in the early weeks.')}</div>`:''}
+    </div>
+    <div class="card pad">
+      <h2 style="margin-bottom:4px">${t('Reminders')}</h2>
+      <div class="between" style="margin-bottom:${settings.vitDEnabled?'12px':'0'}">
+        <span class="small">💊 ${t('Vitamin D reminder')}</span>
+        <button class="chip ${settings.vitDEnabled?'on':''}" data-act="toggle-vitd">${settings.vitDEnabled?t('On'):t('Off')}</button>
+      </div>
+      ${settings.vitDEnabled?`<div class="field" style="margin:0"><label class="label">${t('From')}</label><input type="time" data-set="vitDTime" value="${settings.vitDTime||'07:00'}"></div>`:''}
     </div>
     <div class="card pad">
       <h2 style="margin-bottom:12px">${t('Caregivers')}</h2>
@@ -1063,6 +1111,8 @@ document.addEventListener('click', (ev)=>{
   if(act==='import'){ const fi=document.createElement('input'); fi.type='file'; fi.accept='application/json,.json'; fi.onchange=()=>{ if(fi.files[0]) importBackup(fi.files[0]); }; fi.click(); return; }
   if(act==='sync-now') return syncNow();
   if(act==='toggle-feedgap') return saveSettings({ feedGapEnabled: !settings.feedGapEnabled });
+  if(act==='toggle-vitd') return saveSettings({ vitDEnabled: !settings.vitDEnabled });
+  if(act==='log-vitd'){ addEvent({type:'medication', at:Date.now(), caregiver:settings.currentCaregiver, data:{name:t('Vitamin D'), dose:'400 IU'}}); render(); return; }
 });
 
 // text / number / datetime inputs (no full re-render to preserve focus)
