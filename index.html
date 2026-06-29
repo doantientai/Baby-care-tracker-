@@ -943,12 +943,11 @@ function defaultData(type){
     default: return {};
   }
 }
-// "Done by" default: breastfeeding is at the breast, so default to mom when present.
+// "Done by" defaults: breastfeed/pump → mom, diaper → dad (when such a caregiver exists).
 function defaultCaregiver(type){
-  if(type==='breastfeed'){
-    const mom=settings.caregivers.find(c=>/maman|mom|mum|m[eè]re/i.test(c));
-    if(mom) return mom;
-  }
+  const find=re=>settings.caregivers.find(c=>re.test(c));
+  if(type==='breastfeed'||type==='pump'){ const mom=find(/maman|mom|mum|m[eè]re/i); if(mom) return mom; }
+  if(type==='diaper'){ const dad=find(/papa|dad|daddy|p[eè]re/i); if(dad) return dad; }
   return settings.currentCaregiver;
 }
 function openSheet(type, editing, initial){
