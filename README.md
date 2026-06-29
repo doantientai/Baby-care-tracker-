@@ -60,6 +60,8 @@ the daily wet-diaper target.
 
 ## Features
 
+- **English & French** — switch language any time in Settings (Réglages).
+- **Built-in help** — an ⓘ button on every log type explains it with brief newborn-care guidance.
 - **Quick logging** — one tap from the home screen for every event type.
 - **Diapers** — pee / poop / both, amount, **stool color with danger flags**
   (white/clay, red, black-after-meconium prompt you to call a doctor), texture.

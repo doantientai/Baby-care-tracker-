@@ -138,6 +138,7 @@ const DEFAULT_SETTINGS = {
   tempUnit: 'C',
   syncUrl: '', syncToken: '',
   feedGapEnabled: false, feedGapDayH: 3, feedGapNightH: 5,
+  lang: 'en',
 };
 function loadJSON(key, fallback){ try{ const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }catch(e){ return fallback; } }
 function saveJSON(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
@@ -234,22 +235,179 @@ async function syncNow(){
   syncState.syncing = false; updateSyncUI(); render();
 }
 function syncStatusHtml(){
-  if(!syncReady()) return '<span class="muted">Not connected — paste your Google Sheet web-app URL above, then Sync.</span>';
+  if(!syncReady()) return '<span class="muted">'+t('Not connected — paste your Google Sheet web-app URL above, then Sync.')+'</span>';
   const p = loadOutbox().length;
-  if(syncState.syncing) return '⟳ Syncing…';
-  if(syncState.error) return '<span style="color:#dc2626">⚠ '+esc(syncState.error)+'</span>'+(p?(' · '+p+' pending'):'');
-  return '<span style="color:var(--good)">✓ Synced</span>'+(syncState.last?(' · '+relTime(syncState.last)):'')+(p?(' · '+p+' pending'):'');
+  if(syncState.syncing) return '⟳ '+t('Syncing…');
+  if(syncState.error) return '<span style="color:#dc2626">⚠ '+esc(syncState.error)+'</span>'+(p?(' · '+p+' '+t('pending')):'');
+  return '<span style="color:var(--good)">✓ '+t('Synced')+'</span>'+(syncState.last?(' · '+relTime(syncState.last)):'')+(p?(' · '+p+' '+t('pending')):'');
 }
 function syncPillHtml(){
   if(!syncReady()) return '';
-  if(syncState.syncing) return '⟳ syncing';
-  if(syncState.error) return '<span style="color:#dc2626">⚠ sync error</span>';
-  return '<span style="color:var(--good)">✓ Sheet synced</span>';
+  if(syncState.syncing) return '⟳ '+t('Syncing…');
+  if(syncState.error) return '<span style="color:#dc2626">⚠ '+t('sync error')+'</span>';
+  return '<span style="color:var(--good)">✓ '+t('Sheet synced')+'</span>';
 }
 function updateSyncUI(){
   const s = document.getElementById('syncStatus'); if(s) s.innerHTML = syncStatusHtml();
   const p = document.getElementById('syncPill'); if(p) p.innerHTML = syncPillHtml();
 }
+
+/* ----------------------------------------------------------------- i18n ----- */
+// English strings are used as keys; FR holds French translations. EN holds only
+// templated strings (with {placeholders}). Unknown keys fall back to themselves.
+const EN = {
+  day_one:'{n} day old', day_other:'{n} days old',
+  nursery:'🛏️ Keep the nursery at {min}–{max}°C for safe sleep (ideal ~{ideal}°C).',
+  target:'target ≥ {n}/day',
+  lastRel:'last {rel}',
+  nextFeed:'🤱 Next feed: start on the {side} (last started {last}).',
+  feedGap:"🍼 It's been <b>{h}h</b> since the last feed ({when} guide {thr}h). Newborns usually shouldn't go much longer — consider offering a feed.",
+  relMin:'{n}m ago', relHour:'{n}h ago', relDay:'{n}d ago',
+  imported:'Imported {n} {label}.',
+};
+const FR = {
+  // templated
+  day_one:'{n} jour', day_other:'{n} jours',
+  nursery:'🛏️ Maintenez la chambre à {min}–{max}°C pour un sommeil sûr (idéal ~{ideal}°C).',
+  target:'objectif ≥ {n}/jour',
+  lastRel:'dernier {rel}',
+  nextFeed:'🤱 Prochain repas : commencer à {side} (dernier {last}).',
+  feedGap:"🍼 Cela fait <b>{h}h</b> depuis le dernier repas (repère {when} {thr}h). Un nouveau-né ne devrait pas attendre beaucoup plus — proposez un repas.",
+  relMin:'il y a {n} min', relHour:'il y a {n} h', relDay:'il y a {n} j',
+  imported:'Importé {n} {label}.',
+  // nav
+  'Home':'Accueil','Timeline':'Journal','Trends':'Tendances','Settings':'Réglages',
+  // home
+  'Set date of birth in Settings':'Renseignez la date de naissance dans Réglages',
+  'Outside':'Dehors','Weather unavailable':'Météo indisponible','Loading…':'Chargement…','feels':'ressenti',
+  'Breastfeeding':'Allaitement','Sleep':'Sommeil','Switch':'Changer','Stop':'Arrêter',
+  'Start L':'Début G','Start R':'Début D','Start sleep':'Démarrer le sommeil','tap to stop':'toucher pour arrêter',
+  'Quick log':'Saisie rapide','Today':"Aujourd'hui",'Wet diapers':'Couches mouillées','Dirty diapers':'Couches sales',
+  'Feeds':'Repas','Recent':'Récent','See all →':'Tout voir →','No entries yet today.':"Aucune entrée aujourd'hui.",
+  'check':'vérifier','day':'jour','night':'nuit',
+  // event types
+  'Diaper':'Couche','Breastfeed':'Allaitement','Bottle':'Biberon','Temperature':'Température',
+  'Cry':'Pleurs','Pump':'Tire-lait','Medication':'Médicament','Growth':'Croissance','Note':'Note',
+  // timeline
+  'All':'Tout','Feed':'Tétée','Temp':'Temp','No entries yet.':'Aucune entrée.',
+  'Today_d':"Aujourd'hui",'Yesterday':'Hier',
+  // trends
+  'Diapers per day':'Couches par jour','Wet vs dirty — last 14 days':'Mouillées vs sales — 14 derniers jours',
+  'Feeds per day':'Repas par jour','Breast + bottle — last 14 days':'Sein + biberon — 14 derniers jours',
+  'Sleep per day':'Sommeil par jour','Total hours — last 14 days':'Heures totales — 14 derniers jours',
+  'Weight':'Poids','kg over time':'kg au fil du temps',
+  'Wet':'Mouillées','Dirty':'Sales','Sleep (h)':'Sommeil (h)',
+  'Log at least two weight measurements to see a curve.':'Enregistrez au moins deux pesées pour voir une courbe.',
+  // settings
+  'Language':'Langue','Baby':'Bébé','Name':'Nom','Date of birth':'Date de naissance',
+  'Used for age-based fever alerts and diaper targets.':"Utilisée pour les alertes de fièvre selon l'âge et les objectifs de couches.",
+  'Cloud sync (Google Sheet)':'Synchronisation (Google Sheet)',
+  'Save the log to a shared Google Sheet so you and your wife see the same data on both phones. The app still works offline and syncs when online.':"Enregistrez le journal dans un Google Sheet partagé pour voir les mêmes données sur les deux téléphones. L'app fonctionne hors ligne et se synchronise une fois en ligne.",
+  'Web app URL':"URL de l'application web",'Shared secret (optional)':'Secret partagé (optionnel)',
+  'must match SECRET in the script':'doit correspondre à SECRET dans le script',
+  '⟳ Sync now':'⟳ Synchroniser',
+  'Not connected — paste your Google Sheet web-app URL above, then Sync.':"Non connecté — collez l'URL de votre Google Sheet ci-dessus, puis Synchroniser.",
+  'Synced':'Synchronisé','Syncing…':'Synchronisation…','pending':'en attente',
+  'Sheet synced':'Sheet synchronisé','sync error':'erreur de synchro',
+  'How to set this up (5 min)':'Comment configurer (5 min)',
+  'Create a new Google Sheet.':'Créez un nouveau Google Sheet.',
+  'In it: <b>Extensions → Apps Script</b>.':'Dans celui-ci : <b>Extensions → Apps Script</b>.',
+  'Delete the sample code, paste the contents of <b>google-apps-script.gs</b> from this project, and Save.':'Supprimez le code exemple, collez le contenu de <b>google-apps-script.gs</b> de ce projet, puis Enregistrez.',
+  'Authorize when asked.':'Autorisez si demandé.',
+  'Tap <b>Sync now</b>. Paste the same URL on the other phone.':'Touchez <b>Synchroniser</b>. Collez la même URL sur l\'autre téléphone.',
+  'Feeding':'Alimentation',
+  'Feeding is on demand. Optionally show a gentle nudge only when an unusually long gap passes — a safety floor, not a schedule.':"L'alimentation est à la demande. Affichez éventuellement un rappel discret uniquement si un écart inhabituellement long se produit — un seuil de sécurité, pas un horaire.",
+  'Long-gap nudge':'Rappel d\'écart long','On':'Activé','Off':'Désactivé',
+  'Day max (h)':'Max jour (h)','Night max (h)':'Max nuit (h)',
+  'Night counted as 10pm–7am. Typical guides: ~3h day, ~5h night in the early weeks.':'Nuit comptée de 22h à 7h. Repères : ~3h le jour, ~5h la nuit les premières semaines.',
+  'Caregivers':'Intervenants','Add caregiver…':'Ajouter un intervenant…','Add':'Ajouter',
+  'Location & units':'Lieu & unités','Location label':'Nom du lieu','Temperature unit':'Unité de température',
+  'Backup & share':'Sauvegarde & partage',
+  "Export a CSV for your pediatrician, or a JSON backup to move data to the other parent's phone (imports are de-duplicated).":"Exportez un CSV pour le pédiatre, ou une sauvegarde JSON pour transférer les données vers l'autre téléphone (les imports sont dédupliqués).",
+  '⬇ Export CSV':'⬇ Exporter CSV','⬇ Export backup':'⬇ Exporter sauvegarde','⬆ Import backup':'⬆ Importer sauvegarde',
+  'Baby Care Tracker · stored privately in this browser. Guidance is general and not a substitute for medical advice.':'Baby Care Tracker · stocké en privé dans ce navigateur. Les conseils sont généraux et ne remplacent pas un avis médical.',
+  'new entry':'nouvelle entrée','new entries':'nouvelles entrées',
+  'Not a valid backup file.':'Fichier de sauvegarde invalide.','Import failed.':'Échec de l\'import.',
+  // sheet
+  'Edit':'Modifier','Log':'Noter','Delete':'Supprimer','Save':'Enregistrer','Save changes':'Enregistrer',
+  'Delete this entry?':'Supprimer cette entrée ?','Info':'Info',
+  "What's in the diaper?":'Contenu de la couche ?','Amount':'Quantité','Stool color':'Couleur des selles','Texture':'Texture',
+  'Started on':'Commencé à','Left (min)':'Gauche (min)','Right (min)':'Droite (min)','Total':'Total','Position':'Position',
+  'Content':'Contenu','Volume (ml)':'Volume (ml)','Temperature (°C)':'Température (°C)','Method':'Méthode','Intensity':'Intensité','Side':'Côté',
+  'Medication / supplement':'Médicament / complément','e.g. Vitamin D':'ex. Vitamine D','Dose (optional)':'Dose (optionnel)','e.g. 400 IU':'ex. 400 UI',
+  'Weight (kg)':'Poids (kg)','Height (cm)':'Taille (cm)','Head circumference (cm)':'Périmètre crânien (cm)',
+  'Start':'Début','Time':'Heure','End (optional)':'Fin (optionnel)','Logged by':'Saisi par','Anything to remember…':'À retenir…',
+  // values / chips
+  'Pee':'Pipi','Poop':'Caca','Both':'Les deux','Little':'Peu','Average':'Moyen','Full':'Pleine',
+  'Liquid':'Liquide','Seedy':'Granuleux','Soft':'Molle','Formed':'Moulée','Hard':'Dure','Mucousy':'Glaireuse',
+  'Left':'Gauche','Right':'Droite','Formula':'Lait infantile','Expressed milk':'Lait maternel tiré','Mixed':'Mixte',
+  'Armpit':'Aisselle','Rectal':'Rectale','Ear':'Oreille','Forehead':'Front','Oral':'Buccale',
+  'Fussy':'Grognon','Crying':'Pleurs','Inconsolable':'Inconsolable',
+  'Cradle':'Madone','Cross-cradle':'Madone inversée','Football / rugby':'Ballon de rugby','Laid-back':'Allongée','Side-lying':'Sur le côté',
+  'Yellow':'Jaune','Green':'Verte','Brown':'Brune','Orange':'Orange','Black':'Noire','Red':'Rouge','White / clay':'Blanche / mastic',
+  'Vitamin D':'Vitamine D','Paracetamol':'Paracétamol','Probiotics':'Probiotiques',
+  'head':'tête','measurement':'mesure','just now':"à l'instant",
+  // stool notes
+  'Typical for breastfed babies.':'Typique chez les bébés allaités.','Usually normal.':'Généralement normal.',
+  'Normal, common with formula.':'Normal, fréquent avec le lait infantile.',
+  'Normal as meconium in the first days. After that, black can mean blood — call a doctor.':'Normal (méconium) les premiers jours. Ensuite, du noir peut indiquer du sang — appelez un médecin.',
+  'Red may indicate blood — contact your doctor.':'Le rouge peut indiquer du sang — contactez votre médecin.',
+  'Pale/white stool can signal a liver problem — contact your doctor.':'Des selles pâles/blanches peuvent signaler un problème de foie — contactez votre médecin.',
+  // temperature messages
+  'Low temperature — warm the baby and contact a doctor.':'Température basse — réchauffez le bébé et contactez un médecin.',
+  'Slightly low — warm the baby and recheck soon.':'Légèrement basse — réchauffez le bébé et recontrôlez bientôt.',
+  '🚨 Fever in a baby under 3 months is an emergency — call your doctor or emergency services now.':'🚨 Une fièvre chez un bébé de moins de 3 mois est une urgence — appelez votre médecin ou les secours maintenant.',
+  'High fever — contact your doctor.':'Forte fièvre — contactez votre médecin.',
+  'Fever detected — monitor closely and consider contacting your doctor.':'Fièvre détectée — surveillez de près et envisagez de contacter votre médecin.',
+  'Slightly elevated — keep an eye on it.':'Légèrement élevée — gardez un œil dessus.',
+  'Temperature in the normal range.':'Température dans la normale.',
+  // weather
+  'Clear':'Dégagé','Mainly clear':'Plutôt dégagé','Partly cloudy':'Partiellement nuageux','Overcast':'Couvert',
+  'Fog':'Brouillard','Rime fog':'Brouillard givrant','Light drizzle':'Bruine légère','Drizzle':'Bruine','Heavy drizzle':'Bruine forte',
+  'Light rain':'Pluie légère','Rain':'Pluie','Heavy rain':'Forte pluie','Light snow':'Neige légère','Snow':'Neige','Heavy snow':'Forte neige',
+  'Showers':'Averses','Violent showers':'Averses violentes','Thunderstorm':'Orage',
+};
+function t(key, p){
+  let s = (settings.lang==='fr' && FR[key]!=null) ? FR[key] : (EN[key]!=null ? EN[key] : key);
+  if(p) for(const k in p) s = s.split('{'+k+'}').join(p[k]);
+  return s;
+}
+function tl(key){ return t(key).toLowerCase(); }
+function locale(){ return settings.lang==='fr' ? 'fr-FR' : undefined; }
+// value -> English label, for translating stored values in summaries
+const VAL = {
+  pee:'Pee',poop:'Poop',both:'Both',little:'Little',average:'Average',full:'Full',
+  liquid:'Liquid',seedy:'Seedy',soft:'Soft',formed:'Formed',hard:'Hard',mucousy:'Mucousy',
+  left:'Left',right:'Right',formula:'Formula',expressed:'Expressed milk',mixed:'Mixed',
+  axillary:'Armpit',rectal:'Rectal',ear:'Ear',forehead:'Forehead',oral:'Oral',
+  fussy:'Fussy',crying:'Crying',inconsolable:'Inconsolable',
+  'cradle':'Cradle','cross-cradle':'Cross-cradle','football':'Football / rugby','laid-back':'Laid-back','side-lying':'Side-lying',
+};
+function tv(v){ return t(VAL[v]||v); }
+// Per-log-type help shown via the (i) button in each log sheet.
+const INFO = {
+  diaper:{en:"Log pee, poop or both. About 6+ wet diapers a day (after day 5) means baby is feeding enough. Stool colour matters: white/clay, red, or (after the first days) black should prompt a call to your doctor.",
+    fr:"Notez pipi, caca ou les deux. Environ 6+ couches mouillées par jour (après le 5e jour) indique que bébé boit assez. La couleur des selles compte : blanche/mastic, rouge, ou (après les premiers jours) noire → appelez le médecin."},
+  breastfeed:{en:"Use the two-sided timer: start a breast, tap Switch, then Stop. The app records time on each breast and suggests which side to start on next (alternate to balance supply). You can also note the position.",
+    fr:"Utilisez le minuteur à deux côtés : démarrez un sein, touchez Changer, puis Arrêter. L'app note le temps sur chaque sein et suggère le côté pour commencer (alternez pour équilibrer la lactation). Vous pouvez aussi noter la position."},
+  bottle:{en:"Record formula, expressed milk or a mix, and the volume in millilitres. Feeding is on demand — let baby set the pace.",
+    fr:"Notez le lait infantile, le lait tiré ou un mélange, et le volume en millilitres. L'alimentation est à la demande — laissez bébé donner le rythme."},
+  temperature:{en:"Pick how you measured (rectal is most accurate in newborns). Normal is about 36.5–37.5°C. In a baby under 3 months a fever (≥38°C rectal) is an emergency — contact a doctor immediately.",
+    fr:"Indiquez la méthode (la voie rectale est la plus fiable chez le nouveau-né). La normale est ~36,5–37,5°C. Chez un bébé de moins de 3 mois, une fièvre (≥38°C rectale) est une urgence — contactez un médecin immédiatement."},
+  sleep:{en:"Time sleep sessions with the timer or enter them by hand. Newborns sleep roughly 14–17 hours a day in short stretches.",
+    fr:"Chronométrez le sommeil avec le minuteur ou saisissez-le à la main. Les nouveau-nés dorment environ 14–17 heures par jour, par courtes périodes."},
+  cry:{en:"Note fussy, crying or inconsolable episodes. Persistent inconsolable crying — especially with fever or poor feeding — is worth checking with a doctor.",
+    fr:"Notez les épisodes grognon, pleurs ou inconsolable. Des pleurs inconsolables persistants — surtout avec fièvre ou alimentation difficile — méritent un avis médical."},
+  pump:{en:"Track expressed milk by side and volume — handy for managing a stash and keeping supply up.",
+    fr:"Suivez le lait tiré par côté et volume — utile pour gérer les réserves et maintenir la lactation."},
+  medication:{en:"Record medicines and supplements with the dose. Breastfed babies are usually given vitamin D (commonly 400 IU/day) — check with your doctor.",
+    fr:"Notez les médicaments et compléments avec la dose. Les bébés allaités reçoivent généralement de la vitamine D (souvent 400 UI/jour) — demandez à votre médecin."},
+  growth:{en:"Log weight, length and head circumference. Newborns are weighed regularly in the early weeks to confirm steady growth; watch the trend over time.",
+    fr:"Notez le poids, la taille et le périmètre crânien. Les nouveau-nés sont pesés régulièrement les premières semaines pour confirmer une bonne croissance ; surveillez la tendance."},
+  note:{en:"Capture anything else — a free-form event with your own note.",
+    fr:"Notez tout le reste — un évènement libre avec votre propre note."},
+};
+function infoText(type){ const i=INFO[type]; return i ? (settings.lang==='fr'?i.fr:i.en) : ''; }
 
 /* ------------------------------------------------------- clinical reference -- */
 const DAY = 86400000;
@@ -290,9 +448,9 @@ function dateKey(ts){ const d=new Date(ts); return d.getFullYear()+'-'+pad(d.get
 function sameDay(a,b){ return dateKey(a)===dateKey(b); }
 function dayLabel(ts){
   const now=Date.now();
-  if(sameDay(ts,now)) return 'Today';
-  if(sameDay(ts, now-DAY)) return 'Yesterday';
-  return new Date(ts).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'});
+  if(sameDay(ts,now)) return t('Today');
+  if(sameDay(ts, now-DAY)) return t('Yesterday');
+  return new Date(ts).toLocaleDateString(locale(),{weekday:'short',day:'numeric',month:'short'});
 }
 function fmtDur(sec){
   if(sec==null || sec<0 || isNaN(sec)) return '—';
@@ -303,10 +461,10 @@ function fmtDur(sec){
 }
 function relTime(ts){
   const diff=Math.round((Date.now()-ts)/1000);
-  if(diff<60) return 'just now';
-  if(diff<3600) return Math.floor(diff/60)+'m ago';
-  if(diff<DAY/1000) return Math.floor(diff/3600)+'h ago';
-  return Math.floor(diff/86400)+'d ago';
+  if(diff<60) return t('just now');
+  if(diff<3600) return t('relMin',{n:Math.floor(diff/60)});
+  if(diff<DAY/1000) return t('relHour',{n:Math.floor(diff/3600)});
+  return t('relDay',{n:Math.floor(diff/86400)});
 }
 function toLocalInput(ts){ const d=new Date(ts); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes()); }
 function fromLocalInput(v){ return new Date(v).getTime(); }
@@ -333,16 +491,16 @@ function fmtTemp(c){ return settings.tempUnit==='F' ? ((c*9/5)+32).toFixed(1)+'�
 function summarize(e){
   const d=e.data||{};
   switch(e.type){
-    case 'diaper':{ const p=[]; p.push(d.kind==='both'?'pee + poop':d.kind); if(d.amount)p.push(d.amount);
-      if(d.color)p.push((STOOL[d.color]||{}).label?.toLowerCase()||d.color); if(d.texture)p.push(d.texture); return p.join(' · '); }
-    case 'breastfeed':{ const hs=(d.leftSec>0||d.rightSec>0); const core=hs?('L '+fmtDur(d.leftSec)+' · R '+fmtDur(d.rightSec)):((d.side==='left'?'Left':'Right')+' · '+fmtDur(d.durationSec)); return d.position?core+' · '+d.position:core; }
-    case 'bottle': return (d.volumeMl||0)+' ml · '+(d.content||'');
-    case 'temperature': return fmtTemp(d.celsius)+' · '+d.method;
+    case 'diaper':{ const p=[]; p.push(d.kind==='both'?(tl('Pee')+' + '+tl('Poop')):tl(VAL[d.kind]||d.kind)); if(d.amount)p.push(tl(VAL[d.amount]||d.amount));
+      if(d.color)p.push(tl((STOOL[d.color]||{}).label||d.color)); if(d.texture)p.push(tl(VAL[d.texture]||d.texture)); return p.join(' · '); }
+    case 'breastfeed':{ const hs=(d.leftSec>0||d.rightSec>0); const core=hs?('L '+fmtDur(d.leftSec)+' · R '+fmtDur(d.rightSec)):(t(d.side==='left'?'Left':'Right')+' · '+fmtDur(d.durationSec)); return d.position?core+' · '+tl(VAL[d.position]||d.position):core; }
+    case 'bottle': return (d.volumeMl||0)+' ml · '+tl(VAL[d.content]||d.content||'');
+    case 'temperature': return fmtTemp(d.celsius)+' · '+tl(VAL[d.method]||d.method);
     case 'sleep': return fmtDur(d.durationSec);
-    case 'cry': return (d.intensity||'')+(d.durationSec?' · '+fmtDur(d.durationSec):'');
-    case 'pump': return (d.volumeMl||0)+' ml · '+(d.side||'');
+    case 'cry': return tv(d.intensity||'')+(d.durationSec?' · '+fmtDur(d.durationSec):'');
+    case 'pump': return (d.volumeMl||0)+' ml · '+tl(VAL[d.side]||d.side||'');
     case 'medication': return (d.name||'')+(d.dose?' · '+d.dose:'');
-    case 'growth':{ const p=[]; if(d.weightKg!=null)p.push(d.weightKg+' kg'); if(d.heightCm!=null)p.push(d.heightCm+' cm'); if(d.headCircumferenceCm!=null)p.push('head '+d.headCircumferenceCm+' cm'); return p.join(' · ')||'measurement'; }
+    case 'growth':{ const p=[]; if(d.weightKg!=null)p.push(d.weightKg+' kg'); if(d.heightCm!=null)p.push(d.heightCm+' cm'); if(d.headCircumferenceCm!=null)p.push(t('head')+' '+d.headCircumferenceCm+' cm'); return p.join(' · ')||t('measurement'); }
     default: return e.note||'';
   }
 }
@@ -412,7 +570,7 @@ function render(){
 function renderNav(){
   const tabs=[['home','Home','🏠'],['timeline','Timeline','📜'],['trends','Trends','📈'],['settings','Settings','⚙️']];
   document.getElementById('nav').innerHTML = tabs.map(([id,l,e])=>
-    `<button class="${state.tab===id?'on':''}" data-tab="${id}"><span class="ne">${e}</span>${l}</button>`).join('');
+    `<button class="${state.tab===id?'on':''}" data-tab="${id}"><span class="ne">${e}</span>${t(l)}</button>`).join('');
 }
 
 /* ---- HOME ---- */
@@ -440,7 +598,7 @@ function viewHome(){
     const night=(hr>=22 || hr<7);
     const thr=night?settings.feedGapNightH:settings.feedGapDayH;
     if(hrs>=thr){
-      feedGapBanner=`<div class="banner warn" style="margin-top:12px">🍼 It's been <b>${hrs.toFixed(1)}h</b> since the last feed (${night?'night':'day'} guide ${thr}h). Newborns usually shouldn't go much longer — consider offering a feed.</div>`;
+      feedGapBanner=`<div class="banner warn" style="margin-top:12px">${t('feedGap',{h:hrs.toFixed(1),when:t(night?'night':'day'),thr:thr})}</div>`;
     }
   }
   const sug=nextSide(lastSide);
@@ -453,71 +611,71 @@ function viewHome(){
     const liveL=(bf.leftSec||0)+(bf.currentSide==='left'?(now-(bf.lastSwitchAt||now))/1000:0);
     const liveR=(bf.rightSec||0)+(bf.currentSide==='right'?(now-(bf.lastSwitchAt||now))/1000:0);
     bfCard=`<div class="grid g2" style="gap:6px">
-        <div class="side ${bf.currentSide==='left'?'on':'off'}"><div class="tiny" style="text-transform:uppercase;opacity:.85">Left${bf.currentSide==='left'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveL)}</div></div>
-        <div class="side ${bf.currentSide==='right'?'on':'off'}"><div class="tiny" style="text-transform:uppercase;opacity:.85">Right${bf.currentSide==='right'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveR)}</div></div>
+        <div class="side ${bf.currentSide==='left'?'on':'off'}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Left')}${bf.currentSide==='left'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveL)}</div></div>
+        <div class="side ${bf.currentSide==='right'?'on':'off'}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Right')}${bf.currentSide==='right'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveR)}</div></div>
       </div>
       <div class="grid g2" style="gap:8px;margin-top:8px">
-        <button class="btn" style="background:var(--pink-l);color:#9d174d" data-act="bf-switch">⇄ Switch</button>
-        <button class="btn" style="background:var(--pink);color:#fff" data-act="bf-stop">■ Stop</button>
+        <button class="btn" style="background:var(--pink-l);color:#9d174d" data-act="bf-switch">⇄ ${t('Switch')}</button>
+        <button class="btn" style="background:var(--pink);color:#fff" data-act="bf-stop">■ ${t('Stop')}</button>
       </div>`;
   } else {
     bfCard=`<div class="grid g2" style="gap:8px;margin-top:8px">
-        <button class="btn" data-act="bf-start" data-side="left" style="background:${sug==='left'?'var(--pink)':'var(--pink-l)'};color:${sug==='left'?'#fff':'#9d174d'}">Start L${sug==='left'?' ✦':''}</button>
-        <button class="btn" data-act="bf-start" data-side="right" style="background:${sug==='right'?'var(--pink)':'var(--pink-l)'};color:${sug==='right'?'#fff':'#9d174d'}">Start R${sug==='right'?' ✦':''}</button>
+        <button class="btn" data-act="bf-start" data-side="left" style="background:${sug==='left'?'var(--pink)':'var(--pink-l)'};color:${sug==='left'?'#fff':'#9d174d'}">${t('Start L')}${sug==='left'?' ✦':''}</button>
+        <button class="btn" data-act="bf-start" data-side="right" style="background:${sug==='right'?'var(--pink)':'var(--pink-l)'};color:${sug==='right'?'#fff':'#9d174d'}">${t('Start R')}${sug==='right'?' ✦':''}</button>
       </div>`;
   }
   const slCard = sl
-    ? `<button class="btn btn-block" data-act="sleep-stop" style="background:var(--indigo);color:#fff;margin-top:8px;flex-direction:column;padding:12px"><span class="tabular" style="font-weight:800;font-size:1.05rem">${fmtDur((now-sl.startedAt)/1000)}</span><span class="tiny" style="opacity:.9">tap to stop</span></button>`
-    : `<button class="btn btn-block" data-act="sleep-start" style="background:var(--indigo-l);color:#3730a3;margin-top:8px;padding:14px">😴 Start sleep</button>`;
+    ? `<button class="btn btn-block" data-act="sleep-stop" style="background:var(--indigo);color:#fff;margin-top:8px;flex-direction:column;padding:12px"><span class="tabular" style="font-weight:800;font-size:1.05rem">${fmtDur((now-sl.startedAt)/1000)}</span><span class="tiny" style="opacity:.9">${t('tap to stop')}</span></button>`
+    : `<button class="btn btn-block" data-act="sleep-start" style="background:var(--indigo-l);color:#3730a3;margin-top:8px;padding:14px">😴 ${t('Start sleep')}</button>`;
 
   const weatherHtml = weatherCache
-    ? `<div class="rt" style="text-align:right"><div style="font-size:1.6rem;font-weight:800">${WMO[weatherCache.code]?WMO[weatherCache.code][1]:'🌡️'} ${weatherCache.t}°</div><div class="tiny muted">${WMO[weatherCache.code]?WMO[weatherCache.code][0]:''} · feels ${weatherCache.app}° · ${weatherCache.hum}%</div></div>`
-    : `<div class="small muted">${weatherErr?'Weather unavailable':'Loading…'}</div>`;
+    ? `<div class="rt" style="text-align:right"><div style="font-size:1.6rem;font-weight:800">${WMO[weatherCache.code]?WMO[weatherCache.code][1]:'🌡️'} ${weatherCache.t}°</div><div class="tiny muted">${WMO[weatherCache.code]?t(WMO[weatherCache.code][0]):''} · ${t('feels')} ${weatherCache.app}° · ${weatherCache.hum}%</div></div>`
+    : `<div class="small muted">${weatherErr?t('Weather unavailable'):t('Loading…')}</div>`;
 
   const quick=['diaper','breastfeed','bottle','temperature','sleep','cry','pump','medication','growth'];
 
   return `<div class="wrap grid" style="gap:16px">
     <div class="between">
-      <div><h1>${esc(settings.babyName)}</h1><div class="small muted">${days!=null?(days+' day'+(days===1?'':'s')+' old'):'Set date of birth in Settings'}</div></div>
-      <div class="small muted">${new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'short'})}<div id="syncPill" class="tiny" style="margin-top:2px">${syncPillHtml()}</div></div>
+      <div><h1>${esc(settings.babyName)}</h1><div class="small muted">${days!=null?t(days===1?'day_one':'day_other',{n:days}):t('Set date of birth in Settings')}</div></div>
+      <div class="small muted">${new Date().toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'short'})}<div id="syncPill" class="tiny" style="margin-top:2px">${syncPillHtml()}</div></div>
     </div>
 
     <div class="card pad">
       <div class="between">
-        <div><div class="label" style="margin:0">Outside</div><div class="small muted">${esc(settings.locationLabel)}</div></div>
+        <div><div class="label" style="margin:0">${t('Outside')}</div><div class="small muted">${esc(settings.locationLabel)}</div></div>
         ${weatherHtml}
       </div>
-      <div class="banner info" style="margin-top:12px">🛏️ Keep the nursery at <b>${ROOM.min}–${ROOM.max}°C</b> for safe sleep (ideal ~${ROOM.ideal}°C).</div>
+      <div class="banner info" style="margin-top:12px">${t('nursery',{min:ROOM.min,max:ROOM.max,ideal:ROOM.ideal})}</div>
     </div>
 
     <div class="grid g2">
-      <div class="card pad-s"><div class="label" style="margin:0">Breastfeeding</div>${bfCard}</div>
-      <div class="card pad-s"><div class="label" style="margin:0">Sleep</div>${slCard}</div>
+      <div class="card pad-s"><div class="label" style="margin:0">${t('Breastfeeding')}</div>${bfCard}</div>
+      <div class="card pad-s"><div class="label" style="margin:0">${t('Sleep')}</div>${slCard}</div>
     </div>
 
     <div>
-      <div class="section-title">Quick log</div>
+      <div class="section-title">${t('Quick log')}</div>
       <div class="grid g3">
-        ${quick.map(t=>`<button class="quick" data-log="${t}"><span class="emoji">${META[t].emoji}</span><span class="t">${META[t].label}</span></button>`).join('')}
+        ${quick.map(k=>`<button class="quick" data-log="${k}"><span class="emoji">${META[k].emoji}</span><span class="t">${t(META[k].label)}</span></button>`).join('')}
       </div>
     </div>
 
     <div>
-      <div class="section-title">Today</div>
+      <div class="section-title">${t('Today')}</div>
       <div class="grid g2">
-        <div class="card pad-s stat ${s.wet>=target?'good':''}"><div class="label" style="margin:0">Wet diapers</div><div class="v">${s.wet}</div><div class="tiny muted">target ≥ ${target}/day</div></div>
-        <div class="card pad-s stat"><div class="label" style="margin:0">Dirty diapers</div><div class="v">${s.dirty}</div></div>
-        <div class="card pad-s stat"><div class="label" style="margin:0">Feeds</div><div class="v">${s.feeds}</div>${lastFeed?`<div class="tiny muted">last ${relTime(lastFeed.at)}</div>`:''}</div>
-        <div class="card pad-s stat"><div class="label" style="margin:0">Sleep</div><div class="v">${fmtDur(s.sleepSec)}</div></div>
+        <div class="card pad-s stat ${s.wet>=target?'good':''}"><div class="label" style="margin:0">${t('Wet diapers')}</div><div class="v">${s.wet}</div><div class="tiny muted">${t('target',{n:target})}</div></div>
+        <div class="card pad-s stat"><div class="label" style="margin:0">${t('Dirty diapers')}</div><div class="v">${s.dirty}</div></div>
+        <div class="card pad-s stat"><div class="label" style="margin:0">${t('Feeds')}</div><div class="v">${s.feeds}</div>${lastFeed?`<div class="tiny muted">${t('lastRel',{rel:relTime(lastFeed.at)})}</div>`:''}</div>
+        <div class="card pad-s stat"><div class="label" style="margin:0">${t('Sleep')}</div><div class="v">${fmtDur(s.sleepSec)}</div></div>
       </div>
       ${feedGapBanner}
-      ${lastFeed?`<div class="banner pink" style="margin-top:12px">🤱 Next feed: start on the <b>${sug}</b> (last started ${lastSide}).</div>`:''}
+      ${lastFeed?`<div class="banner pink" style="margin-top:12px">${t('nextFeed',{side:'<b>'+tl(sug==='left'?'Left':'Right')+'</b>',last:tl(lastSide==='left'?'Left':'Right')})}</div>`:''}
     </div>
 
     <div>
-      <div class="between" style="margin-bottom:8px"><div class="section-title" style="margin:0">Recent</div><button class="btn" style="background:none;color:var(--brand-d);padding:0" data-tab="timeline">See all →</button></div>
+      <div class="between" style="margin-bottom:8px"><div class="section-title" style="margin:0">${t('Recent')}</div><button class="btn" style="background:none;color:var(--brand-d);padding:0" data-tab="timeline">${t('See all →')}</button></div>
       <div class="card" style="padding:4px">
-        ${list.length===0?'<div class="center muted small" style="padding:18px">No entries yet today.</div>':
+        ${list.length===0?'<div class="center muted small" style="padding:18px">'+t('No entries yet today.')+'</div>':
           list.slice().sort((a,b)=>b.at-a.at).slice(0,6).map(eventRow).join('')}
       </div>
     </div>
@@ -527,7 +685,7 @@ function eventRow(e){
   const m=META[e.type]; const warn=eventConcerning(e);
   return `<button class="ev ${warn?'warn':''}" data-edit="${e.id}">
     <span class="ic" style="background:${m.color}22">${m.emoji}</span>
-    <span class="mid"><span class="ttl">${m.label}${warn?' <span class="tiny" style="color:#dc2626;font-weight:800">⚠ check</span>':''}</span><span class="sub">${esc(summarize(e))}${e.note?' — '+esc(e.note):''}</span></span>
+    <span class="mid"><span class="ttl">${t(m.label)}${warn?' <span class="tiny" style="color:#dc2626;font-weight:800">⚠ '+t('check')+'</span>':''}</span><span class="sub">${esc(summarize(e))}${e.note?' — '+esc(e.note):''}</span></span>
     <span class="rt"><div class="small tabular" style="font-weight:600">${clock(e.at)}</div><div class="tiny muted">${esc(e.caregiver)}</div></span>
   </button>`;
 }
@@ -539,9 +697,9 @@ function viewTimeline(){
   const groups=[]; const idx={};
   for(const e of sorted){ const k=dateKey(e.at); if(!idx[k]){ idx[k]=[]; groups.push([k,idx[k]]); } idx[k].push(e); }
   return `<div class="wrap">
-    <h1 style="margin-bottom:12px">Timeline</h1>
-    <div class="filterbar">${filters.map(([v,l,e])=>`<button class="chip ${state.filter===v?'on':''}" data-filter="${v}">${e} ${l}</button>`).join('')}</div>
-    ${groups.length===0?'<div class="card pad center muted">No entries yet.</div>':
+    <h1 style="margin-bottom:12px">${t('Timeline')}</h1>
+    <div class="filterbar">${filters.map(([v,l,e])=>`<button class="chip ${state.filter===v?'on':''}" data-filter="${v}">${e} ${t(l)}</button>`).join('')}</div>
+    ${groups.length===0?'<div class="card pad center muted">'+t('No entries yet.')+'</div>':
       groups.map(([k,items])=>`<div style="margin-bottom:18px"><div class="daycap section-title">${dayLabel(items[0].at)}</div><div class="card" style="padding:4px">${items.map(eventRow).join('')}</div></div>`).join('')}
   </div>`;
 }
@@ -578,7 +736,7 @@ function barChart(rows, series){
 }
 function lineChart(points){
   const W=440,H=180,padL=30,padB=22,padT=10;
-  if(points.length<2) return '<div class="center muted small" style="padding:24px">Log at least two weight measurements to see a curve.</div>';
+  if(points.length<2) return '<div class="center muted small" style="padding:24px">'+t('Log at least two weight measurements to see a curve.')+'</div>';
   const xs=points.map((p,i)=>i), ys=points.map(p=>p.v);
   const minY=Math.min(...ys), maxY=Math.max(...ys), span=(maxY-minY)||1;
   const X=i=>padL+(i/(points.length-1))*(W-padL-6);
@@ -593,76 +751,81 @@ function viewTrends(){
   const rows=buildDaily(14);
   const weights=events.filter(e=>e.type==='growth'&&e.data.weightKg!=null).sort((a,b)=>a.at-b.at).map(e=>({label:(new Date(e.at).getDate())+'/'+(new Date(e.at).getMonth()+1),v:e.data.weightKg}));
   return `<div class="wrap grid" style="gap:16px">
-    <h1>Trends</h1>
-    <div class="card pad"><h2>Diapers per day</h2><div class="tiny muted" style="margin-bottom:4px">Wet vs dirty — last 14 days</div>${barChart(rows,[{key:'wet',name:'Wet',color:'#0ea5e9'},{key:'dirty',name:'Dirty',color:'#f59e0b'}])}</div>
-    <div class="card pad"><h2>Feeds per day</h2><div class="tiny muted" style="margin-bottom:4px">Breast + bottle — last 14 days</div>${barChart(rows,[{key:'feeds',name:'Feeds',color:'#ec4899'}])}</div>
-    <div class="card pad"><h2>Sleep per day</h2><div class="tiny muted" style="margin-bottom:4px">Total hours — last 14 days</div>${barChart(rows,[{key:'sleepH',name:'Sleep (h)',color:'#6366f1'}])}</div>
-    <div class="card pad"><h2>Weight</h2><div class="tiny muted" style="margin-bottom:4px">kg over time</div>${lineChart(weights)}</div>
+    <h1>${t('Trends')}</h1>
+    <div class="card pad"><h2>${t('Diapers per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Wet vs dirty — last 14 days')}</div>${barChart(rows,[{key:'wet',name:t('Wet'),color:'#0ea5e9'},{key:'dirty',name:t('Dirty'),color:'#f59e0b'}])}</div>
+    <div class="card pad"><h2>${t('Feeds per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Breast + bottle — last 14 days')}</div>${barChart(rows,[{key:'feeds',name:t('Feeds'),color:'#ec4899'}])}</div>
+    <div class="card pad"><h2>${t('Sleep per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Total hours — last 14 days')}</div>${barChart(rows,[{key:'sleepH',name:t('Sleep (h)'),color:'#6366f1'}])}</div>
+    <div class="card pad"><h2>${t('Weight')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('kg over time')}</div>${lineChart(weights)}</div>
   </div>`;
 }
 
 /* ---- SETTINGS ---- */
 function viewSettings(){
   return `<div class="wrap grid" style="gap:16px">
-    <h1>Settings</h1>
+    <h1>${t('Settings')}</h1>
     <div class="card pad">
-      <h2 style="margin-bottom:12px">Baby</h2>
-      <div class="field"><label class="label">Name</label><input data-set="babyName" value="${esc(settings.babyName)}"></div>
-      <div class="field"><label class="label">Date of birth</label><input type="datetime-local" data-set="babyDob" value="${settings.babyDob?toLocalInput(settings.babyDob):''}"><div class="tiny muted" style="margin-top:4px">Used for age-based fever alerts and diaper targets.</div></div>
+      <div class="between"><h2>${t('Language')}</h2>
+        <div class="chips"><button class="chip ${settings.lang==='en'?'on':''}" data-lang="en">English</button><button class="chip ${settings.lang==='fr'?'on':''}" data-lang="fr">Français</button></div>
+      </div>
     </div>
     <div class="card pad">
-      <h2>Cloud sync (Google Sheet)</h2>
-      <div class="tiny muted" style="margin:4px 0 12px">Save the log to a shared Google Sheet so you and your wife see the same data on both phones. The app still works offline and syncs when online.</div>
-      <div class="field"><label class="label">Web app URL</label><input data-set="syncUrl" value="${esc(settings.syncUrl||'')}" placeholder="https://script.google.com/macros/s/…/exec"></div>
-      <div class="field"><label class="label">Shared secret (optional)</label><input data-set="syncToken" value="${esc(settings.syncToken||'')}" placeholder="must match SECRET in the script"></div>
-      <button class="btn btn-primary" data-act="sync-now">⟳ Sync now</button>
+      <h2 style="margin-bottom:12px">${t('Baby')}</h2>
+      <div class="field"><label class="label">${t('Name')}</label><input data-set="babyName" value="${esc(settings.babyName)}"></div>
+      <div class="field"><label class="label">${t('Date of birth')}</label><input type="datetime-local" data-set="babyDob" value="${settings.babyDob?toLocalInput(settings.babyDob):''}"><div class="tiny muted" style="margin-top:4px">${t('Used for age-based fever alerts and diaper targets.')}</div></div>
+    </div>
+    <div class="card pad">
+      <h2>${t('Cloud sync (Google Sheet)')}</h2>
+      <div class="tiny muted" style="margin:4px 0 12px">${t('Save the log to a shared Google Sheet so you and your wife see the same data on both phones. The app still works offline and syncs when online.')}</div>
+      <div class="field"><label class="label">${t('Web app URL')}</label><input data-set="syncUrl" value="${esc(settings.syncUrl||'')}" placeholder="https://script.google.com/macros/s/…/exec"></div>
+      <div class="field"><label class="label">${t('Shared secret (optional)')}</label><input data-set="syncToken" value="${esc(settings.syncToken||'')}" placeholder="${t('must match SECRET in the script')}"></div>
+      <button class="btn btn-primary" data-act="sync-now">${t('⟳ Sync now')}</button>
       <div id="syncStatus" class="small" style="margin-top:10px">${syncStatusHtml()}</div>
       <details style="margin-top:12px">
-        <summary class="small" style="cursor:pointer;color:var(--brand-d)">How to set this up (5 min)</summary>
+        <summary class="small" style="cursor:pointer;color:var(--brand-d)">${t('How to set this up (5 min)')}</summary>
         <ol class="small muted" style="padding-left:18px;line-height:1.5">
-          <li>Create a new Google Sheet.</li>
-          <li>In it: <b>Extensions → Apps Script</b>.</li>
-          <li>Delete the sample code, paste the contents of <b>google-apps-script.gs</b> from this project, and Save.</li>
-          <li><b>Deploy → New deployment → Web app</b>. Set <i>Execute as: Me</i> and <i>Who has access: Anyone</i>. Authorize when asked.</li>
-          <li>Copy the <b>Web app URL</b> (ends in <code>/exec</code>) and paste it above. Optionally set a shared secret in the script and here.</li>
-          <li>Tap <b>Sync now</b>. Paste the same URL on the other phone.</li>
+          <li>${t('Create a new Google Sheet.')}</li>
+          <li>${t('In it: <b>Extensions → Apps Script</b>.')}</li>
+          <li>${t('Delete the sample code, paste the contents of <b>google-apps-script.gs</b> from this project, and Save.')}</li>
+          <li><b>Deploy → New deployment → Web app</b>. Execute as: Me · Who has access: Anyone. ${t('Authorize when asked.')}</li>
+          <li><b>Web app URL</b> (… /exec) → ${t('Web app URL')}.</li>
+          <li>${t('Tap <b>Sync now</b>. Paste the same URL on the other phone.')}</li>
         </ol>
       </details>
     </div>
     <div class="card pad">
-      <h2 style="margin-bottom:4px">Feeding</h2>
-      <div class="tiny muted" style="margin-bottom:12px">Feeding is on demand. Optionally show a gentle nudge only when an unusually long gap passes — a safety floor, not a schedule.</div>
+      <h2 style="margin-bottom:4px">${t('Feeding')}</h2>
+      <div class="tiny muted" style="margin-bottom:12px">${t('Feeding is on demand. Optionally show a gentle nudge only when an unusually long gap passes — a safety floor, not a schedule.')}</div>
       <div class="between" style="margin-bottom:${settings.feedGapEnabled?'12px':'0'}">
-        <span class="small">Long-gap nudge</span>
-        <button class="chip ${settings.feedGapEnabled?'on':''}" data-act="toggle-feedgap">${settings.feedGapEnabled?'On':'Off'}</button>
+        <span class="small">${t('Long-gap nudge')}</span>
+        <button class="chip ${settings.feedGapEnabled?'on':''}" data-act="toggle-feedgap">${settings.feedGapEnabled?t('On'):t('Off')}</button>
       </div>
       ${settings.feedGapEnabled?`<div class="grid g2">
-        <div class="field" style="margin:0"><label class="label">Day max (h)</label><input type="number" step="0.5" inputmode="decimal" data-setnum="feedGapDayH" value="${settings.feedGapDayH}"></div>
-        <div class="field" style="margin:0"><label class="label">Night max (h)</label><input type="number" step="0.5" inputmode="decimal" data-setnum="feedGapNightH" value="${settings.feedGapNightH}"></div>
-      </div><div class="tiny muted" style="margin-top:8px">Night counted as 10pm–7am. Typical guides: ~3h day, ~5h night in the early weeks.</div>`:''}
+        <div class="field" style="margin:0"><label class="label">${t('Day max (h)')}</label><input type="number" step="0.5" inputmode="decimal" data-setnum="feedGapDayH" value="${settings.feedGapDayH}"></div>
+        <div class="field" style="margin:0"><label class="label">${t('Night max (h)')}</label><input type="number" step="0.5" inputmode="decimal" data-setnum="feedGapNightH" value="${settings.feedGapNightH}"></div>
+      </div><div class="tiny muted" style="margin-top:8px">${t('Night counted as 10pm–7am. Typical guides: ~3h day, ~5h night in the early weeks.')}</div>`:''}
     </div>
     <div class="card pad">
-      <h2 style="margin-bottom:12px">Caregivers</h2>
+      <h2 style="margin-bottom:12px">${t('Caregivers')}</h2>
       <div class="chips" style="margin-bottom:12px">${settings.caregivers.map(c=>`<span class="chip">${esc(c)}${settings.caregivers.length>1?` <button data-rm-care="${esc(c)}" style="border:none;background:none;color:#94a3b8;padding:0 0 0 2px">✕</button>`:''}</span>`).join('')}</div>
-      <div class="row"><input id="newCare" placeholder="Add caregiver…"><button class="btn btn-ghost" data-act="add-care">Add</button></div>
+      <div class="row"><input id="newCare" placeholder="${t('Add caregiver…')}"><button class="btn btn-ghost" data-act="add-care">${t('Add')}</button></div>
     </div>
     <div class="card pad">
-      <h2 style="margin-bottom:12px">Location & units</h2>
-      <div class="field"><label class="label">Location label</label><input data-set="locationLabel" value="${esc(settings.locationLabel)}"></div>
+      <h2 style="margin-bottom:12px">${t('Location & units')}</h2>
+      <div class="field"><label class="label">${t('Location label')}</label><input data-set="locationLabel" value="${esc(settings.locationLabel)}"></div>
       <div class="grid g2"><div class="field"><label class="label">Latitude</label><input type="number" step="0.0001" data-set="lat" value="${settings.lat}"></div><div class="field"><label class="label">Longitude</label><input type="number" step="0.0001" data-set="lon" value="${settings.lon}"></div></div>
-      <div class="field"><label class="label">Temperature unit</label><div class="chips"><button class="chip ${settings.tempUnit==='C'?'on':''}" data-unit="C">°C</button><button class="chip ${settings.tempUnit==='F'?'on':''}" data-unit="F">°F</button></div></div>
+      <div class="field"><label class="label">${t('Temperature unit')}</label><div class="chips"><button class="chip ${settings.tempUnit==='C'?'on':''}" data-unit="C">°C</button><button class="chip ${settings.tempUnit==='F'?'on':''}" data-unit="F">°F</button></div></div>
     </div>
     <div class="card pad">
-      <h2>Backup & share</h2>
-      <div class="tiny muted" style="margin:4px 0 12px">Export a CSV for your pediatrician, or a JSON backup to move data to the other parent's phone (imports are de-duplicated).</div>
+      <h2>${t('Backup & share')}</h2>
+      <div class="tiny muted" style="margin:4px 0 12px">${t("Export a CSV for your pediatrician, or a JSON backup to move data to the other parent's phone (imports are de-duplicated).")}</div>
       <div class="chips">
-        <button class="btn btn-ghost" data-act="export-csv">⬇ Export CSV</button>
-        <button class="btn btn-ghost" data-act="export-json">⬇ Export backup</button>
-        <button class="btn btn-ghost" data-act="import">⬆ Import backup</button>
+        <button class="btn btn-ghost" data-act="export-csv">${t('⬇ Export CSV')}</button>
+        <button class="btn btn-ghost" data-act="export-json">${t('⬇ Export backup')}</button>
+        <button class="btn btn-ghost" data-act="import">${t('⬆ Import backup')}</button>
       </div>
       <div id="ioMsg" class="small" style="color:var(--brand-d);margin-top:10px"></div>
     </div>
-    <div class="center tiny muted" style="padding:0 8px">Baby Care Tracker · stored privately in this browser. Guidance is general and not a substitute for medical advice.</div>
+    <div class="center tiny muted" style="padding:0 8px">${t('Baby Care Tracker · stored privately in this browser. Guidance is general and not a substitute for medical advice.')}</div>
   </div>`;
 }
 
@@ -693,63 +856,70 @@ function renderSheet(){
   const s=state.sheet;
   if(!s){ sheetRoot.innerHTML=''; return; }
   const m=META[s.type];
+  const info=infoText(s.type);
   sheetRoot.innerHTML=`<div class="scrim" data-act="close"></div><div class="sheet" role="dialog">
-    <div class="head"><h2>${m.emoji} ${s.editing?'Edit':'Log'} ${m.label.toLowerCase()}</h2><button class="x" data-act="close">✕</button></div>
+    <div class="head"><h2>${m.emoji} ${t(s.editing?'Edit':'Log')} ${t(m.label).toLowerCase()}</h2>
+      <div class="row" style="gap:6px">
+        <button class="x" data-act="info-toggle" title="${t('Info')}" style="${s.showInfo?'background:var(--brand);color:#fff':''}">ⓘ</button>
+        <button class="x" data-act="close">✕</button>
+      </div>
+    </div>
+    ${s.showInfo&&info?`<div class="banner info" style="margin-bottom:14px">${esc(info)}</div>`:''}
     <div id="sheetBody">${sheetBody(s)}</div>
     <div class="row" style="margin-top:8px">
-      ${s.editing?`<button class="btn btn-ghost" style="color:#dc2626" data-act="delete">Delete</button>`:''}
-      <button class="btn btn-primary" style="flex:1" data-act="save">${s.editing?'Save changes':'Save'}</button>
+      ${s.editing?`<button class="btn btn-ghost" style="color:#dc2626" data-act="delete">${t('Delete')}</button>`:''}
+      <button class="btn btn-primary" style="flex:1" data-act="save">${t(s.editing?'Save changes':'Save')}</button>
     </div>
   </div>`;
 }
 function chipgroup(name, opts, val){
-  return `<div class="chips" data-chip="${name}">${opts.map(o=>`<button class="chip ${val===o.v?'on':''}" data-v="${o.v}">${o.e?o.e+' ':''}${o.l}</button>`).join('')}</div>`;
+  return `<div class="chips" data-chip="${name}">${opts.map(o=>`<button class="chip ${val===o.v?'on':''}" data-v="${o.v}">${o.e?o.e+' ':''}${t(o.l)}</button>`).join('')}</div>`;
 }
 function sheetBody(s){
   const d=s.draft; let html='';
   if(s.type==='diaper'){
-    html+=`<div class="field"><label class="label">What's in the diaper?</label>${chipgroup('kind',[{v:'pee',l:'Pee',e:'💧'},{v:'poop',l:'Poop',e:'💩'},{v:'both',l:'Both',e:'💧💩'}],d.kind)}</div>`;
-    html+=`<div class="field"><label class="label">Amount</label>${chipgroup('amount',[{v:'little',l:'Little'},{v:'average',l:'Average'},{v:'full',l:'Full'}],d.amount)}</div>`;
+    html+=`<div class="field"><label class="label">${t("What's in the diaper?")}</label>${chipgroup('kind',[{v:'pee',l:'Pee',e:'💧'},{v:'poop',l:'Poop',e:'💩'},{v:'both',l:'Both',e:'💧💩'}],d.kind)}</div>`;
+    html+=`<div class="field"><label class="label">${t('Amount')}</label>${chipgroup('amount',[{v:'little',l:'Little'},{v:'average',l:'Average'},{v:'full',l:'Full'}],d.amount)}</div>`;
     if(d.kind==='poop'||d.kind==='both'){
-      html+=`<div class="field"><label class="label">Stool color</label><div class="chips" data-chip="color">${Object.keys(STOOL).map(c=>`<button class="chip ${d.color===c?'on':''}" data-v="${c}"><span class="swatch" style="background:${STOOL[c].sw}"></span>${STOOL[c].label}</button>`).join('')}</div></div>`;
-      if(d.color){ const con=stoolConcerning(d.color); html+=`<div class="banner ${con?'bad':''}" style="${con?'':'background:#f1f5f9;color:#64748b'};margin-bottom:16px">${con?'⚠ ':''}${STOOL[d.color].note}</div>`; }
-      html+=`<div class="field"><label class="label">Texture</label>${chipgroup('texture',[{v:'liquid',l:'Liquid'},{v:'seedy',l:'Seedy'},{v:'soft',l:'Soft'},{v:'formed',l:'Formed'},{v:'hard',l:'Hard'},{v:'mucousy',l:'Mucousy'}],d.texture)}</div>`;
+      html+=`<div class="field"><label class="label">${t('Stool color')}</label><div class="chips" data-chip="color">${Object.keys(STOOL).map(c=>`<button class="chip ${d.color===c?'on':''}" data-v="${c}"><span class="swatch" style="background:${STOOL[c].sw}"></span>${t(STOOL[c].label)}</button>`).join('')}</div></div>`;
+      if(d.color){ const con=stoolConcerning(d.color); html+=`<div class="banner ${con?'bad':''}" style="${con?'':'background:#f1f5f9;color:#64748b'};margin-bottom:16px">${con?'⚠ ':''}${t(STOOL[d.color].note)}</div>`; }
+      html+=`<div class="field"><label class="label">${t('Texture')}</label>${chipgroup('texture',[{v:'liquid',l:'Liquid'},{v:'seedy',l:'Seedy'},{v:'soft',l:'Soft'},{v:'formed',l:'Formed'},{v:'hard',l:'Hard'},{v:'mucousy',l:'Mucousy'}],d.texture)}</div>`;
     }
   } else if(s.type==='breastfeed'){
     const total=(d.leftSec||0)+(d.rightSec||0);
-    html+=`<div class="field"><label class="label">Started on</label>${chipgroup('side',[{v:'left',l:'Left'},{v:'right',l:'Right'}],d.side)}</div>`;
-    html+=`<div class="grid g2"><div class="field"><label class="label">Left (min)</label><input type="number" inputmode="numeric" data-num="leftSec" data-mul="60" value="${d.leftSec?Math.round(d.leftSec/60):''}" placeholder="0"></div>
-      <div class="field"><label class="label">Right (min)</label><input type="number" inputmode="numeric" data-num="rightSec" data-mul="60" value="${d.rightSec?Math.round(d.rightSec/60):''}" placeholder="0"></div></div>`;
-    html+=`<div class="small muted" id="bfTotal" style="margin:-8px 0 14px">${total>0?('Total '+fmtDur(total)+' · L '+fmtDur(d.leftSec)+' / R '+fmtDur(d.rightSec)):''}</div>`;
-    html+=`<div class="field"><label class="label">Position</label>${chipgroup('position',POSITIONS.map(p=>({v:p.v,l:p.l})),d.position)}</div>`;
+    html+=`<div class="field"><label class="label">${t('Started on')}</label>${chipgroup('side',[{v:'left',l:'Left'},{v:'right',l:'Right'}],d.side)}</div>`;
+    html+=`<div class="grid g2"><div class="field"><label class="label">${t('Left (min)')}</label><input type="number" inputmode="numeric" data-num="leftSec" data-mul="60" value="${d.leftSec?Math.round(d.leftSec/60):''}" placeholder="0"></div>
+      <div class="field"><label class="label">${t('Right (min)')}</label><input type="number" inputmode="numeric" data-num="rightSec" data-mul="60" value="${d.rightSec?Math.round(d.rightSec/60):''}" placeholder="0"></div></div>`;
+    html+=`<div class="small muted" id="bfTotal" style="margin:-8px 0 14px">${total>0?(t('Total')+' '+fmtDur(total)+' · L '+fmtDur(d.leftSec)+' / R '+fmtDur(d.rightSec)):''}</div>`;
+    html+=`<div class="field"><label class="label">${t('Position')}</label>${chipgroup('position',POSITIONS.map(p=>({v:p.v,l:p.l})),d.position)}</div>`;
   } else if(s.type==='bottle'){
-    html+=`<div class="field"><label class="label">Content</label>${chipgroup('content',[{v:'formula',l:'Formula'},{v:'expressed',l:'Expressed milk'},{v:'mixed',l:'Mixed'}],d.content)}</div>`;
-    html+=`<div class="field"><label class="label">Volume (ml)</label><input type="number" inputmode="numeric" data-num="volumeMl" value="${d.volumeMl}"><div class="pillrow">${[30,60,90,120,150,180].map(v=>`<button class="chip" data-preset="volumeMl" data-pv="${v}">${v}</button>`).join('')}</div></div>`;
+    html+=`<div class="field"><label class="label">${t('Content')}</label>${chipgroup('content',[{v:'formula',l:'Formula'},{v:'expressed',l:'Expressed milk'},{v:'mixed',l:'Mixed'}],d.content)}</div>`;
+    html+=`<div class="field"><label class="label">${t('Volume (ml)')}</label><input type="number" inputmode="numeric" data-num="volumeMl" value="${d.volumeMl}"><div class="pillrow">${[30,60,90,120,150,180].map(v=>`<button class="chip" data-preset="volumeMl" data-pv="${v}">${v}</button>`).join('')}</div></div>`;
   } else if(s.type==='temperature'){
     const a=assessTemperature(d.celsius,d.method);
-    html+=`<div class="field"><label class="label">Temperature (°C)</label><input type="number" step="0.1" inputmode="decimal" data-num="celsius" data-live="temp" value="${d.celsius}" style="font-size:1.4rem;font-weight:800"></div>`;
-    html+=`<div class="field"><label class="label">Method</label>${chipgroup('method',[{v:'axillary',l:'Armpit'},{v:'rectal',l:'Rectal'},{v:'ear',l:'Ear'},{v:'forehead',l:'Forehead'},{v:'oral',l:'Oral'}],d.method)}</div>`;
-    html+=`<div class="banner ${a.level}" id="tempMsg" style="margin-bottom:16px">${a.msg}</div>`;
+    html+=`<div class="field"><label class="label">${t('Temperature (°C)')}</label><input type="number" step="0.1" inputmode="decimal" data-num="celsius" data-live="temp" value="${d.celsius}" style="font-size:1.4rem;font-weight:800"></div>`;
+    html+=`<div class="field"><label class="label">${t('Method')}</label>${chipgroup('method',[{v:'axillary',l:'Armpit'},{v:'rectal',l:'Rectal'},{v:'ear',l:'Ear'},{v:'forehead',l:'Forehead'},{v:'oral',l:'Oral'}],d.method)}</div>`;
+    html+=`<div class="banner ${a.level}" id="tempMsg" style="margin-bottom:16px">${t(a.msg)}</div>`;
   } else if(s.type==='cry'){
-    html+=`<div class="field"><label class="label">Intensity</label>${chipgroup('intensity',[{v:'fussy',l:'Fussy'},{v:'crying',l:'Crying'},{v:'inconsolable',l:'Inconsolable'}],d.intensity)}</div>`;
+    html+=`<div class="field"><label class="label">${t('Intensity')}</label>${chipgroup('intensity',[{v:'fussy',l:'Fussy'},{v:'crying',l:'Crying'},{v:'inconsolable',l:'Inconsolable'}],d.intensity)}</div>`;
   } else if(s.type==='pump'){
-    html+=`<div class="field"><label class="label">Side</label>${chipgroup('side',[{v:'left',l:'Left'},{v:'right',l:'Right'},{v:'both',l:'Both'}],d.side)}</div>`;
-    html+=`<div class="field"><label class="label">Volume (ml)</label><input type="number" inputmode="numeric" data-num="volumeMl" value="${d.volumeMl}"></div>`;
+    html+=`<div class="field"><label class="label">${t('Side')}</label>${chipgroup('side',[{v:'left',l:'Left'},{v:'right',l:'Right'},{v:'both',l:'Both'}],d.side)}</div>`;
+    html+=`<div class="field"><label class="label">${t('Volume (ml)')}</label><input type="number" inputmode="numeric" data-num="volumeMl" value="${d.volumeMl}"></div>`;
   } else if(s.type==='medication'){
-    html+=`<div class="field"><label class="label">Medication / supplement</label><input data-str="name" value="${esc(d.name||'')}" placeholder="e.g. Vitamin D"><div class="pillrow">${['Vitamin D','Paracetamol','Probiotics'].map(n=>`<button class="chip" data-preset-str="name" data-pv="${n}">${n}</button>`).join('')}</div></div>`;
-    html+=`<div class="field"><label class="label">Dose (optional)</label><input data-str="dose" value="${esc(d.dose||'')}" placeholder="e.g. 400 IU"></div>`;
+    html+=`<div class="field"><label class="label">${t('Medication / supplement')}</label><input data-str="name" value="${esc(d.name||'')}" placeholder="${t('e.g. Vitamin D')}"><div class="pillrow">${['Vitamin D','Paracetamol','Probiotics'].map(n=>`<button class="chip" data-preset-str="name" data-pv="${esc(n)}">${t(n)}</button>`).join('')}</div></div>`;
+    html+=`<div class="field"><label class="label">${t('Dose (optional)')}</label><input data-str="dose" value="${esc(d.dose||'')}" placeholder="${t('e.g. 400 IU')}"></div>`;
   } else if(s.type==='growth'){
-    html+=`<div class="field"><label class="label">Weight (kg)</label><input type="number" step="0.01" inputmode="decimal" data-num="weightKg" value="${d.weightKg??''}"></div>`;
-    html+=`<div class="field"><label class="label">Height (cm)</label><input type="number" step="0.1" inputmode="decimal" data-num="heightCm" value="${d.heightCm??''}"></div>`;
-    html+=`<div class="field"><label class="label">Head circumference (cm)</label><input type="number" step="0.1" inputmode="decimal" data-num="headCircumferenceCm" value="${d.headCircumferenceCm??''}"></div>`;
+    html+=`<div class="field"><label class="label">${t('Weight (kg)')}</label><input type="number" step="0.01" inputmode="decimal" data-num="weightKg" value="${d.weightKg??''}"></div>`;
+    html+=`<div class="field"><label class="label">${t('Height (cm)')}</label><input type="number" step="0.1" inputmode="decimal" data-num="heightCm" value="${d.heightCm??''}"></div>`;
+    html+=`<div class="field"><label class="label">${t('Head circumference (cm)')}</label><input type="number" step="0.1" inputmode="decimal" data-num="headCircumferenceCm" value="${d.headCircumferenceCm??''}"></div>`;
   }
   // common time + caregiver + note
-  html+=`<div class="field"><label class="label">${hasRange(s.type)?'Start':'Time'}</label><input type="datetime-local" data-when="at" value="${toLocalInput(s.at)}"></div>`;
+  html+=`<div class="field"><label class="label">${hasRange(s.type)?t('Start'):t('Time')}</label><input type="datetime-local" data-when="at" value="${toLocalInput(s.at)}"></div>`;
   if(hasRange(s.type)){
-    html+=`<div class="field"><label class="label">End (optional)</label><input type="datetime-local" data-when="endAt" value="${s.endAt?toLocalInput(s.endAt):''}"></div>`;
+    html+=`<div class="field"><label class="label">${t('End (optional)')}</label><input type="datetime-local" data-when="endAt" value="${s.endAt?toLocalInput(s.endAt):''}"></div>`;
   }
-  html+=`<div class="field"><label class="label">Logged by</label>${chipgroup('caregiver',settings.caregivers.map(c=>({v:c,l:c})),s.caregiver)}</div>`;
-  html+=`<div class="field"><label class="label">Note</label><textarea data-note placeholder="Anything to remember…">${esc(s.note)}</textarea></div>`;
+  html+=`<div class="field"><label class="label">${t('Logged by')}</label>${chipgroup('caregiver',settings.caregivers.map(c=>({v:c,l:c})),s.caregiver)}</div>`;
+  html+=`<div class="field"><label class="label">${t('Note')}</label><textarea data-note placeholder="${t('Anything to remember…')}">${esc(s.note)}</textarea></div>`;
   return html;
 }
 function saveSheet(){
@@ -782,33 +952,34 @@ function importBackup(file){
   reader.onload=()=>{
     try{
       const j=JSON.parse(reader.result);
-      if(j.app!=='baby-care-tracker'||!Array.isArray(j.events)) throw new Error('Not a valid backup file.');
+      if(j.app!=='baby-care-tracker'||!Array.isArray(j.events)) throw new Error(t('Not a valid backup file.'));
       const seen=new Set(events.map(e=>e.type+'|'+e.at+'|'+e.caregiver)); let added=0;
       for(const ev of j.events){ const k=ev.type+'|'+ev.at+'|'+ev.caregiver; if(seen.has(k))continue; seen.add(k);
         const ne=Object.assign({},ev,{id:newId()}); events.push(ne); queueUpsert(ne); added++; }
       persistEvents(); render();
-      const el=document.getElementById('ioMsg'); if(el) el.textContent='Imported '+added+' new entr'+(added===1?'y':'ies')+'.';
-    }catch(err){ const el=document.getElementById('ioMsg'); if(el) el.textContent=err.message||'Import failed.'; }
+      const el=document.getElementById('ioMsg'); if(el) el.textContent=t('imported',{n:added,label:(added===1?t('new entry'):t('new entries'))});
+    }catch(err){ const el=document.getElementById('ioMsg'); if(el) el.textContent=err.message||t('Import failed.'); }
   };
   reader.readAsText(file);
 }
 
 /* --------------------------------------------------------------- listeners -- */
 document.addEventListener('click', (ev)=>{
-  const t=ev.target.closest('[data-tab],[data-log],[data-edit],[data-filter],[data-act],[data-unit],[data-rm-care],[data-chip] [data-v],[data-preset],[data-preset-str]');
-  if(!t) return;
+  const el=ev.target.closest('[data-tab],[data-log],[data-edit],[data-filter],[data-act],[data-unit],[data-lang],[data-rm-care],[data-chip] [data-v],[data-preset],[data-preset-str]');
+  if(!el) return;
 
-  if(t.dataset.tab){ state.tab=t.dataset.tab; render(); if(t.dataset.tab==='home' && !weatherCache) fetchWeather(); return; }
-  if(t.dataset.log){ openSheet(t.dataset.log,null,null); return; }
-  if(t.dataset.edit){ const e=findEvent(t.dataset.edit); if(e) openSheet(null,e,null); return; }
-  if(t.dataset.filter){ state.filter=t.dataset.filter; render(); return; }
-  if(t.dataset.unit){ saveSettings({tempUnit:t.dataset.unit}); return; }
-  if(t.dataset.rmCare){ if(settings.caregivers.length>1){ const cs=settings.caregivers.filter(c=>c!==t.dataset.rmCare); saveSettings({caregivers:cs, currentCaregiver: cs.includes(settings.currentCaregiver)?settings.currentCaregiver:cs[0]}); } return; }
+  if(el.dataset.tab){ state.tab=el.dataset.tab; render(); if(el.dataset.tab==='home' && !weatherCache) fetchWeather(); return; }
+  if(el.dataset.log){ openSheet(el.dataset.log,null,null); return; }
+  if(el.dataset.edit){ const e=findEvent(el.dataset.edit); if(e) openSheet(null,e,null); return; }
+  if(el.dataset.filter){ state.filter=el.dataset.filter; render(); return; }
+  if(el.dataset.unit){ saveSettings({tempUnit:el.dataset.unit}); return; }
+  if(el.dataset.lang){ saveSettings({lang:el.dataset.lang}); return; }
+  if(el.dataset.rmCare){ if(settings.caregivers.length>1){ const cs=settings.caregivers.filter(c=>c!==el.dataset.rmCare); saveSettings({caregivers:cs, currentCaregiver: cs.includes(settings.currentCaregiver)?settings.currentCaregiver:cs[0]}); } return; }
 
   // chip selection inside sheet / caregiver
-  const chipWrap=t.closest('[data-chip]');
-  if(chipWrap && t.dataset.v!=null){
-    const field=chipWrap.dataset.chip; const val=t.dataset.v;
+  const chipWrap=el.closest('[data-chip]');
+  if(chipWrap && el.dataset.v!=null){
+    const field=chipWrap.dataset.chip; const val=el.dataset.v;
     if(state.sheet){
       if(field==='caregiver'){ state.sheet.caregiver=val; }
       else { state.sheet.draft[field]=val; }
@@ -816,15 +987,16 @@ document.addEventListener('click', (ev)=>{
     }
     return;
   }
-  if(t.dataset.preset && state.sheet){ state.sheet.draft[t.dataset.preset]=+t.dataset.pv; renderSheet(); return; }
-  if(t.dataset.presetStr && state.sheet){ state.sheet.draft[t.dataset.presetStr]=t.dataset.pv; renderSheet(); return; }
+  if(el.dataset.preset && state.sheet){ state.sheet.draft[el.dataset.preset]=+el.dataset.pv; renderSheet(); return; }
+  if(el.dataset.presetStr && state.sheet){ state.sheet.draft[el.dataset.presetStr]=el.dataset.pv; renderSheet(); return; }
 
-  const act=t.dataset.act;
+  const act=el.dataset.act;
   if(!act) return;
   if(act==='close') return closeSheet();
+  if(act==='info-toggle'){ if(state.sheet){ state.sheet.showInfo=!state.sheet.showInfo; renderSheet(); } return; }
   if(act==='save') return saveSheet();
-  if(act==='delete'){ if(state.sheet&&state.sheet.editing&&confirm('Delete this entry?')){ deleteEvent(state.sheet.editing.id); closeSheet(); render(); } return; }
-  if(act==='bf-start') return startBreastfeed(t.dataset.side);
+  if(act==='delete'){ if(state.sheet&&state.sheet.editing&&confirm(t('Delete this entry?'))){ deleteEvent(state.sheet.editing.id); closeSheet(); render(); } return; }
+  if(act==='bf-start') return startBreastfeed(el.dataset.side);
   if(act==='bf-switch') return switchBreast();
   if(act==='bf-stop') return stopBreast();
   if(act==='sleep-start') return startSleep();
@@ -853,8 +1025,8 @@ document.addEventListener('input', (ev)=>{
   if(!state.sheet) return;
   const s=state.sheet;
   if(el.dataset.num!=null){ const mul=el.dataset.mul?+el.dataset.mul:1; s.draft[el.dataset.num]= el.value===''?(el.dataset.num==='leftSec'||el.dataset.num==='rightSec'?0:undefined):(parseFloat(el.value)*mul);
-    if(el.dataset.live==='temp'){ const a=assessTemperature(s.draft.celsius,s.draft.method); const mEl=document.getElementById('tempMsg'); if(mEl){ mEl.className='banner '+a.level; mEl.innerHTML=a.msg; } }
-    if(el.dataset.num==='leftSec'||el.dataset.num==='rightSec'){ const tot=(s.draft.leftSec||0)+(s.draft.rightSec||0); const bt=document.getElementById('bfTotal'); if(bt) bt.textContent=tot>0?('Total '+fmtDur(tot)+' · L '+fmtDur(s.draft.leftSec)+' / R '+fmtDur(s.draft.rightSec)):''; }
+    if(el.dataset.live==='temp'){ const a=assessTemperature(s.draft.celsius,s.draft.method); const mEl=document.getElementById('tempMsg'); if(mEl){ mEl.className='banner '+a.level; mEl.innerHTML=t(a.msg); } }
+    if(el.dataset.num==='leftSec'||el.dataset.num==='rightSec'){ const tot=(s.draft.leftSec||0)+(s.draft.rightSec||0); const bt=document.getElementById('bfTotal'); if(bt) bt.textContent=tot>0?(t('Total')+' '+fmtDur(tot)+' · L '+fmtDur(s.draft.leftSec)+' / R '+fmtDur(s.draft.rightSec)):''; }
     return; }
   if(el.dataset.str!=null){ s.draft[el.dataset.str]=el.value; return; }
   if(el.dataset.when!=null){ s[el.dataset.when]= el.value?fromLocalInput(el.value):undefined; return; }
