@@ -387,7 +387,7 @@ const FR = {
   'Content':'Contenu','Volume (ml)':'Volume (ml)','Temperature (°C)':'Température (°C)','Method':'Méthode','Intensity':'Intensité','Side':'Côté',
   'Medication / supplement':'Médicament / complément','e.g. Vitamin D':'ex. Vitamine D','Dose (optional)':'Dose (optionnel)','e.g. 400 IU':'ex. 400 UI',
   'Weight (kg)':'Poids (kg)','Height (cm)':'Taille (cm)','Head circumference (cm)':'Périmètre crânien (cm)',
-  'Start':'Début','Time':'Heure','End (optional)':'Fin (optionnel)','Logged by':'Saisi par','Anything to remember…':'À retenir…',
+  'Start':'Début','Time':'Heure','End (optional)':'Fin (optionnel)','Done by':'Fait par','Anything to remember…':'À retenir…',
   // values / chips
   'Pee':'Pipi','Poop':'Caca','Both':'Les deux','Little':'Peu','Average':'Moyen','Full':'Pleine',
   'Liquid':'Liquide','Seedy':'Granuleux','Soft':'Molle','Formed':'Moulée','Hard':'Dure','Mucousy':'Glaireuse',
@@ -943,10 +943,18 @@ function defaultData(type){
     default: return {};
   }
 }
+// "Done by" default: breastfeeding is at the breast, so default to mom when present.
+function defaultCaregiver(type){
+  if(type==='breastfeed'){
+    const mom=settings.caregivers.find(c=>/maman|mom|mum|m[eè]re/i.test(c));
+    if(mom) return mom;
+  }
+  return settings.currentCaregiver;
+}
 function openSheet(type, editing, initial){
   let draft, at, endAt, caregiver, note;
   if(editing){ draft=Object.assign({},editing.data); at=editing.at; endAt=editing.endAt; caregiver=editing.caregiver; note=editing.note||''; type=editing.type; }
-  else { draft=Object.assign(defaultData(type),(initial&&initial.data)||{}); at=(initial&&initial.at)||Date.now(); endAt=initial&&initial.endAt; caregiver=settings.currentCaregiver; note=(initial&&initial.note)||''; }
+  else { draft=Object.assign(defaultData(type),(initial&&initial.data)||{}); at=(initial&&initial.at)||Date.now(); endAt=initial&&initial.endAt; caregiver=defaultCaregiver(type); note=(initial&&initial.note)||''; }
   state.sheet={type,editing:editing||null,draft,at,endAt,caregiver,note};
   renderSheet();
 }
@@ -1026,7 +1034,7 @@ function sheetBody(s){
   if(hasRange(s.type)){
     html+=`<div class="field"><label class="label">${t('End (optional)')}</label><input type="datetime-local" data-when="endAt" value="${s.endAt?toLocalInput(s.endAt):''}"></div>`;
   }
-  html+=`<div class="field"><label class="label">${t('Logged by')}</label>${chipgroup('caregiver',settings.caregivers.map(c=>({v:c,l:c})),s.caregiver)}</div>`;
+  html+=`<div class="field"><label class="label">${t('Done by')}</label>${chipgroup('caregiver',settings.caregivers.map(c=>({v:c,l:c})),s.caregiver)}</div>`;
   html+=`<div class="field"><label class="label">${t('Note')}</label><textarea data-note placeholder="${t('Anything to remember…')}">${esc(s.note)}</textarea></div>`;
   return html;
 }
