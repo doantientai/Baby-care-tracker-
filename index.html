@@ -89,7 +89,8 @@
   .banner.good{background:var(--good-l);color:var(--good-ink);font-weight:600}
   .banner.warn{background:var(--warn-l);color:var(--warn-ink);font-weight:600}
   .banner.bad{background:var(--bad-l);color:var(--bad-ink);font-weight:700}
-  .ev{display:flex;align-items:center;gap:12px;padding:10px 12px;width:100%;text-align:left;border:none;background:none;border-radius:12px}
+  .ev{display:flex;align-items:center;gap:12px;padding:10px 12px;width:100%;text-align:left;border:none;background:none;border-radius:12px;overflow:hidden}
+  .updbar{position:fixed;left:12px;right:12px;bottom:72px;z-index:60;max-width:456px;margin:0 auto;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.25);font-weight:600;cursor:pointer}
   .ev:active{background:var(--ev-active)}
   .ev+.ev{border-top:1px solid var(--card-border)}
   .ev .ic{width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex:0 0 auto}
@@ -135,6 +136,7 @@
 
 <script>
 "use strict";
+const APP_VERSION = '2026-06-29.1';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -325,6 +327,7 @@ const FR = {
   'Quick log':'Saisie rapide','Today':"Aujourd'hui",'Wet diapers':'Couches mouillées','Dirty diapers':'Couches sales',
   'Feeds':'Repas','Recent':'Récent','See all →':'Tout voir →','No entries yet today.':"Aucune entrée aujourd'hui.",
   'check':'vérifier','day':'jour','night':'nuit','Now':'Maintenant',
+  'Update available':'Nouvelle version disponible','Refresh':'Mettre à jour',
   // reminders + outfit
   'Reminders':'Rappels','Vitamin D reminder':'Rappel Vitamine D','From':'À partir de',
   'Vitamin D — give this morning’s dose':'Vitamine D — donnez la dose du matin','Log it':'Noter','Vitamin D given today ✓':'Vitamine D donnée ✓',
@@ -1166,13 +1169,32 @@ document.addEventListener('input', (ev)=>{
 // live tick for running timers on Home
 setInterval(()=>{ if(state.tab==='home' && !state.sheet && (getTimer('breastfeed')||getTimer('sleep'))) render(); }, 1000);
 
+/* --------------------------------------------------- self-update notice ----- */
+// Detects when a newer version is deployed (compares the embedded APP_VERSION
+// against the freshly-fetched page) and offers a one-tap refresh. No-ops offline.
+async function checkUpdate(){
+  if(document.getElementById('updBar')) return;
+  try{
+    const r=await fetch(location.pathname+'?_v='+Date.now(),{cache:'no-store'});
+    if(!r.ok) return;
+    const m=(await r.text()).match(/APP_VERSION = '([^']+)'/);
+    if(m && m[1] && m[1]!==APP_VERSION){
+      const d=document.createElement('div'); d.id='updBar'; d.className='updbar safe-bottom';
+      d.innerHTML='<span>🔄 '+t('Update available')+'</span><button class="btn" style="background:#fff;color:var(--brand-d);padding:6px 12px">'+t('Refresh')+'</button>';
+      d.onclick=()=>location.reload();
+      document.body.appendChild(d);
+    }
+  }catch(e){}
+}
+
 /* ------------------------------------------------------------------- boot --- */
 applyTheme();
 render();
 fetchWeather();
+checkUpdate();
 if(syncReady()) syncNow();
-// keep two phones fresh: pull when the tab regains focus
-window.addEventListener('focus', ()=>{ if(syncReady() && !syncState.syncing) syncNow(); });
+// keep two phones fresh + check for a new app version when the tab regains focus
+window.addEventListener('focus', ()=>{ if(syncReady() && !syncState.syncing) syncNow(); checkUpdate(); });
 </script>
 </body>
 </html>
