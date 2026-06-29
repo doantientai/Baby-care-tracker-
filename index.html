@@ -896,6 +896,9 @@ function hasRange(t){ return t==='breastfeed'||t==='sleep'||t==='pump'||t==='cry
 
 function renderSheet(){
   const s=state.sheet;
+  const prev=sheetRoot.querySelector('.sheet');
+  const savedScroll=prev?prev.scrollTop:0;
+  const isReRender=!!prev;
   if(!s){ sheetRoot.innerHTML=''; return; }
   const m=META[s.type];
   const info=infoText(s.type);
@@ -913,6 +916,8 @@ function renderSheet(){
       <button class="btn btn-primary" style="flex:1" data-act="save">${t(s.editing?'Save changes':'Save')}</button>
     </div>
   </div>`;
+  const sheetEl=sheetRoot.querySelector('.sheet');
+  if(sheetEl){ if(isReRender){ sheetEl.style.animation='none'; sheetEl.scrollTop=savedScroll; } }
 }
 function chipgroup(name, opts, val){
   return `<div class="chips" data-chip="${name}">${opts.map(o=>`<button class="chip ${val===o.v?'on':''}" data-v="${o.v}">${o.e?o.e+' ':''}${t(o.l)}</button>`).join('')}</div>`;
@@ -1011,7 +1016,12 @@ function importBackup(file){
 document.addEventListener('click', (ev)=>{
   const el=ev.target.closest('[data-tab],[data-log],[data-edit],[data-filter],[data-act],[data-unit],[data-lang],[data-themeset],[data-rm-care],[data-chip] [data-v],[data-preset],[data-preset-str],[data-tadj]');
   if(!el) return;
-  if(el.dataset.tadj!=null && state.sheet){ state.sheet.at = Date.now() - (+el.dataset.tadj)*60000; renderSheet(); return; }
+  if(el.dataset.tadj!=null && state.sheet){
+    state.sheet.at = Date.now() - (+el.dataset.tadj)*60000;
+    const inp=sheetRoot.querySelector('[data-when=at]');   // update in place — no re-render, keeps scroll position
+    if(inp) inp.value=toLocalInput(state.sheet.at);
+    return;
+  }
 
   if(el.dataset.tab){ state.tab=el.dataset.tab; render(); if(el.dataset.tab==='home' && !weatherCache) fetchWeather(); return; }
   if(el.dataset.log){ openSheet(el.dataset.log,null,null); return; }
