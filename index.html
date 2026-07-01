@@ -136,7 +136,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.2';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.3';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -347,6 +347,8 @@ const FR = {
   // trends
   'Diapers per day':'Couches par jour','Wet vs dirty — last 14 days':'Mouillées vs sales — 14 derniers jours',
   'Feeds per day':'Repas par jour','Breast + bottle — last 14 days':'Sein + biberon — 14 derniers jours',
+  'Breastfeeding per day':'Allaitement par jour','Minutes at the breast — last 14 days':'Minutes au sein — 14 derniers jours',
+  'Breast time':'Temps au sein','avg':'moy.',
   'Sleep per day':'Sommeil par jour','Total hours — last 14 days':'Heures totales — 14 derniers jours',
   'Weight':'Poids','kg over time':'kg au fil du temps',
   'Wet':'Mouillées','Dirty':'Sales','Sleep (h)':'Sommeil (h)',
@@ -654,14 +656,23 @@ function renderNav(){
 /* ---- HOME ---- */
 function todays(){ const k=dateKey(Date.now()); return events.filter(e=>dateKey(e.at)===k); }
 function lastOfType(type){ const a=events.filter(e=>e.type===type).sort((x,y)=>y.at-x.at); return a[0]; }
+// Seconds spent breastfeeding for one event (per-side, else total, else range),
+// split by side for balance stats.
+function bfSecOf(e){
+  const d=e.data||{};
+  let l=d.leftSec||0, r=d.rightSec||0;
+  if(!l && !r){ const tot = d.durationSec!=null ? d.durationSec : (e.endAt?(e.endAt-e.at)/1000:0); if(d.side==='right') r=tot; else l=tot; }
+  return {l, r, tot:l+r};
+}
 function daySummary(list){
-  let wet=0,dirty=0,feeds=0,sleepSec=0;
+  let wet=0,dirty=0,feeds=0,sleepSec=0,bfSec=0,bfCount=0;
   for(const e of list){
     if(e.type==='diaper'){ const k=e.data.kind; if(k==='pee'||k==='both')wet++; if(k==='poop'||k==='both')dirty++; }
-    else if(e.type==='breastfeed'||e.type==='bottle') feeds++;
+    else if(e.type==='breastfeed'){ feeds++; bfCount++; bfSec += bfSecOf(e).tot; }
+    else if(e.type==='bottle') feeds++;
     else if(e.type==='sleep') sleepSec += (e.data.durationSec!=null?e.data.durationSec:(e.endAt?(e.endAt-e.at)/1000:0));
   }
-  return {wet,dirty,feeds,sleepSec};
+  return {wet,dirty,feeds,sleepSec,bfSec,bfCount};
 }
 function viewHome(){
   const days=ageInDays();
@@ -754,6 +765,7 @@ function viewHome(){
         <div class="card pad-s stat"><div class="label" style="margin:0">${t('Dirty diapers')}</div><div class="v">${s.dirty}</div></div>
         <div class="card pad-s stat"><div class="label" style="margin:0">${t('Feeds')}</div><div class="v">${s.feeds}</div>${lastFeed?`<div class="tiny muted">${t('lastRel',{rel:relTime(lastFeed.at)})}</div>`:''}</div>
         <div class="card pad-s stat"><div class="label" style="margin:0">${t('Sleep')}</div><div class="v">${fmtDur(s.sleepSec)}</div></div>
+        <div class="card pad-s stat"><div class="label" style="margin:0">${t('Breast time')}</div><div class="v">${fmtDur(s.bfSec)}</div>${s.bfCount?`<div class="tiny muted">${s.bfCount} × · ${t('avg')} ${fmtDur(s.bfSec/s.bfCount)}</div>`:''}</div>
       </div>
       ${feedGapBanner}
       ${lastFeed?`<div class="banner pink" style="margin-top:12px">${t('nextFeed',{side:'<b>'+tl(sug==='left'?'Left':'Right')+'</b>',last:tl(lastSide==='left'?'Left':'Right')})}</div>`:''}
@@ -796,13 +808,14 @@ function buildDaily(n){
   const rows=[]; const idx={};
   const start=new Date(); start.setHours(0,0,0,0);
   for(let i=n-1;i>=0;i--){ const d=new Date(start.getTime()-i*DAY); const k=dateKey(d.getTime());
-    const row={k,label:(d.getDate())+'/'+(d.getMonth()+1),wet:0,dirty:0,feeds:0,sleepH:0,_sleep:0}; idx[k]=row; rows.push(row); }
+    const row={k,label:(d.getDate())+'/'+(d.getMonth()+1),wet:0,dirty:0,feeds:0,sleepH:0,_sleep:0,_bfL:0,_bfR:0,bfLeftMin:0,bfRightMin:0}; idx[k]=row; rows.push(row); }
   for(const e of events){ const r=idx[dateKey(e.at)]; if(!r) continue;
     if(e.type==='diaper'){ const k=e.data.kind; if(k==='pee'||k==='both')r.wet++; if(k==='poop'||k==='both')r.dirty++; }
-    else if(e.type==='breastfeed'||e.type==='bottle') r.feeds++;
+    else if(e.type==='breastfeed'){ r.feeds++; const b=bfSecOf(e); r._bfL+=b.l; r._bfR+=b.r; }
+    else if(e.type==='bottle') r.feeds++;
     else if(e.type==='sleep') r._sleep += (e.data.durationSec!=null?e.data.durationSec:(e.endAt?(e.endAt-e.at)/1000:0));
   }
-  rows.forEach(r=>r.sleepH=Math.round(r._sleep/360)/10);
+  rows.forEach(r=>{ r.sleepH=Math.round(r._sleep/360)/10; r.bfLeftMin=Math.round(r._bfL/60); r.bfRightMin=Math.round(r._bfR/60); });
   return rows;
 }
 function barChart(rows, series){
@@ -841,6 +854,7 @@ function viewTrends(){
     <h1>${t('Trends')}</h1>
     <div class="card pad"><h2>${t('Diapers per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Wet vs dirty — last 14 days')}</div>${barChart(rows,[{key:'wet',name:t('Wet'),color:'#0ea5e9'},{key:'dirty',name:t('Dirty'),color:'#f59e0b'}])}</div>
     <div class="card pad"><h2>${t('Feeds per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Breast + bottle — last 14 days')}</div>${barChart(rows,[{key:'feeds',name:t('Feeds'),color:'#ec4899'}])}</div>
+    <div class="card pad"><h2>${t('Breastfeeding per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Minutes at the breast — last 14 days')}</div>${barChart(rows,[{key:'bfLeftMin',name:t('Left'),color:'#ec4899'},{key:'bfRightMin',name:t('Right'),color:'#f9a8d4'}])}</div>
     <div class="card pad"><h2>${t('Sleep per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Total hours — last 14 days')}</div>${barChart(rows,[{key:'sleepH',name:t('Sleep (h)'),color:'#6366f1'}])}</div>
     <div class="card pad"><h2>${t('Weight')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('kg over time')}</div>${lineChart(weights)}</div>
   </div>`;
