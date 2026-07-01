@@ -136,7 +136,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.3';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.4';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -1108,6 +1108,9 @@ document.addEventListener('click', (ev)=>{
     state.sheet.at = Date.now() - (+el.dataset.tadj)*60000;
     const inp=sheetRoot.querySelector('[data-when=at]');   // update in place — no re-render, keeps scroll position
     if(inp) inp.value=toLocalInput(state.sheet.at);
+    // visual feedback: highlight the tapped shortcut so it's clearly registered
+    sheetRoot.querySelectorAll('[data-tadj]').forEach(c=>c.classList.remove('on'));
+    el.classList.add('on');
     return;
   }
 
@@ -1176,7 +1179,7 @@ document.addEventListener('input', (ev)=>{
     if(el.dataset.num==='leftSec'||el.dataset.num==='rightSec'){ const tot=(s.draft.leftSec||0)+(s.draft.rightSec||0); const bt=document.getElementById('bfTotal'); if(bt) bt.textContent=tot>0?(t('Total')+' '+fmtDur(tot)+' · L '+fmtDur(s.draft.leftSec)+' / R '+fmtDur(s.draft.rightSec)):''; }
     return; }
   if(el.dataset.str!=null){ s.draft[el.dataset.str]=el.value; return; }
-  if(el.dataset.when!=null){ s[el.dataset.when]= el.value?fromLocalInput(el.value):undefined; return; }
+  if(el.dataset.when!=null){ s[el.dataset.when]= el.value?fromLocalInput(el.value):undefined; if(el.dataset.when==='at') sheetRoot.querySelectorAll('[data-tadj].on').forEach(c=>c.classList.remove('on')); return; }
   if(el.dataset.note!=null){ s.note=el.value; return; }
 });
 
