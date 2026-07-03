@@ -136,7 +136,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.5';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.6';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -347,7 +347,7 @@ const FR = {
   // trends
   'Diapers per day':'Couches par jour','Wet vs dirty — last 14 days':'Mouillées vs sales — 14 derniers jours',
   'Feeds per day':'Repas par jour','Breast + bottle — last 14 days':'Sein + biberon — 14 derniers jours',
-  'Breastfeeding per day':'Allaitement par jour','Minutes at the breast — last 14 days':'Minutes au sein — 14 derniers jours',
+  'Breastfeeding per day':'Allaitement par jour','Time at the breast — last 14 days':'Temps au sein — 14 derniers jours',
   'Breast time':'Temps au sein','avg':'moy.',
   'Sleep per day':'Sommeil par jour','Total hours — last 14 days':'Heures totales — 14 derniers jours',
   'Weight':'Poids','kg over time':'kg au fil du temps',
@@ -464,7 +464,7 @@ const VI = {
   // trends
   'Diapers per day':'Tã mỗi ngày','Wet vs dirty — last 14 days':'Ướt vs bẩn — 14 ngày qua',
   'Feeds per day':'Cữ bú mỗi ngày','Breast + bottle — last 14 days':'Bú mẹ + bình — 14 ngày qua',
-  'Breastfeeding per day':'Bú mẹ mỗi ngày','Minutes at the breast — last 14 days':'Số phút bú mẹ — 14 ngày qua',
+  'Breastfeeding per day':'Bú mẹ mỗi ngày','Time at the breast — last 14 days':'Thời gian bú mẹ — 14 ngày qua',
   'Breast time':'Thời gian bú','avg':'TB',
   'Sleep per day':'Giấc ngủ mỗi ngày','Total hours — last 14 days':'Tổng số giờ — 14 ngày qua',
   'Weight':'Cân nặng','kg over time':'kg theo thời gian',
@@ -946,12 +946,25 @@ function buildDaily(n){
     else if(e.type==='bottle') r.feeds++;
     else if(e.type==='sleep') r._sleep += (e.data.durationSec!=null?e.data.durationSec:(e.endAt?(e.endAt-e.at)/1000:0));
   }
-  rows.forEach(r=>{ r.sleepH=Math.round(r._sleep/360)/10; r.bfLeftMin=Math.round(r._bfL/60); r.bfRightMin=Math.round(r._bfR/60); });
+  rows.forEach(r=>{ r.sleepH=Math.round(r._sleep/360)/10; r.bfLeftH=Math.round(r._bfL/36)/100; r.bfRightH=Math.round(r._bfR/36)/100; });
   return rows;
 }
-function barChart(rows, series){
-  const W=440,H=180,padL=24,padB=22,padT=8;
-  const max=Math.max(1,...rows.map(r=>series.reduce((s,se)=>s+(r[se.key]||0),0)));
+// "Nice" axis: round the max up and pick a clean step so ticks read well.
+function niceTicks(rawMax){
+  const max=Math.max(1,rawMax); const rough=max/3;
+  const pow=Math.pow(10,Math.floor(Math.log10(rough)));
+  const step=[1,2,2.5,5,10].map(x=>x*pow).find(c=>c>=rough) || 10*pow;
+  const niceMax=Math.ceil(max/step)*step;
+  const ticks=[]; for(let v=0; v<=niceMax+1e-9; v+=step) ticks.push(Math.round(v*100)/100);
+  return {niceMax, ticks};
+}
+// Format an hours value as 2h / 2h30.
+function hourLabel(h){ const H=Math.floor(h+1e-9), m=Math.round((h-H)*60); return m? (H+'h'+String(m).padStart(2,'0')) : (H+'h'); }
+function barChart(rows, series, opts){
+  opts=opts||{}; const fmtY=opts.fmtY||(v=>String(v));
+  const W=440,H=180,padL=30,padB=22,padT=8;
+  const rawMax=Math.max(1,...rows.map(r=>series.reduce((s,se)=>s+(r[se.key]||0),0)));
+  const {niceMax, ticks}=niceTicks(rawMax); const max=niceMax;
   const bw=(W-padL)/rows.length;
   let bars='';
   rows.forEach((r,i)=>{
@@ -960,8 +973,7 @@ function barChart(rows, series){
       if(h>0) bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${se.color}" rx="2"></rect>`; });
     if(i%2===0||rows.length<=7) bars+=`<text x="${(padL+i*bw+bw/2).toFixed(1)}" y="${H-6}" font-size="9" fill="#94a3b8" text-anchor="middle">${r.label}</text>`;
   });
-  const ticks=[0,Math.ceil(max/2),max].filter((v,i,a)=>a.indexOf(v)===i);
-  const grid=ticks.map(t=>{ const y=H-padB-(t/max)*(H-padB-padT); return `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W}" y2="${y.toFixed(1)}" stroke="#eef2f7"></line><text x="0" y="${(y+3).toFixed(1)}" font-size="9" fill="#cbd5e1">${t}</text>`; }).join('');
+  const grid=ticks.map(tv=>{ const y=H-padB-(tv/max)*(H-padB-padT); return `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W}" y2="${y.toFixed(1)}" stroke="#eef2f7"></line><text x="0" y="${(y+3).toFixed(1)}" font-size="9" fill="#cbd5e1">${fmtY(tv)}</text>`; }).join('');
   const legend=`<div class="legend">${series.map(se=>`<span><i style="background:${se.color}"></i>${se.name}</span>`).join('')}</div>`;
   return `<svg class="chart" viewBox="0 0 ${W} ${H}">${grid}${bars}</svg>${legend}`;
 }
@@ -985,8 +997,8 @@ function viewTrends(){
     <h1>${t('Trends')}</h1>
     <div class="card pad"><h2>${t('Diapers per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Wet vs dirty — last 14 days')}</div>${barChart(rows,[{key:'wet',name:t('Wet'),color:'#0ea5e9'},{key:'dirty',name:t('Dirty'),color:'#f59e0b'}])}</div>
     <div class="card pad"><h2>${t('Feeds per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Breast + bottle — last 14 days')}</div>${barChart(rows,[{key:'feeds',name:t('Feeds'),color:'#ec4899'}])}</div>
-    <div class="card pad"><h2>${t('Breastfeeding per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Minutes at the breast — last 14 days')}</div>${barChart(rows,[{key:'bfLeftMin',name:t('Left'),color:'#ec4899'},{key:'bfRightMin',name:t('Right'),color:'#f9a8d4'}])}</div>
-    <div class="card pad"><h2>${t('Sleep per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Total hours — last 14 days')}</div>${barChart(rows,[{key:'sleepH',name:t('Sleep (h)'),color:'#6366f1'}])}</div>
+    <div class="card pad"><h2>${t('Breastfeeding per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Time at the breast — last 14 days')}</div>${barChart(rows,[{key:'bfLeftH',name:t('Left'),color:'#ec4899'},{key:'bfRightH',name:t('Right'),color:'#f9a8d4'}],{fmtY:hourLabel})}</div>
+    <div class="card pad"><h2>${t('Sleep per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Total hours — last 14 days')}</div>${barChart(rows,[{key:'sleepH',name:t('Sleep (h)'),color:'#6366f1'}],{fmtY:hourLabel})}</div>
     <div class="card pad"><h2>${t('Weight')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('kg over time')}</div>${lineChart(weights)}</div>
   </div>`;
 }
