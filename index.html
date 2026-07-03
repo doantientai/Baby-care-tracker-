@@ -136,7 +136,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.4';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.5';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -423,13 +423,132 @@ const FR = {
   'Light rain':'Pluie légère','Rain':'Pluie','Heavy rain':'Forte pluie','Light snow':'Neige légère','Snow':'Neige','Heavy snow':'Forte neige',
   'Showers':'Averses','Violent showers':'Averses violentes','Thunderstorm':'Orage',
 };
+const VI = {
+  // templated
+  day_one:'{n} ngày tuổi', day_other:'{n} ngày tuổi',
+  nursery:'🛏️ Giữ phòng ở {min}–{max}°C để bé ngủ an toàn (lý tưởng ~{ideal}°C).',
+  target:'mục tiêu ≥ {n}/ngày',
+  lastRel:'gần nhất {rel}',
+  nextFeed:'🤱 Cữ bú tiếp: bắt đầu bên {side} (lần trước {last}).',
+  feedGap:'🍼 Đã <b>{h}h</b> kể từ cữ bú gần nhất (mốc {when} {thr}h). Trẻ sơ sinh thường không nên đợi lâu hơn — hãy cho bé bú.',
+  relMin:'{n} phút trước', relHour:'{n} giờ trước', relDay:'{n} ngày trước',
+  imported:'Đã nhập {n} {label}.',
+  outfitVeryWarm:'Rất nóng — một lớp mỏng (body tay ngắn), đội mũ khi ra nắng, không đắp chăn. Coi chừng quá nóng.',
+  outfitWarm:'Nóng — body tay ngắn + quần mỏng hoặc bộ liền mỏng; mũ khi ra nắng.',
+  outfitMild:'Dịu — body tay dài + bộ liền; mũ mỏng và tất.',
+  outfitCool:'Mát — body + bộ liền + áo len hoặc áo khoác; mũ, tất, chăn xe đẩy.',
+  outfitCold:'Lạnh — thêm một lớp ấm (nỉ/áo liền quần), mũ, bao tay, tất, chăn.',
+  outfitVeryCold:'Rất lạnh — áo liền quần, mũ, bao tay, giày, chăn; ra ngoài ngắn thôi. Cởi áo liền quần dày khi ngồi ghế xe hơi.',
+  // nav
+  'Home':'Trang chính','Timeline':'Nhật ký','Trends':'Xu hướng','Settings':'Cài đặt',
+  // home
+  'Set date of birth in Settings':'Đặt ngày sinh trong Cài đặt',
+  'Outside':'Bên ngoài','Weather unavailable':'Không có thời tiết','Loading…':'Đang tải…','feels':'cảm giác',
+  'Breastfeeding':'Cho bú','Sleep':'Ngủ','Switch':'Đổi bên','Stop':'Dừng',
+  'Pause':'Tạm dừng','Resume':'Tiếp tục','paused':'đang tạm dừng',
+  'Start L':'Bắt đầu T','Start R':'Bắt đầu P','Start sleep':'Bắt đầu ngủ','tap to stop':'chạm để dừng',
+  'Quick log':'Ghi nhanh','Today':'Hôm nay','Wet diapers':'Tã ướt','Dirty diapers':'Tã bẩn',
+  'Feeds':'Cữ bú','Recent':'Gần đây','See all →':'Xem tất cả →','No entries yet today.':'Chưa có mục nào hôm nay.',
+  'check':'kiểm tra','day':'ngày','night':'đêm','Now':'Bây giờ',
+  'Update available':'Có bản cập nhật','Refresh':'Cập nhật',
+  // reminders + outfit
+  'Reminders':'Nhắc nhở','Vitamin D reminder':'Nhắc Vitamin D','From':'Từ',
+  'Vitamin D — give this morning’s dose':'Vitamin D — cho bé uống liều sáng nay','Log it':'Ghi lại','Vitamin D given today ✓':'Đã cho Vitamin D ✓',
+  'Going out':'Ra ngoài','What to wear':'Mặc gì cho bé',
+  // event types
+  'Diaper':'Tã','Breastfeed':'Cho bú','Bottle':'Bình sữa','Temperature':'Nhiệt độ',
+  'Cry':'Khóc','Pump':'Hút sữa','Medication':'Thuốc','Growth':'Tăng trưởng','Note':'Ghi chú',
+  // timeline
+  'All':'Tất cả','Feed':'Bú','Temp':'Nhiệt','No entries yet.':'Chưa có mục nào.',
+  'Today_d':'Hôm nay','Yesterday':'Hôm qua',
+  // trends
+  'Diapers per day':'Tã mỗi ngày','Wet vs dirty — last 14 days':'Ướt vs bẩn — 14 ngày qua',
+  'Feeds per day':'Cữ bú mỗi ngày','Breast + bottle — last 14 days':'Bú mẹ + bình — 14 ngày qua',
+  'Breastfeeding per day':'Bú mẹ mỗi ngày','Minutes at the breast — last 14 days':'Số phút bú mẹ — 14 ngày qua',
+  'Breast time':'Thời gian bú','avg':'TB',
+  'Sleep per day':'Giấc ngủ mỗi ngày','Total hours — last 14 days':'Tổng số giờ — 14 ngày qua',
+  'Weight':'Cân nặng','kg over time':'kg theo thời gian',
+  'Wet':'Ướt','Dirty':'Bẩn','Sleep (h)':'Ngủ (giờ)',
+  'Log at least two weight measurements to see a curve.':'Ghi ít nhất hai lần cân để thấy đường cong.',
+  // settings
+  'Language':'Ngôn ngữ','Appearance':'Giao diện','Auto':'Tự động','Light':'Sáng','Dark':'Tối',
+  'Baby':'Em bé','Name':'Tên','Date of birth':'Ngày sinh',
+  'Used for age-based fever alerts and diaper targets.':'Dùng cho cảnh báo sốt theo tuổi và mục tiêu tã.',
+  'Cloud sync (Google Sheet)':'Đồng bộ (Google Sheet)',
+  'Save the log to a shared Google Sheet so you and your wife see the same data on both phones. The app still works offline and syncs when online.':'Lưu nhật ký vào một Google Sheet chung để cả hai điện thoại thấy cùng dữ liệu. Ứng dụng vẫn hoạt động ngoại tuyến và đồng bộ khi có mạng.',
+  'Web app URL':'URL ứng dụng web','Shared secret (optional)':'Mã bí mật chung (tùy chọn)',
+  'must match SECRET in the script':'phải khớp SECRET trong script',
+  '⟳ Sync now':'⟳ Đồng bộ ngay',
+  'Not connected — paste your Google Sheet web-app URL above, then Sync.':'Chưa kết nối — dán URL Google Sheet ở trên, rồi Đồng bộ.',
+  'Synced':'Đã đồng bộ','Syncing…':'Đang đồng bộ…','pending':'đang chờ',
+  'Sheet synced':'Đã đồng bộ Sheet','sync error':'lỗi đồng bộ',
+  'How to set this up (5 min)':'Cách thiết lập (5 phút)',
+  'Create a new Google Sheet.':'Tạo một Google Sheet mới.',
+  'In it: <b>Extensions → Apps Script</b>.':'Trong đó: <b>Extensions → Apps Script</b>.',
+  'Delete the sample code, paste the contents of <b>google-apps-script.gs</b> from this project, and Save.':'Xóa mã mẫu, dán nội dung <b>google-apps-script.gs</b> của dự án, rồi Lưu.',
+  'Authorize when asked.':'Cấp quyền khi được hỏi.',
+  'Tap <b>Sync now</b>. Paste the same URL on the other phone.':'Chạm <b>Đồng bộ ngay</b>. Dán cùng URL trên điện thoại kia.',
+  'Feeding':'Cho ăn',
+  'Feeding is on demand. Optionally show a gentle nudge only when an unusually long gap passes — a safety floor, not a schedule.':'Cho bú theo nhu cầu. Có thể hiện nhắc nhẹ chỉ khi khoảng cách quá dài — mức an toàn, không phải lịch cố định.',
+  'Long-gap nudge':'Nhắc khi cách quá lâu','On':'Bật','Off':'Tắt',
+  'Day max (h)':'Tối đa ngày (giờ)','Night max (h)':'Tối đa đêm (giờ)',
+  'Night counted as 10pm–7am. Typical guides: ~3h day, ~5h night in the early weeks.':'Đêm tính từ 22h–7h. Tham khảo: ~3h ban ngày, ~5h ban đêm trong những tuần đầu.',
+  'Caregivers':'Người chăm sóc','Add caregiver…':'Thêm người chăm sóc…','Add':'Thêm',
+  'Location & units':'Vị trí & đơn vị','Location label':'Tên vị trí','Temperature unit':'Đơn vị nhiệt độ',
+  'Backup & share':'Sao lưu & chia sẻ',
+  "Export a CSV for your pediatrician, or a JSON backup to move data to the other parent's phone (imports are de-duplicated).":'Xuất CSV cho bác sĩ nhi, hoặc sao lưu JSON để chuyển dữ liệu sang điện thoại kia (nhập sẽ tự loại trùng).',
+  '⬇ Export CSV':'⬇ Xuất CSV','⬇ Export backup':'⬇ Xuất sao lưu','⬆ Import backup':'⬆ Nhập sao lưu',
+  'Baby Care Tracker · stored privately in this browser. Guidance is general and not a substitute for medical advice.':'Baby Care Tracker · lưu riêng tư trong trình duyệt này. Hướng dẫn chỉ mang tính chung, không thay thế tư vấn y tế.',
+  'new entry':'mục mới','new entries':'mục mới',
+  'Not a valid backup file.':'Tệp sao lưu không hợp lệ.','Import failed.':'Nhập thất bại.',
+  // sheet
+  'Edit':'Sửa','Log':'Ghi','Delete':'Xóa','Save':'Lưu','Save changes':'Lưu thay đổi',
+  'Delete this entry?':'Xóa mục này?','Info':'Thông tin',
+  "What's in the diaper?":'Trong tã có gì?','Amount':'Lượng','Stool color':'Màu phân','Texture':'Kết cấu',
+  'Started on':'Bắt đầu bên','Left (min)':'Trái (phút)','Right (min)':'Phải (phút)','Total':'Tổng','Position':'Tư thế',
+  'Content':'Loại sữa','Volume (ml)':'Thể tích (ml)','Temperature (°C)':'Nhiệt độ (°C)','Method':'Cách đo','Intensity':'Mức độ','Side':'Bên',
+  'Medication / supplement':'Thuốc / thực phẩm bổ sung','e.g. Vitamin D':'vd. Vitamin D','Dose (optional)':'Liều (tùy chọn)','e.g. 400 IU':'vd. 400 IU',
+  'Weight (kg)':'Cân nặng (kg)','Height (cm)':'Chiều cao (cm)','Head circumference (cm)':'Vòng đầu (cm)',
+  'Start':'Bắt đầu','Time':'Thời gian','End (optional)':'Kết thúc (tùy chọn)','Done by':'Thực hiện bởi','Anything to remember…':'Điều cần nhớ…',
+  // values / chips
+  'Pee':'Tè','Poop':'Ị','Both':'Cả hai','Little':'Ít','Average':'Vừa','Full':'Đầy',
+  'Liquid':'Lỏng','Seedy':'Lợn cợn','Soft':'Mềm','Formed':'Thành khuôn','Hard':'Cứng','Mucousy':'Nhầy',
+  'Left':'Trái','Right':'Phải','Formula':'Sữa công thức','Expressed milk':'Sữa mẹ vắt','Mixed':'Hỗn hợp',
+  'Armpit':'Nách','Rectal':'Hậu môn','Ear':'Tai','Forehead':'Trán','Oral':'Miệng',
+  'Fussy':'Càu nhàu','Crying':'Khóc','Inconsolable':'Khóc dữ',
+  'Cradle':'Bế nôi','Cross-cradle':'Bế nôi chéo','Football / rugby':'Ôm bóng bầu dục','Laid-back':'Ngả lưng','Side-lying':'Nằm nghiêng',
+  'Yellow':'Vàng','Green':'Xanh lá','Brown':'Nâu','Orange':'Cam','Black':'Đen','Red':'Đỏ','White / clay':'Trắng / bạc màu',
+  'Vitamin D':'Vitamin D','Paracetamol':'Paracetamol','Probiotics':'Men vi sinh',
+  'head':'vòng đầu','measurement':'số đo','just now':'vừa xong',
+  // stool notes
+  'Typical for breastfed babies.':'Điển hình ở bé bú mẹ.','Usually normal.':'Thường là bình thường.',
+  'Normal, common with formula.':'Bình thường, hay gặp khi dùng sữa công thức.',
+  'Normal as meconium in the first days. After that, black can mean blood — call a doctor.':'Bình thường (phân su) những ngày đầu. Sau đó, màu đen có thể là máu — hãy gọi bác sĩ.',
+  'Red may indicate blood — contact your doctor.':'Màu đỏ có thể là máu — hãy liên hệ bác sĩ.',
+  'Pale/white stool can signal a liver problem — contact your doctor.':'Phân nhạt/trắng có thể là dấu hiệu bệnh gan — hãy liên hệ bác sĩ.',
+  // temperature messages
+  'Low temperature — warm the baby and contact a doctor.':'Nhiệt độ thấp — ủ ấm cho bé và liên hệ bác sĩ.',
+  'Slightly low — warm the baby and recheck soon.':'Hơi thấp — ủ ấm cho bé và kiểm tra lại sớm.',
+  '🚨 Fever in a baby under 3 months is an emergency — call your doctor or emergency services now.':'🚨 Sốt ở bé dưới 3 tháng là cấp cứu — gọi bác sĩ hoặc cấp cứu ngay.',
+  'High fever — contact your doctor.':'Sốt cao — hãy liên hệ bác sĩ.',
+  'Fever detected — monitor closely and consider contacting your doctor.':'Phát hiện sốt — theo dõi sát và cân nhắc liên hệ bác sĩ.',
+  'Slightly elevated — keep an eye on it.':'Hơi cao — hãy để ý theo dõi.',
+  'Temperature in the normal range.':'Nhiệt độ trong mức bình thường.',
+  // weather
+  'Clear':'Quang đãng','Mainly clear':'Chủ yếu quang','Partly cloudy':'Ít mây','Overcast':'Nhiều mây',
+  'Fog':'Sương mù','Rime fog':'Sương muối','Light drizzle':'Mưa phùn nhẹ','Drizzle':'Mưa phùn','Heavy drizzle':'Mưa phùn nặng',
+  'Light rain':'Mưa nhẹ','Rain':'Mưa','Heavy rain':'Mưa to','Light snow':'Tuyết nhẹ','Snow':'Tuyết','Heavy snow':'Tuyết dày',
+  'Showers':'Mưa rào','Violent showers':'Mưa rào dữ dội','Thunderstorm':'Giông bão',
+};
+const LANGS = { fr:FR, vi:VI };
 function t(key, p){
-  let s = (settings.lang==='fr' && FR[key]!=null) ? FR[key] : (EN[key]!=null ? EN[key] : key);
+  const d = LANGS[settings.lang];
+  let s = (d && d[key]!=null) ? d[key] : (EN[key]!=null ? EN[key] : key);
   if(p) for(const k in p) s = s.split('{'+k+'}').join(p[k]);
   return s;
 }
 function tl(key){ return t(key).toLowerCase(); }
-function locale(){ return settings.lang==='fr' ? 'fr-FR' : undefined; }
+function locale(){ return settings.lang==='fr' ? 'fr-FR' : settings.lang==='vi' ? 'vi-VN' : undefined; }
 // value -> English label, for translating stored values in summaries
 const VAL = {
   pee:'Pee',poop:'Poop',both:'Both',little:'Little',average:'Average',full:'Full',
@@ -463,7 +582,19 @@ const INFO = {
   note:{en:"Capture anything else — a free-form event with your own note.",
     fr:"Notez tout le reste — un évènement libre avec votre propre note."},
 };
-function infoText(type){ const i=INFO[type]; return i ? (settings.lang==='fr'?i.fr:i.en) : ''; }
+const INFO_VI = {
+  diaper:'Ghi tè, ị hoặc cả hai. Khoảng 6+ tã ướt mỗi ngày (sau ngày thứ 5) cho thấy bé bú đủ. Màu phân quan trọng: trắng/bạc màu, đỏ, hoặc (sau vài ngày đầu) đen thì nên gọi bác sĩ.',
+  breastfeed:'Dùng đồng hồ hai bên: bắt đầu một bên, chạm Đổi bên, rồi Dừng. Ứng dụng ghi thời gian từng bên và gợi ý bên bắt đầu lần sau (đổi bên để cân bằng sữa). Bạn cũng có thể ghi tư thế.',
+  bottle:'Ghi sữa công thức, sữa mẹ vắt hoặc hỗn hợp, và thể tích tính bằng ml. Cho bú theo nhu cầu — để bé quyết định nhịp.',
+  temperature:'Chọn cách đo (đo hậu môn chính xác nhất ở trẻ sơ sinh). Bình thường khoảng 36,5–37,5°C. Ở bé dưới 3 tháng, sốt (≥38°C hậu môn) là cấp cứu — liên hệ bác sĩ ngay.',
+  sleep:'Bấm giờ giấc ngủ hoặc nhập tay. Trẻ sơ sinh ngủ khoảng 14–17 giờ mỗi ngày, thành nhiều giấc ngắn.',
+  cry:'Ghi các lần càu nhàu, khóc hoặc khóc dữ. Khóc dữ kéo dài — nhất là kèm sốt hoặc bú kém — nên hỏi ý kiến bác sĩ.',
+  pump:'Theo dõi sữa vắt theo bên và thể tích — tiện để quản lý lượng trữ và duy trì nguồn sữa.',
+  medication:'Ghi thuốc và thực phẩm bổ sung kèm liều. Bé bú mẹ thường được cho Vitamin D (thường 400 IU/ngày) — hỏi bác sĩ của bạn.',
+  growth:'Ghi cân nặng, chiều dài và vòng đầu. Trẻ sơ sinh được cân đều những tuần đầu để xác nhận tăng trưởng tốt; theo dõi xu hướng.',
+  note:'Ghi mọi thứ khác — một sự kiện tự do với ghi chú của bạn.',
+};
+function infoText(type){ const i=INFO[type]; if(!i) return ''; if(settings.lang==='vi') return INFO_VI[type]||i.en; return settings.lang==='fr'?i.fr:i.en; }
 
 /* ------------------------------------------------------- clinical reference -- */
 const DAY = 86400000;
@@ -866,7 +997,7 @@ function viewSettings(){
     <h1>${t('Settings')}</h1>
     <div class="card pad">
       <div class="between"><h2>${t('Language')}</h2>
-        <div class="chips"><button class="chip ${settings.lang==='en'?'on':''}" data-lang="en">English</button><button class="chip ${settings.lang==='fr'?'on':''}" data-lang="fr">Français</button></div>
+        <div class="chips"><button class="chip ${settings.lang==='en'?'on':''}" data-lang="en">English</button><button class="chip ${settings.lang==='fr'?'on':''}" data-lang="fr">Français</button><button class="chip ${settings.lang==='vi'?'on':''}" data-lang="vi">Tiếng Việt</button></div>
       </div>
     </div>
     <div class="card pad">
@@ -963,8 +1094,8 @@ function defaultData(type){
 // "Done by" defaults: breastfeed/pump → mom, diaper → dad (when such a caregiver exists).
 function defaultCaregiver(type){
   const find=re=>settings.caregivers.find(c=>re.test(c));
-  if(type==='breastfeed'||type==='pump'){ const mom=find(/maman|mom|mum|m[eè]re/i); if(mom) return mom; }
-  if(type==='diaper'){ const dad=find(/papa|dad|daddy|p[eè]re/i); if(dad) return dad; }
+  if(type==='breastfeed'||type==='pump'){ const mom=find(/maman|mom|mum|m[eè]re|mẹ|má/i); if(mom) return mom; }
+  if(type==='diaper'){ const dad=find(/papa|dad|daddy|p[eè]re|bố|ba|cha/i); if(dad) return dad; }
   return settings.currentCaregiver;
 }
 function openSheet(type, editing, initial){

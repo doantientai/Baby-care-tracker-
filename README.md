@@ -63,7 +63,7 @@ location, or personal data in the app.
 ## Features
 
 - **Dark mode** — Light, Dark, or Auto (follows your phone); easy on the eyes at 3am.
-- **English & French** — switch language any time in Settings (Réglages).
+- **English, French & Vietnamese** — switch language any time in Settings.
 - **Built-in help** — an ⓘ button on every log type explains it with brief newborn-care guidance.
 - **Quick logging** — one tap from the home screen for every event type.
 - **Diapers** — pee / poop / both, amount, **stool color with danger flags**
