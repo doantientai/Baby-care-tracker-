@@ -136,7 +136,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.6';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.7';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -159,6 +159,7 @@ const DEFAULT_SETTINGS = {
   feedGapEnabled: false, feedGapDayH: 3, feedGapNightH: 5,
   lang: 'en', theme: 'system',
   vitDEnabled: true, vitDTime: '07:00',
+  showSleep: true,
 };
 function loadJSON(key, fallback){ try{ const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }catch(e){ return fallback; } }
 function saveJSON(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
@@ -355,6 +356,7 @@ const FR = {
   'Log at least two weight measurements to see a curve.':'Enregistrez au moins deux pesées pour voir une courbe.',
   // settings
   'Language':'Langue','Appearance':'Apparence','Auto':'Auto','Light':'Clair','Dark':'Sombre',
+  'Tracking':'Suivi','Hide features you don’t use.':'Masquez les fonctions que vous n’utilisez pas.','Sleep tracking':'Suivi du sommeil',
   'Baby':'Bébé','Name':'Nom','Date of birth':'Date de naissance',
   'Used for age-based fever alerts and diaper targets.':"Utilisée pour les alertes de fièvre selon l'âge et les objectifs de couches.",
   'Cloud sync (Google Sheet)':'Synchronisation (Google Sheet)',
@@ -472,6 +474,7 @@ const VI = {
   'Log at least two weight measurements to see a curve.':'Ghi ít nhất hai lần cân để thấy đường cong.',
   // settings
   'Language':'Ngôn ngữ','Appearance':'Giao diện','Auto':'Tự động','Light':'Sáng','Dark':'Tối',
+  'Tracking':'Theo dõi','Hide features you don’t use.':'Ẩn các tính năng bạn không dùng.','Sleep tracking':'Theo dõi giấc ngủ',
   'Baby':'Em bé','Name':'Tên','Date of birth':'Ngày sinh',
   'Used for age-based fever alerts and diaper targets.':'Dùng cho cảnh báo sốt theo tuổi và mục tiêu tã.',
   'Cloud sync (Google Sheet)':'Đồng bộ (Google Sheet)',
@@ -855,7 +858,7 @@ function viewHome(){
     ? `<div class="rt" style="text-align:right"><div style="font-size:1.6rem;font-weight:800">${WMO[weatherCache.code]?WMO[weatherCache.code][1]:'🌡️'} ${weatherCache.t}°</div><div class="tiny muted">${WMO[weatherCache.code]?t(WMO[weatherCache.code][0]):''} · ${t('feels')} ${weatherCache.app}° · ${weatherCache.hum}%</div></div>`
     : `<div class="small muted">${weatherErr?t('Weather unavailable'):t('Loading…')}</div>`;
 
-  const quick=['diaper','breastfeed','bottle','temperature','sleep','cry','pump','medication','growth'];
+  const quick=['diaper','breastfeed','bottle','temperature','sleep','cry','pump','medication','growth'].filter(k=>settings.showSleep!==false||k!=='sleep');
 
   return `<div class="wrap grid" style="gap:16px">
     <div class="between">
@@ -877,10 +880,10 @@ function viewHome(){
       ${weatherCache?`<div class="banner info" style="margin-top:8px">${(()=>{const o=outfitAdvice(weatherCache.t);return o.e+' '+t('Going out')+' : '+t(o.key);})()}</div>`:''}
     </div>
 
-    <div class="grid g2">
+    ${settings.showSleep!==false?`<div class="grid g2">
       <div class="card pad-s"><div class="label" style="margin:0">${t('Breastfeeding')}</div>${bfCard}</div>
       <div class="card pad-s"><div class="label" style="margin:0">${t('Sleep')}</div>${slCard}</div>
-    </div>
+    </div>`:`<div class="card pad-s"><div class="label" style="margin:0">${t('Breastfeeding')}</div>${bfCard}</div>`}
 
     <div>
       <div class="section-title">${t('Quick log')}</div>
@@ -895,7 +898,7 @@ function viewHome(){
         <div class="card pad-s stat ${s.wet>=target?'good':''}"><div class="label" style="margin:0">${t('Wet diapers')}</div><div class="v">${s.wet}</div><div class="tiny muted">${t('target',{n:target})}</div></div>
         <div class="card pad-s stat"><div class="label" style="margin:0">${t('Dirty diapers')}</div><div class="v">${s.dirty}</div></div>
         <div class="card pad-s stat"><div class="label" style="margin:0">${t('Feeds')}</div><div class="v">${s.feeds}</div>${lastFeed?`<div class="tiny muted">${t('lastRel',{rel:relTime(lastFeed.at)})}</div>`:''}</div>
-        <div class="card pad-s stat"><div class="label" style="margin:0">${t('Sleep')}</div><div class="v">${fmtDur(s.sleepSec)}</div></div>
+        ${settings.showSleep!==false?`<div class="card pad-s stat"><div class="label" style="margin:0">${t('Sleep')}</div><div class="v">${fmtDur(s.sleepSec)}</div></div>`:''}
         <div class="card pad-s stat"><div class="label" style="margin:0">${t('Breast time')}</div><div class="v">${fmtDur(s.bfSec)}</div>${s.bfCount?`<div class="tiny muted">${s.bfCount} × · ${t('avg')} ${fmtDur(s.bfSec/s.bfCount)}</div>`:''}</div>
       </div>
       ${feedGapBanner}
@@ -922,7 +925,8 @@ function eventRow(e){
 
 /* ---- TIMELINE ---- */
 function viewTimeline(){
-  const filters=[['all','All','🗂️'],['diaper','Diaper','🧷'],['breastfeed','Feed','🤱'],['bottle','Bottle','🍼'],['sleep','Sleep','😴'],['temperature','Temp','🌡️'],['cry','Cry','😢']];
+  const filters=[['all','All','🗂️'],['diaper','Diaper','🧷'],['breastfeed','Feed','🤱'],['bottle','Bottle','🍼'],['sleep','Sleep','😴'],['temperature','Temp','🌡️'],['cry','Cry','😢']].filter(f=>settings.showSleep!==false||f[0]!=='sleep');
+  if(state.filter==='sleep' && settings.showSleep===false) state.filter='all';
   const sorted=events.slice().sort((a,b)=>b.at-a.at).filter(e=>state.filter==='all'||e.type===state.filter);
   const groups=[]; const idx={};
   for(const e of sorted){ const k=dateKey(e.at); if(!idx[k]){ idx[k]=[]; groups.push([k,idx[k]]); } idx[k].push(e); }
@@ -998,7 +1002,7 @@ function viewTrends(){
     <div class="card pad"><h2>${t('Diapers per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Wet vs dirty — last 14 days')}</div>${barChart(rows,[{key:'wet',name:t('Wet'),color:'#0ea5e9'},{key:'dirty',name:t('Dirty'),color:'#f59e0b'}])}</div>
     <div class="card pad"><h2>${t('Feeds per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Breast + bottle — last 14 days')}</div>${barChart(rows,[{key:'feeds',name:t('Feeds'),color:'#ec4899'}])}</div>
     <div class="card pad"><h2>${t('Breastfeeding per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Time at the breast — last 14 days')}</div>${barChart(rows,[{key:'bfLeftH',name:t('Left'),color:'#ec4899'},{key:'bfRightH',name:t('Right'),color:'#f9a8d4'}],{fmtY:hourLabel})}</div>
-    <div class="card pad"><h2>${t('Sleep per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Total hours — last 14 days')}</div>${barChart(rows,[{key:'sleepH',name:t('Sleep (h)'),color:'#6366f1'}],{fmtY:hourLabel})}</div>
+    ${settings.showSleep!==false?`<div class="card pad"><h2>${t('Sleep per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Total hours — last 14 days')}</div>${barChart(rows,[{key:'sleepH',name:t('Sleep (h)'),color:'#6366f1'}],{fmtY:hourLabel})}</div>`:''}
     <div class="card pad"><h2>${t('Weight')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('kg over time')}</div>${lineChart(weights)}</div>
   </div>`;
 }
@@ -1064,6 +1068,14 @@ function viewSettings(){
         <button class="chip ${settings.vitDEnabled?'on':''}" data-act="toggle-vitd">${settings.vitDEnabled?t('On'):t('Off')}</button>
       </div>
       ${settings.vitDEnabled?`<div class="field" style="margin:0"><label class="label">${t('From')}</label><input type="time" data-set="vitDTime" value="${settings.vitDTime||'07:00'}"></div>`:''}
+    </div>
+    <div class="card pad">
+      <h2 style="margin-bottom:4px">${t('Tracking')}</h2>
+      <div class="tiny muted" style="margin-bottom:12px">${t('Hide features you don’t use.')}</div>
+      <div class="between">
+        <span class="small">😴 ${t('Sleep tracking')}</span>
+        <button class="chip ${settings.showSleep!==false?'on':''}" data-act="toggle-sleep">${settings.showSleep!==false?t('On'):t('Off')}</button>
+      </div>
     </div>
     <div class="card pad">
       <h2 style="margin-bottom:12px">${t('Caregivers')}</h2>
@@ -1298,6 +1310,7 @@ document.addEventListener('click', (ev)=>{
   if(act==='import'){ const fi=document.createElement('input'); fi.type='file'; fi.accept='application/json,.json'; fi.onchange=()=>{ if(fi.files[0]) importBackup(fi.files[0]); }; fi.click(); return; }
   if(act==='sync-now') return syncNow();
   if(act==='toggle-feedgap') return saveSettings({ feedGapEnabled: !settings.feedGapEnabled });
+  if(act==='toggle-sleep') return saveSettings({ showSleep: settings.showSleep===false });
   if(act==='toggle-vitd') return saveSettings({ vitDEnabled: !settings.vitDEnabled });
   if(act==='log-vitd'){ addEvent({type:'medication', at:Date.now(), caregiver:settings.currentCaregiver, data:{name:t('Vitamin D'), dose:'400 IU'}}); render(); return; }
 });
