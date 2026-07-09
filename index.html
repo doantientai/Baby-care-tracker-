@@ -136,7 +136,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.7';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.8';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -349,7 +349,7 @@ const FR = {
   'Diapers per day':'Couches par jour','Wet vs dirty — last 14 days':'Mouillées vs sales — 14 derniers jours',
   'Feeds per day':'Repas par jour','Breast + bottle — last 14 days':'Sein + biberon — 14 derniers jours',
   'Breastfeeding per day':'Allaitement par jour','Time at the breast — last 14 days':'Temps au sein — 14 derniers jours',
-  'Breast time':'Temps au sein','avg':'moy.',
+  'Breast time':'Temps au sein','avg':'moy.','normal':'normal','d':'j',
   'Sleep per day':'Sommeil par jour','Total hours — last 14 days':'Heures totales — 14 derniers jours',
   'Weight':'Poids','kg over time':'kg au fil du temps',
   'Wet':'Mouillées','Dirty':'Sales','Sleep (h)':'Sommeil (h)',
@@ -467,7 +467,7 @@ const VI = {
   'Diapers per day':'Tã mỗi ngày','Wet vs dirty — last 14 days':'Ướt vs bẩn — 14 ngày qua',
   'Feeds per day':'Cữ bú mỗi ngày','Breast + bottle — last 14 days':'Bú mẹ + bình — 14 ngày qua',
   'Breastfeeding per day':'Bú mẹ mỗi ngày','Time at the breast — last 14 days':'Thời gian bú mẹ — 14 ngày qua',
-  'Breast time':'Thời gian bú','avg':'TB',
+  'Breast time':'Thời gian bú','avg':'TB','normal':'bình thường','d':'ngày',
   'Sleep per day':'Giấc ngủ mỗi ngày','Total hours — last 14 days':'Tổng số giờ — 14 ngày qua',
   'Weight':'Cân nặng','kg over time':'kg theo thời gian',
   'Wet':'Ướt','Dirty':'Bẩn','Sleep (h)':'Ngủ (giờ)',
@@ -580,8 +580,8 @@ const INFO = {
     fr:"Suivez le lait tiré par côté et volume — utile pour gérer les réserves et maintenir la lactation."},
   medication:{en:"Record medicines and supplements with the dose. Breastfed babies are usually given vitamin D (commonly 400 IU/day) — check with your doctor.",
     fr:"Notez les médicaments et compléments avec la dose. Les bébés allaités reçoivent généralement de la vitamine D (souvent 400 UI/jour) — demandez à votre médecin."},
-  growth:{en:"Log weight, length and head circumference. Newborns are weighed regularly in the early weeks to confirm steady growth; watch the trend over time.",
-    fr:"Notez le poids, la taille et le périmètre crânien. Les nouveau-nés sont pesés régulièrement les premières semaines pour confirmer une bonne croissance ; surveillez la tendance."},
+  growth:{en:"Log weight, length and head circumference. Newborns are weighed regularly in the early weeks to confirm steady growth; watch the trend over time. Once feeding is established, a typical gain is about 20–25 g/day.",
+    fr:"Notez le poids, la taille et le périmètre crânien. Les nouveau-nés sont pesés régulièrement les premières semaines pour confirmer une bonne croissance ; surveillez la tendance. Une fois l'allaitement établi, la prise est d'environ 20–25 g/jour."},
   note:{en:"Capture anything else — a free-form event with your own note.",
     fr:"Notez tout le reste — un évènement libre avec votre propre note."},
 };
@@ -594,7 +594,7 @@ const INFO_VI = {
   cry:'Ghi các lần càu nhàu, khóc hoặc khóc dữ. Khóc dữ kéo dài — nhất là kèm sốt hoặc bú kém — nên hỏi ý kiến bác sĩ.',
   pump:'Theo dõi sữa vắt theo bên và thể tích — tiện để quản lý lượng trữ và duy trì nguồn sữa.',
   medication:'Ghi thuốc và thực phẩm bổ sung kèm liều. Bé bú mẹ thường được cho Vitamin D (thường 400 IU/ngày) — hỏi bác sĩ của bạn.',
-  growth:'Ghi cân nặng, chiều dài và vòng đầu. Trẻ sơ sinh được cân đều những tuần đầu để xác nhận tăng trưởng tốt; theo dõi xu hướng.',
+  growth:'Ghi cân nặng, chiều dài và vòng đầu. Trẻ sơ sinh được cân đều những tuần đầu để xác nhận tăng trưởng tốt; theo dõi xu hướng. Khi việc bú đã ổn định, mức tăng thường khoảng 20–25 g/ngày.',
   note:'Ghi mọi thứ khác — một sự kiện tự do với ghi chú của bạn.',
 };
 function infoText(type){ const i=INFO[type]; if(!i) return ''; if(settings.lang==='vi') return INFO_VI[type]||i.en; return settings.lang==='fr'?i.fr:i.en; }
@@ -994,16 +994,29 @@ function lineChart(points){
   const yl=[minY,maxY].map(v=>`<text x="0" y="${(Y(v)+3).toFixed(1)}" font-size="9" fill="#cbd5e1">${v}</text>`).join('');
   return `<svg class="chart" viewBox="0 0 ${W} ${H}">${yl}<path d="${d}" fill="none" stroke="#0ea5e9" stroke-width="2"></path>${dots}${labels}</svg>`;
 }
+// Estimate daily weight gain (g/day) from the last weigh-in vs an earlier one
+// at least ~half a day before (falls back to the first measurement).
+function weightGain(weights){
+  if(!weights || weights.length<2) return null;
+  const last=weights[weights.length-1];
+  let prev=null;
+  for(let i=weights.length-2;i>=0;i--){ if((last.at-weights[i].at)/DAY>=0.5){ prev=weights[i]; break; } }
+  if(!prev) prev=weights[0];
+  const days=(last.at-prev.at)/DAY;
+  if(days<=0) return null;
+  return { perDay:(last.v-prev.v)*1000/days, days };
+}
 function viewTrends(){
   const rows=buildDaily(14);
-  const weights=events.filter(e=>e.type==='growth'&&e.data.weightKg!=null).sort((a,b)=>a.at-b.at).map(e=>({label:(new Date(e.at).getDate())+'/'+(new Date(e.at).getMonth()+1),v:e.data.weightKg}));
+  const weights=events.filter(e=>e.type==='growth'&&e.data.weightKg!=null).sort((a,b)=>a.at-b.at).map(e=>({label:(new Date(e.at).getDate())+'/'+(new Date(e.at).getMonth()+1),v:e.data.weightKg,at:e.at}));
+  const wg=weightGain(weights);
   return `<div class="wrap grid" style="gap:16px">
     <h1>${t('Trends')}</h1>
     <div class="card pad"><h2>${t('Diapers per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Wet vs dirty — last 14 days')}</div>${barChart(rows,[{key:'wet',name:t('Wet'),color:'#0ea5e9'},{key:'dirty',name:t('Dirty'),color:'#f59e0b'}])}</div>
     <div class="card pad"><h2>${t('Feeds per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Breast + bottle — last 14 days')}</div>${barChart(rows,[{key:'feeds',name:t('Feeds'),color:'#ec4899'}])}</div>
     <div class="card pad"><h2>${t('Breastfeeding per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Time at the breast — last 14 days')}</div>${barChart(rows,[{key:'bfLeftH',name:t('Left'),color:'#ec4899'},{key:'bfRightH',name:t('Right'),color:'#f9a8d4'}],{fmtY:hourLabel})}</div>
     ${settings.showSleep!==false?`<div class="card pad"><h2>${t('Sleep per day')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('Total hours — last 14 days')}</div>${barChart(rows,[{key:'sleepH',name:t('Sleep (h)'),color:'#6366f1'}],{fmtY:hourLabel})}</div>`:''}
-    <div class="card pad"><h2>${t('Weight')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('kg over time')}</div>${lineChart(weights)}</div>
+    <div class="card pad"><h2>${t('Weight')}</h2><div class="tiny muted" style="margin-bottom:4px">${t('kg over time')}</div>${lineChart(weights)}${wg?`<div class="banner ${wg.perDay>=20?'good':'warn'}" style="margin-top:8px">📈 ${wg.perDay>0?'+':''}${Math.round(wg.perDay)} g/${t('day')} (${Math.round(wg.days)}${t('d')}) · ${t('normal')} 20–25 g/${t('day')}</div>`:''}</div>
   </div>`;
 }
 
