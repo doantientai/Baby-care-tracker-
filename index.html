@@ -175,7 +175,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.13';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.14';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -407,6 +407,7 @@ const FR = {
   'Language':'Langue','Appearance':'Apparence','Auto':'Auto','Light':'Clair','Dark':'Sombre',
   'Tracking':'Suivi','Hide features you don’t use.':'Masquez les fonctions que vous n’utilisez pas.','Sleep tracking':'Suivi du sommeil',
   'E-reader mode':'Mode liseuse','Black-and-white, no animations — for Kindle & e-ink screens.':'Noir et blanc, sans animations — pour Kindle et écrans e-ink.',
+  'Since last feed':'Depuis le dernier repas',
   'Baby':'Bébé','Name':'Nom','Date of birth':'Date de naissance',
   'Used for age-based fever alerts and diaper targets.':"Utilisée pour les alertes de fièvre selon l'âge et les objectifs de couches.",
   'Cloud sync (Google Sheet)':'Synchronisation (Google Sheet)',
@@ -526,6 +527,7 @@ const VI = {
   'Language':'Ngôn ngữ','Appearance':'Giao diện','Auto':'Tự động','Light':'Sáng','Dark':'Tối',
   'Tracking':'Theo dõi','Hide features you don’t use.':'Ẩn các tính năng bạn không dùng.','Sleep tracking':'Theo dõi giấc ngủ',
   'E-reader mode':'Chế độ máy đọc sách','Black-and-white, no animations — for Kindle & e-ink screens.':'Đen trắng, không hoạt ảnh — cho Kindle và màn hình e-ink.',
+  'Since last feed':'Từ lần bú trước',
   'Baby':'Em bé','Name':'Tên','Date of birth':'Ngày sinh',
   'Used for age-based fever alerts and diaper targets.':'Dùng cho cảnh báo sốt theo tuổi và mục tiêu tã.',
   'Cloud sync (Google Sheet)':'Đồng bộ (Google Sheet)',
@@ -884,7 +886,17 @@ function bfCardHtml(){
       </div>
       <button class="btn btn-block" style="background:var(--pink);color:#fff;margin-top:8px" data-act="bf-stop">■ ${t('Stop')}</button>`;
   }
-  return `<div class="grid g2" style="gap:8px;margin-top:8px">
+  // On the Kindle home, show how long since the baby last ate (start time of the
+  // most recent breast/bottle feed) right above the Start L/R buttons.
+  let sinceLine='';
+  if(kindleOn()){
+    const lastFeedAny=events.filter(e=>e.type==='breastfeed'||e.type==='bottle').sort((a,b)=>b.at-a.at)[0];
+    if(lastFeedAny){
+      const clock=new Date(lastFeedAny.at).toLocaleTimeString(locale(),{hour:'2-digit',minute:'2-digit'});
+      sinceLine=`<div class="banner" style="margin-top:8px;text-align:center;font-weight:700">🍼 ${t('Since last feed')}: ${fmtDur((now-lastFeedAny.at)/1000)} · ${clock}</div>`;
+    }
+  }
+  return `${sinceLine}<div class="grid g2" style="gap:8px;margin-top:8px">
         <button class="btn" data-act="bf-start" data-side="left" style="background:${sug==='left'?'var(--pink)':'var(--pink-l)'};color:${sug==='left'?'#fff':'var(--pink-ink)'}">${t('Start L')}${sug==='left'?' ✦':''}</button>
         <button class="btn" data-act="bf-start" data-side="right" style="background:${sug==='right'?'var(--pink)':'var(--pink-l)'};color:${sug==='right'?'#fff':'var(--pink-ink)'}">${t('Start R')}${sug==='right'?' ✦':''}</button>
       </div>`;
