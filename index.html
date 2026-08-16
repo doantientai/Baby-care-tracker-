@@ -154,6 +154,13 @@
   :root[data-kindle="1"] .stat.good,:root[data-kindle="1"] .stat.warn{border:2px solid #000;background:#fff}
   :root[data-kindle="1"] .nav{backdrop-filter:none;background:#fff;border-top:2px solid #000}
   :root[data-kindle="1"] .nav .inner{grid-template-columns:repeat(3,1fr)}
+  /* emoji are stripped on e-ink (no glyph font) — hide the now-empty icon slots */
+  :root[data-kindle="1"] .nav button .ne{display:none}
+  :root[data-kindle="1"] .nav button{padding:14px 0;font-size:.85rem}
+  :root[data-kindle="1"] .quick .emoji{display:none}
+  :root[data-kindle="1"] .quick{min-height:66px;justify-content:center}
+  :root[data-kindle="1"] .quick .t{font-size:.95rem}
+  :root[data-kindle="1"] .ev .ic{display:none}
   :root[data-kindle="1"] .nav button{color:#000}
   :root[data-kindle="1"] .nav button.on{color:#000;font-weight:800;text-decoration:underline}
   :root[data-kindle="1"] .ev .ic{border:1px solid #000;background:#fff!important}
@@ -175,7 +182,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.14';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.15';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -729,6 +736,17 @@ function relTime(ts){
 function toLocalInput(ts){ const d=new Date(ts); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes()); }
 function fromLocalInput(v){ return new Date(v).getTime(); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+// Kindle e-ink browsers have no emoji font (they render as tofu boxes). Strip
+// emoji from rendered HTML in Kindle mode. Uses surrogate-pair ranges (no \p{}
+// / 'u' flag) so it parses on the Paperwhite's older engine. Keeps plain
+// monochrome symbols (✓ → · ● ■) which render fine.
+function stripEmoji(s){
+  return String(s)
+    .replace(/[\uD83C-\uD83E][\uDC00-\uDFFF]/g, '')  // astral-plane emoji (surrogate pairs)
+    .replace(/[←-⇿⌀-⏿①-⓿■-➿⤀-⥿⬀-⯿]️/g, '')  // emoji-presentation symbol + VS16 (gear, sun…)
+    .replace(/[‍️⃣]/g, '');  // ZWJ, lone variation selector, keycap combiner
+}
+function setHTML(el, html){ el.innerHTML = kindleOn() ? stripEmoji(html) : html; }
 
 /* ----------------------------------------------------------- event display -- */
 const META = {
@@ -829,18 +847,20 @@ const sheetRoot = document.getElementById('sheet-root');
 function render(){
   // Kindle mode drops the analysis (Trends) tab; fall back to Home if on it.
   if(kindleOn() && state.tab==='trends') state.tab='home';
-  if(state.tab==='home') app.innerHTML = kindleOn() ? viewHomeKindle() : viewHome();
-  else if(state.tab==='timeline') app.innerHTML = viewTimeline();
-  else if(state.tab==='trends') app.innerHTML = viewTrends();
-  else if(state.tab==='settings') app.innerHTML = viewSettings();
+  let html;
+  if(state.tab==='home') html = kindleOn() ? viewHomeKindle() : viewHome();
+  else if(state.tab==='timeline') html = viewTimeline();
+  else if(state.tab==='trends') html = viewTrends();
+  else html = viewSettings();
+  setHTML(app, html);   // strips emoji when in Kindle mode
   renderNav();
   renderSheet();
 }
 function renderNav(){
   let tabs=[['home','Home','🏠'],['timeline','Timeline','📜'],['trends','Trends','📈'],['settings','Settings','⚙️']];
   if(kindleOn()) tabs=tabs.filter(([id])=>id!=='trends');  // no analysis on Kindle
-  document.getElementById('nav').innerHTML = tabs.map(([id,l,e])=>
-    `<button class="${state.tab===id?'on':''}" data-tab="${id}"><span class="ne">${e}</span>${t(l)}</button>`).join('');
+  setHTML(document.getElementById('nav'), tabs.map(([id,l,e])=>
+    `<button class="${state.tab===id?'on':''}" data-tab="${id}"><span class="ne">${e}</span>${t(l)}</button>`).join(''));
 }
 
 /* ---- HOME ---- */
@@ -871,20 +891,22 @@ function bfCardHtml(){
   const lastFeed=lastOfType('breastfeed');
   const sug=nextSide(lastFeed?lastFeed.data.side:null);
   const bf=getTimer('breastfeed');
+  const K=kindleOn();  // drop leading media/geometric glyphs on e-ink (no glyph font)
   if(bf){
     const accr = bf.paused ? 0 : 1;
     const liveL=(bf.leftSec||0)+(accr && bf.currentSide==='left'?(now-(bf.lastSwitchAt||now))/1000:0);
     const liveR=(bf.rightSec||0)+(accr && bf.currentSide==='right'?(now-(bf.lastSwitchAt||now))/1000:0);
+    const dot=K?'':' ●';
     return `<div class="grid g2" style="gap:6px">
-        <div class="side ${bf.currentSide==='left'?'on':'off'}" style="${bf.paused?'opacity:.6':''}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Left')}${bf.currentSide==='left'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveL)}</div></div>
-        <div class="side ${bf.currentSide==='right'?'on':'off'}" style="${bf.paused?'opacity:.6':''}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Right')}${bf.currentSide==='right'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveR)}</div></div>
+        <div class="side ${bf.currentSide==='left'?'on':'off'}" style="${bf.paused?'opacity:.6':''}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Left')}${bf.currentSide==='left'?dot:''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveL)}</div></div>
+        <div class="side ${bf.currentSide==='right'?'on':'off'}" style="${bf.paused?'opacity:.6':''}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Right')}${bf.currentSide==='right'?dot:''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveR)}</div></div>
       </div>
-      ${bf.paused?`<div class="tiny center" style="color:var(--pink-ink);margin-top:6px;font-weight:700">⏸ ${t('paused')}</div>`:''}
+      ${bf.paused?`<div class="tiny center" style="color:var(--pink-ink);margin-top:6px;font-weight:700">${K?'':'⏸ '}${t('paused')}</div>`:''}
       <div class="grid g2" style="gap:8px;margin-top:8px">
-        <button class="btn" style="background:var(--pink-l);color:var(--pink-ink)" data-act="bf-pause">${bf.paused?'▶ '+t('Resume'):'⏸ '+t('Pause')}</button>
-        <button class="btn" style="background:var(--pink-l);color:var(--pink-ink)" data-act="bf-switch">⇄ ${t('Switch')}</button>
+        <button class="btn" style="background:var(--pink-l);color:var(--pink-ink)" data-act="bf-pause">${bf.paused?(K?'':'▶ ')+t('Resume'):(K?'':'⏸ ')+t('Pause')}</button>
+        <button class="btn" style="background:var(--pink-l);color:var(--pink-ink)" data-act="bf-switch">${K?'':'⇄ '}${t('Switch')}</button>
       </div>
-      <button class="btn btn-block" style="background:var(--pink);color:#fff;margin-top:8px" data-act="bf-stop">■ ${t('Stop')}</button>`;
+      <button class="btn btn-block" style="background:var(--pink);color:#fff;margin-top:8px" data-act="bf-stop">${K?'':'■ '}${t('Stop')}</button>`;
   }
   // On the Kindle home, show how long since the baby last ate (start time of the
   // most recent breast/bottle feed) right above the Start L/R buttons.
@@ -896,9 +918,10 @@ function bfCardHtml(){
       sinceLine=`<div class="banner" style="margin-top:8px;text-align:center;font-weight:700">🍼 ${t('Since last feed')}: ${fmtDur((now-lastFeedAny.at)/1000)} · ${clock}</div>`;
     }
   }
+  const star=K?'':' ✦';
   return `${sinceLine}<div class="grid g2" style="gap:8px;margin-top:8px">
-        <button class="btn" data-act="bf-start" data-side="left" style="background:${sug==='left'?'var(--pink)':'var(--pink-l)'};color:${sug==='left'?'#fff':'var(--pink-ink)'}">${t('Start L')}${sug==='left'?' ✦':''}</button>
-        <button class="btn" data-act="bf-start" data-side="right" style="background:${sug==='right'?'var(--pink)':'var(--pink-l)'};color:${sug==='right'?'#fff':'var(--pink-ink)'}">${t('Start R')}${sug==='right'?' ✦':''}</button>
+        <button class="btn" data-act="bf-start" data-side="left" style="background:${sug==='left'?'var(--pink)':'var(--pink-l)'};color:${sug==='left'?'#fff':'var(--pink-ink)'}">${t('Start L')}${sug==='left'?star:''}</button>
+        <button class="btn" data-act="bf-start" data-side="right" style="background:${sug==='right'?'var(--pink)':'var(--pink-l)'};color:${sug==='right'?'#fff':'var(--pink-ink)'}">${t('Start R')}${sug==='right'?star:''}</button>
       </div>`;
 }
 // Kindle home: focused on feeding, diaper and vitamin D — logging + recent
@@ -1285,7 +1308,7 @@ function renderSheet(){
   if(!s){ sheetRoot.innerHTML=''; return; }
   const m=META[s.type];
   const info=infoText(s.type);
-  sheetRoot.innerHTML=`<div class="scrim"></div><div class="sheet" role="dialog">
+  setHTML(sheetRoot, `<div class="scrim"></div><div class="sheet" role="dialog">
     <div class="head"><h2>${m.emoji} ${t(s.editing?'Edit':'Log')} ${t(m.label).toLowerCase()}</h2>
       <div class="row" style="gap:6px">
         <button class="x" data-act="info-toggle" title="${t('Info')}" style="${s.showInfo?'background:var(--brand);color:#fff':''}">ⓘ</button>
@@ -1298,7 +1321,7 @@ function renderSheet(){
       ${s.editing?`<button class="btn btn-ghost" style="color:#dc2626" data-act="delete">${t('Delete')}</button>`:''}
       <button class="btn btn-primary" style="flex:1" data-act="save">${t(s.editing?'Save changes':'Save')}</button>
     </div>
-  </div>`;
+  </div>`);
   const sheetEl=sheetRoot.querySelector('.sheet');
   if(sheetEl){ if(isReRender){ sheetEl.style.animation='none'; sheetEl.scrollTop=savedScroll; } }
 }
@@ -1499,7 +1522,7 @@ async function checkUpdate(){
     const m=(await r.text()).match(/APP_VERSION = '([^']+)'/);
     if(m && m[1] && m[1]!==APP_VERSION){
       const d=document.createElement('div'); d.id='updBar'; d.className='updbar safe-bottom';
-      d.innerHTML='<span>🔄 '+t('Update available')+'</span><button class="btn" style="background:#fff;color:var(--brand-d);padding:6px 12px">'+t('Refresh')+'</button>';
+      setHTML(d, '<span>🔄 '+t('Update available')+'</span><button class="btn" style="background:#fff;color:var(--brand-d);padding:6px 12px">'+t('Refresh')+'</button>');
       d.onclick=()=>location.reload();
       document.body.appendChild(d);
     }
