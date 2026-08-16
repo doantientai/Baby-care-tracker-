@@ -175,7 +175,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.12';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.13';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -657,7 +657,7 @@ function ageInMonths(ref=Date.now()){ return settings.babyDob==null ? null : (re
 
 const FEVER_C = { rectal:38.0, ear:38.0, forehead:38.0, oral:37.8, axillary:37.5 };
 function assessTemperature(c, method){
-  const th = FEVER_C[method] ?? 38.0;
+  const th = FEVER_C[method]!=null ? FEVER_C[method] : 38.0;
   const months = ageInMonths();
   if(c < 36.0) return { level:'bad', urgent:c<35.5, msg: c<35.5 ? 'Low temperature — warm the baby and contact a doctor.' : 'Slightly low — warm the baby and recheck soon.' };
   if(c >= th && months!=null && months < 3) return { level:'bad', urgent:true, msg:'🚨 Fever in a baby under 3 months is an emergency — call your doctor or emergency services now.' };
@@ -1327,9 +1327,9 @@ function sheetBody(s){
     html+=`<div class="field"><label class="label">${t('Medication / supplement')}</label><input data-str="name" value="${esc(d.name||'')}" placeholder="${t('e.g. Vitamin D')}"><div class="pillrow">${['Vitamin D','Paracetamol','Probiotics'].map(n=>`<button class="chip" data-preset-str="name" data-pv="${esc(n)}">${t(n)}</button>`).join('')}</div></div>`;
     html+=`<div class="field"><label class="label">${t('Dose (optional)')}</label><input data-str="dose" value="${esc(d.dose||'')}" placeholder="${t('e.g. 400 IU')}"></div>`;
   } else if(s.type==='growth'){
-    html+=`<div class="field"><label class="label">${t('Weight (kg)')}</label><input type="number" step="0.01" inputmode="decimal" data-num="weightKg" value="${d.weightKg??''}"></div>`;
-    html+=`<div class="field"><label class="label">${t('Height (cm)')}</label><input type="number" step="0.1" inputmode="decimal" data-num="heightCm" value="${d.heightCm??''}"></div>`;
-    html+=`<div class="field"><label class="label">${t('Head circumference (cm)')}</label><input type="number" step="0.1" inputmode="decimal" data-num="headCircumferenceCm" value="${d.headCircumferenceCm??''}"></div>`;
+    html+=`<div class="field"><label class="label">${t('Weight (kg)')}</label><input type="number" step="0.01" inputmode="decimal" data-num="weightKg" value="${d.weightKg!=null?d.weightKg:''}"></div>`;
+    html+=`<div class="field"><label class="label">${t('Height (cm)')}</label><input type="number" step="0.1" inputmode="decimal" data-num="heightCm" value="${d.heightCm!=null?d.heightCm:''}"></div>`;
+    html+=`<div class="field"><label class="label">${t('Head circumference (cm)')}</label><input type="number" step="0.1" inputmode="decimal" data-num="headCircumferenceCm" value="${d.headCircumferenceCm!=null?d.headCircumferenceCm:''}"></div>`;
   }
   // common time + caregiver + note
   const tadj=[['Now',0],['-5m',5],['-15m',15],['-30m',30],['-1h',60],['-2h',120]];
@@ -1495,8 +1495,17 @@ async function checkUpdate(){
 }
 
 /* ------------------------------------------------------------------- boot --- */
-applyTheme();
-render();
+// Show a readable message instead of a blank screen if the first render throws
+// (helps debug on devices with no dev-tools, e.g. an e-reader browser).
+try{
+  applyTheme();
+  render();
+}catch(err){
+  try{ document.getElementById('app').innerHTML =
+    '<div style="padding:16px;font:14px/1.5 monospace;color:#000;background:#fff">'
+    + '<b>Startup error</b><br>The app failed to start in this browser.<br><br>'
+    + '<pre style="white-space:pre-wrap">'+String((err&&err.stack)||err)+'</pre></div>'; }catch(e){}
+}
 fetchWeather();
 checkUpdate();
 if(syncReady()) syncNow();
