@@ -182,7 +182,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.16';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.17';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -416,7 +416,7 @@ const FR = {
   'Tracking':'Suivi','Hide features you don’t use.':'Masquez les fonctions que vous n’utilisez pas.','Sleep tracking':'Suivi du sommeil',
   'E-reader mode':'Mode liseuse','Black-and-white, no animations — for Kindle & e-ink screens.':'Noir et blanc, sans animations — pour Kindle et écrans e-ink.',
   'Since last feed':'Depuis le dernier repas',
-  'Time zone':'Fuseau horaire','Device default':'Réglage de l’appareil',
+  'Time zone':'Fuseau horaire','Device default':'Réglage de l’appareil','Now showing':'Affiche maintenant',
   'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Seulement si cet appareil affiche la mauvaise heure (ex. un Kindle bloqué sur UTC). Décalage fixe — à ajuster aux changements d’heure.',
   'Baby':'Bébé','Name':'Nom','Date of birth':'Date de naissance',
   'Used for age-based fever alerts and diaper targets.':"Utilisée pour les alertes de fièvre selon l'âge et les objectifs de couches.",
@@ -538,7 +538,7 @@ const VI = {
   'Tracking':'Theo dõi','Hide features you don’t use.':'Ẩn các tính năng bạn không dùng.','Sleep tracking':'Theo dõi giấc ngủ',
   'E-reader mode':'Chế độ máy đọc sách','Black-and-white, no animations — for Kindle & e-ink screens.':'Đen trắng, không hoạt ảnh — cho Kindle và màn hình e-ink.',
   'Since last feed':'Từ lần bú trước',
-  'Time zone':'Múi giờ','Device default':'Theo thiết bị',
+  'Time zone':'Múi giờ','Device default':'Theo thiết bị','Now showing':'Đang hiển thị',
   'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Chỉ khi thiết bị hiển thị sai giờ (vd. Kindle bị kẹt ở UTC). Lệch cố định — chỉnh lại khi đổi giờ mùa.',
   'Baby':'Em bé','Name':'Tên','Date of birth':'Ngày sinh',
   'Used for age-based fever alerts and diaper targets.':'Dùng cho cảnh báo sốt theo tuổi và mục tiêu tã.',
@@ -1259,9 +1259,10 @@ function viewSettings(){
     <div class="card pad">
       <h2 style="margin-bottom:4px">${t('Time zone')}</h2>
       <div class="tiny muted" style="margin-bottom:12px">${t('Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.')}</div>
-      <select data-set="tzOffset">
-        ${[['',null],['UTC−8',-480],['UTC−7',-420],['UTC−6',-360],['UTC−5',-300],['UTC−3',-180],['UTC',0],['UTC+1',60],['UTC+2',120],['UTC+3',180],['UTC+3:30',210],['UTC+5:30',330],['UTC+7',420],['UTC+8',480],['UTC+9',540],['UTC+10',600]].map(([l,v])=>`<option value="${v==null?'':v}" ${(settings.tzOffset==null?'':String(settings.tzOffset))===(v==null?'':String(v))?'selected':''}>${v==null?t('Device default'):l}</option>`).join('')}
-      </select>
+      <div class="chips">
+        ${[['Device default',null],['UTC',0],['UTC+1',60],['UTC+2',120],['UTC+3',180],['UTC+3:30',210],['UTC+5:30',330],['UTC+7',420],['UTC+8',480],['UTC+9',540],['UTC−5',-300],['UTC−8',-480]].map(([l,v])=>`<button class="chip ${((settings.tzOffset==null?null:settings.tzOffset))===v?'on':''}" data-act="set-tz" data-tz="${v==null?'':v}">${v==null?t('Device default'):l}</button>`).join('')}
+      </div>
+      <div class="tiny muted" style="margin-top:10px">${t('Now showing')}: <b>${clock(Date.now())}</b></div>
     </div>
     <div class="card pad">
       <h2 style="margin-bottom:12px">${t('Caregivers')}</h2>
@@ -1498,6 +1499,7 @@ document.addEventListener('click', (ev)=>{
   if(act==='toggle-feedgap') return saveSettings({ feedGapEnabled: !settings.feedGapEnabled });
   if(act==='toggle-sleep') return saveSettings({ showSleep: settings.showSleep===false });
   if(act==='toggle-kindle') return saveSettings({ kindle: !settings.kindle });
+  if(act==='set-tz'){ const v=el.dataset.tz; return saveSettings({ tzOffset: v===''?null:parseInt(v,10) }); }
   if(act==='toggle-vitd') return saveSettings({ vitDEnabled: !settings.vitDEnabled });
   if(act==='log-vitd'){ addEvent({type:'medication', at:Date.now(), caregiver:settings.currentCaregiver, data:{name:t('Vitamin D'), dose:'400 IU'}}); render(); return; }
 });
