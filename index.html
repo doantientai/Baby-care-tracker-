@@ -153,6 +153,7 @@
   :root[data-kindle="1"] .banner{border:2px solid #000;background:#fff!important;color:#000!important;font-weight:600}
   :root[data-kindle="1"] .stat.good,:root[data-kindle="1"] .stat.warn{border:2px solid #000;background:#fff}
   :root[data-kindle="1"] .nav{backdrop-filter:none;background:#fff;border-top:2px solid #000}
+  :root[data-kindle="1"] .nav .inner{grid-template-columns:repeat(3,1fr)}
   :root[data-kindle="1"] .nav button{color:#000}
   :root[data-kindle="1"] .nav button.on{color:#000;font-weight:800;text-decoration:underline}
   :root[data-kindle="1"] .ev .ic{border:1px solid #000;background:#fff!important}
@@ -174,7 +175,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.11';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.12';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -824,7 +825,9 @@ const app = document.getElementById('app');
 const sheetRoot = document.getElementById('sheet-root');
 
 function render(){
-  if(state.tab==='home') app.innerHTML = viewHome();
+  // Kindle mode drops the analysis (Trends) tab; fall back to Home if on it.
+  if(kindleOn() && state.tab==='trends') state.tab='home';
+  if(state.tab==='home') app.innerHTML = kindleOn() ? viewHomeKindle() : viewHome();
   else if(state.tab==='timeline') app.innerHTML = viewTimeline();
   else if(state.tab==='trends') app.innerHTML = viewTrends();
   else if(state.tab==='settings') app.innerHTML = viewSettings();
@@ -832,7 +835,8 @@ function render(){
   renderSheet();
 }
 function renderNav(){
-  const tabs=[['home','Home','🏠'],['timeline','Timeline','📜'],['trends','Trends','📈'],['settings','Settings','⚙️']];
+  let tabs=[['home','Home','🏠'],['timeline','Timeline','📜'],['trends','Trends','📈'],['settings','Settings','⚙️']];
+  if(kindleOn()) tabs=tabs.filter(([id])=>id!=='trends');  // no analysis on Kindle
   document.getElementById('nav').innerHTML = tabs.map(([id,l,e])=>
     `<button class="${state.tab===id?'on':''}" data-tab="${id}"><span class="ne">${e}</span>${t(l)}</button>`).join('');
 }
@@ -858,6 +862,74 @@ function daySummary(list){
   }
   return {wet,dirty,feeds,sleepSec,bfSec,bfCount};
 }
+// The two-sided breastfeed timer card (live timers, switch/pause/stop, or the
+// start buttons with a suggested next side). Shared by the full and Kindle home.
+function bfCardHtml(){
+  const now=Date.now();
+  const lastFeed=lastOfType('breastfeed');
+  const sug=nextSide(lastFeed?lastFeed.data.side:null);
+  const bf=getTimer('breastfeed');
+  if(bf){
+    const accr = bf.paused ? 0 : 1;
+    const liveL=(bf.leftSec||0)+(accr && bf.currentSide==='left'?(now-(bf.lastSwitchAt||now))/1000:0);
+    const liveR=(bf.rightSec||0)+(accr && bf.currentSide==='right'?(now-(bf.lastSwitchAt||now))/1000:0);
+    return `<div class="grid g2" style="gap:6px">
+        <div class="side ${bf.currentSide==='left'?'on':'off'}" style="${bf.paused?'opacity:.6':''}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Left')}${bf.currentSide==='left'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveL)}</div></div>
+        <div class="side ${bf.currentSide==='right'?'on':'off'}" style="${bf.paused?'opacity:.6':''}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Right')}${bf.currentSide==='right'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveR)}</div></div>
+      </div>
+      ${bf.paused?`<div class="tiny center" style="color:var(--pink-ink);margin-top:6px;font-weight:700">⏸ ${t('paused')}</div>`:''}
+      <div class="grid g2" style="gap:8px;margin-top:8px">
+        <button class="btn" style="background:var(--pink-l);color:var(--pink-ink)" data-act="bf-pause">${bf.paused?'▶ '+t('Resume'):'⏸ '+t('Pause')}</button>
+        <button class="btn" style="background:var(--pink-l);color:var(--pink-ink)" data-act="bf-switch">⇄ ${t('Switch')}</button>
+      </div>
+      <button class="btn btn-block" style="background:var(--pink);color:#fff;margin-top:8px" data-act="bf-stop">■ ${t('Stop')}</button>`;
+  }
+  return `<div class="grid g2" style="gap:8px;margin-top:8px">
+        <button class="btn" data-act="bf-start" data-side="left" style="background:${sug==='left'?'var(--pink)':'var(--pink-l)'};color:${sug==='left'?'#fff':'var(--pink-ink)'}">${t('Start L')}${sug==='left'?' ✦':''}</button>
+        <button class="btn" data-act="bf-start" data-side="right" style="background:${sug==='right'?'var(--pink)':'var(--pink-l)'};color:${sug==='right'?'#fff':'var(--pink-ink)'}">${t('Start R')}${sug==='right'?' ✦':''}</button>
+      </div>`;
+}
+// Kindle home: focused on feeding, diaper and vitamin D — logging + recent
+// history only, no weather/sleep/stats/analysis.
+function viewHomeKindle(){
+  const list=todays();
+  const lastFeed=lastOfType('breastfeed');
+  const sug=nextSide(lastFeed?lastFeed.data.side:null);
+  const lastSide=lastFeed?lastFeed.data.side:null;
+  const vitDone=vitDDoneToday();
+  const tiles=['breastfeed','bottle','diaper'];
+  return `<div class="wrap grid" style="gap:16px">
+    <div class="between">
+      <div><h1>${esc(settings.babyName)}</h1><div class="small muted">${new Date().toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'short'})}</div></div>
+      <div class="tiny" id="syncPill">${syncPillHtml()}</div>
+    </div>
+
+    ${vitDDue()?`<div class="banner warn" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <span>💊 ${t('Vitamin D — give this morning’s dose')}</span>
+      <button class="btn" style="background:var(--brand);color:#fff;padding:7px 14px;flex:0 0 auto" data-act="log-vitd">${t('Log it')}</button>
+    </div>`:''}
+
+    <div class="card pad-s"><div class="label" style="margin:0">${t('Breastfeeding')}</div>${bfCardHtml()}</div>
+
+    <div>
+      <div class="section-title">${t('Quick log')}</div>
+      <div class="grid g2">
+        ${tiles.map(k=>`<button class="quick" data-log="${k}"><span class="emoji">${META[k].emoji}</span><span class="t">${t(META[k].label)}</span></button>`).join('')}
+        <button class="quick" data-act="log-vitd"><span class="emoji">💊</span><span class="t">${t('Vitamin D')}${vitDone?' ✓':''}</span></button>
+      </div>
+    </div>
+
+    ${lastFeed?`<div class="banner pink">${t('nextFeed',{side:'<b>'+tl(sug==='left'?'Left':'Right')+'</b>',last:tl(lastSide==='left'?'Left':'Right')})}</div>`:''}
+
+    <div>
+      <div class="between" style="margin-bottom:8px"><div class="section-title" style="margin:0">${t('Recent')}</div><button class="btn" style="background:none;color:var(--brand-d);padding:0" data-tab="timeline">${t('See all →')}</button></div>
+      <div class="card" style="padding:4px">
+        ${list.length===0?'<div class="center muted small" style="padding:18px">'+t('No entries yet today.')+'</div>':
+          list.slice().sort((a,b)=>b.at-a.at).slice(0,8).map(eventRow).join('')}
+      </div>
+    </div>
+  </div>`;
+}
 function viewHome(){
   const days=ageInDays();
   const list=todays(); const s=daySummary(list);
@@ -879,27 +951,7 @@ function viewHome(){
   const now=Date.now();
   const target=expectedWet();
 
-  let bfCard;
-  if(bf){
-    const accr = bf.paused ? 0 : 1;
-    const liveL=(bf.leftSec||0)+(accr && bf.currentSide==='left'?(now-(bf.lastSwitchAt||now))/1000:0);
-    const liveR=(bf.rightSec||0)+(accr && bf.currentSide==='right'?(now-(bf.lastSwitchAt||now))/1000:0);
-    bfCard=`<div class="grid g2" style="gap:6px">
-        <div class="side ${bf.currentSide==='left'?'on':'off'}" style="${bf.paused?'opacity:.6':''}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Left')}${bf.currentSide==='left'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveL)}</div></div>
-        <div class="side ${bf.currentSide==='right'?'on':'off'}" style="${bf.paused?'opacity:.6':''}"><div class="tiny" style="text-transform:uppercase;opacity:.85">${t('Right')}${bf.currentSide==='right'?' ●':''}</div><div class="tabular" style="font-weight:800">${fmtDur(liveR)}</div></div>
-      </div>
-      ${bf.paused?`<div class="tiny center" style="color:var(--pink-ink);margin-top:6px;font-weight:700">⏸ ${t('paused')}</div>`:''}
-      <div class="grid g2" style="gap:8px;margin-top:8px">
-        <button class="btn" style="background:var(--pink-l);color:var(--pink-ink)" data-act="bf-pause">${bf.paused?'▶ '+t('Resume'):'⏸ '+t('Pause')}</button>
-        <button class="btn" style="background:var(--pink-l);color:var(--pink-ink)" data-act="bf-switch">⇄ ${t('Switch')}</button>
-      </div>
-      <button class="btn btn-block" style="background:var(--pink);color:#fff;margin-top:8px" data-act="bf-stop">■ ${t('Stop')}</button>`;
-  } else {
-    bfCard=`<div class="grid g2" style="gap:8px;margin-top:8px">
-        <button class="btn" data-act="bf-start" data-side="left" style="background:${sug==='left'?'var(--pink)':'var(--pink-l)'};color:${sug==='left'?'#fff':'var(--pink-ink)'}">${t('Start L')}${sug==='left'?' ✦':''}</button>
-        <button class="btn" data-act="bf-start" data-side="right" style="background:${sug==='right'?'var(--pink)':'var(--pink-l)'};color:${sug==='right'?'#fff':'var(--pink-ink)'}">${t('Start R')}${sug==='right'?' ✦':''}</button>
-      </div>`;
-  }
+  const bfCard=bfCardHtml();
   const slCard = sl
     ? `<button class="btn btn-block" data-act="sleep-stop" style="background:var(--indigo);color:#fff;margin-top:8px;flex-direction:column;padding:12px"><span class="tabular" style="font-weight:800;font-size:1.05rem">${fmtDur((now-sl.startedAt)/1000)}</span><span class="tiny" style="opacity:.9">${t('tap to stop')}</span></button>`
     : `<button class="btn btn-block" data-act="sleep-start" style="background:var(--indigo-l);color:var(--indigo-ink);margin-top:8px;padding:14px">😴 ${t('Start sleep')}</button>`;
