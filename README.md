@@ -63,6 +63,10 @@ location, or personal data in the app.
 ## Features
 
 - **Dark mode** — Light, Dark, or Auto (follows your phone); easy on the eyes at 3am.
+- **E-reader / Kindle mode** — a black-and-white, animation-free, large-button
+  layout tuned for e-ink screens, with grayscale charts (Settings → *E-reader
+  mode*, or just open `index.html?kindle=1`). A Kindle makes a great low-glare,
+  long-battery bedside logger.
 - **English, French & Vietnamese** — switch language any time in Settings.
 - **Built-in help** — an ⓘ button on every log type explains it with brief newborn-care guidance.
 - **Quick logging** — one tap from the home screen for every event type.

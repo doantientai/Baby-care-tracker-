@@ -125,6 +125,44 @@
   .side{border-radius:10px;padding:6px 4px;text-align:center}
   .side.on{background:var(--pink);color:#fff}
   .side.off{background:var(--pink-l);color:var(--pink-ink)}
+
+  /* ---- Kindle / e-ink mode: monochrome, high-contrast, no animation ---- */
+  :root[data-kindle="1"]{
+    color-scheme:light;
+    --brand:#000; --brand-d:#000; --bg:#fff; --ink:#000; --muted:#333;
+    --line:#000; --card:#fff; --card-border:#000; --pink:#000; --pink-l:#fff; --pink-ink:#000;
+    --indigo:#000; --indigo-l:#fff; --indigo-ink:#000;
+    --good:#000; --good-l:#fff; --good-ink:#000; --warn:#000; --warn-l:#fff; --warn-ink:#000;
+    --bad:#000; --bad-l:#fff; --bad-ink:#000;
+    --field-bg:#fff; --ghost-bg:#fff; --ghost-ink:#000; --chip-bg:#fff; --chip-ink:#000;
+    --label:#000; --info-bg:#fff; --info-ink:#000; --ev-active:#e5e5e5;
+    --nav-bg:#fff; --daycap:#fff;
+  }
+  :root[data-kindle="1"] *{transition:none!important;animation:none!important}
+  :root[data-kindle="1"] body{font-size:17px}
+  :root[data-kindle="1"] .card{border:2px solid #000;border-radius:8px;box-shadow:none}
+  :root[data-kindle="1"] .quick{border:2px solid #000;border-radius:8px;padding:18px 6px}
+  :root[data-kindle="1"] .quick .t{color:#000;font-size:.85rem}
+  :root[data-kindle="1"] .btn{border:2px solid #000;border-radius:8px;padding:14px 16px;font-size:1rem}
+  :root[data-kindle="1"] .btn-primary{background:#000;color:#fff}
+  :root[data-kindle="1"] .btn-ghost{background:#fff;color:#000}
+  :root[data-kindle="1"] .chip{border:2px solid #000;border-radius:8px;padding:11px 14px;background:#fff;color:#000}
+  :root[data-kindle="1"] .chip.on{background:#000;color:#fff;border-color:#000}
+  :root[data-kindle="1"] input,:root[data-kindle="1"] textarea,:root[data-kindle="1"] select{border:2px solid #000;border-radius:8px}
+  :root[data-kindle="1"] input:focus,:root[data-kindle="1"] textarea:focus,:root[data-kindle="1"] select:focus{box-shadow:none;border-color:#000}
+  :root[data-kindle="1"] .banner{border:2px solid #000;background:#fff!important;color:#000!important;font-weight:600}
+  :root[data-kindle="1"] .stat.good,:root[data-kindle="1"] .stat.warn{border:2px solid #000;background:#fff}
+  :root[data-kindle="1"] .nav{backdrop-filter:none;background:#fff;border-top:2px solid #000}
+  :root[data-kindle="1"] .nav button{color:#000}
+  :root[data-kindle="1"] .nav button.on{color:#000;font-weight:800;text-decoration:underline}
+  :root[data-kindle="1"] .ev .ic{border:1px solid #000;background:#fff!important}
+  :root[data-kindle="1"] .ev .sub{color:#333}
+  :root[data-kindle="1"] .updbar{box-shadow:none;border:2px solid #000;background:#000}
+  :root[data-kindle="1"] .sheet{border:2px solid #000}
+  :root[data-kindle="1"] .x{background:#fff;border:2px solid #000;color:#000}
+  :root[data-kindle="1"] .side.on{background:#000;color:#fff}
+  :root[data-kindle="1"] .side.off{background:#fff;color:#000;border:1px solid #000}
+  :root[data-kindle="1"] .legend i{border:1px solid #000}
 </style>
 </head>
 <body>
@@ -136,7 +174,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.10';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.11';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -160,12 +198,18 @@ const DEFAULT_SETTINGS = {
   lang: 'en', theme: 'system',
   vitDEnabled: true, vitDTime: '07:00',
   showSleep: true,
+  kindle: false,
 };
 function loadJSON(key, fallback){ try{ const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }catch(e){ return fallback; } }
 function saveJSON(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
 
 let settings = Object.assign({}, DEFAULT_SETTINGS, loadJSON(LS.settings, {}));
 let events = loadJSON(LS.events, []);
+
+// URL toggle so a Kindle / e-ink device can bookmark index.html?kindle=1
+// (?kindle=0 turns it back off). Regex-based to avoid relying on URLSearchParams.
+try{ if(/[?&]kindle=/.test(location.search)){ settings.kindle = !/[?&]kindle=0(?:&|$)/.test(location.search); saveJSON(LS.settings, settings); } }catch(e){}
+function kindleOn(){ return !!settings.kindle; }
 
 function saveSettings(patch){ settings = Object.assign({}, settings, patch); saveJSON(LS.settings, settings); applyTheme(); render(); }
 
@@ -175,10 +219,14 @@ function resolvedTheme(){
   return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
 }
 function applyTheme(){
+  const k = kindleOn();
   const r = resolvedTheme();
-  document.documentElement.setAttribute('data-theme', r);
+  // In Kindle mode force the light palette, then data-kindle overrides it to mono.
+  document.documentElement.setAttribute('data-theme', k ? 'light' : r);
+  if(k) document.documentElement.setAttribute('data-kindle', '1');
+  else document.documentElement.removeAttribute('data-kindle');
   const meta = document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.setAttribute('content', r==='dark' ? '#0b1220' : '#0ea5e9');
+  if(meta) meta.setAttribute('content', k ? '#ffffff' : (r==='dark' ? '#0b1220' : '#0ea5e9'));
 }
 if(window.matchMedia){
   try{ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>{ if(settings.theme==='system') applyTheme(); }); }catch(e){}
@@ -357,6 +405,7 @@ const FR = {
   // settings
   'Language':'Langue','Appearance':'Apparence','Auto':'Auto','Light':'Clair','Dark':'Sombre',
   'Tracking':'Suivi','Hide features you don’t use.':'Masquez les fonctions que vous n’utilisez pas.','Sleep tracking':'Suivi du sommeil',
+  'E-reader mode':'Mode liseuse','Black-and-white, no animations — for Kindle & e-ink screens.':'Noir et blanc, sans animations — pour Kindle et écrans e-ink.',
   'Baby':'Bébé','Name':'Nom','Date of birth':'Date de naissance',
   'Used for age-based fever alerts and diaper targets.':"Utilisée pour les alertes de fièvre selon l'âge et les objectifs de couches.",
   'Cloud sync (Google Sheet)':'Synchronisation (Google Sheet)',
@@ -475,6 +524,7 @@ const VI = {
   // settings
   'Language':'Ngôn ngữ','Appearance':'Giao diện','Auto':'Tự động','Light':'Sáng','Dark':'Tối',
   'Tracking':'Theo dõi','Hide features you don’t use.':'Ẩn các tính năng bạn không dùng.','Sleep tracking':'Theo dõi giấc ngủ',
+  'E-reader mode':'Chế độ máy đọc sách','Black-and-white, no animations — for Kindle & e-ink screens.':'Đen trắng, không hoạt ảnh — cho Kindle và màn hình e-ink.',
   'Baby':'Em bé','Name':'Tên','Date of birth':'Ngày sinh',
   'Used for age-based fever alerts and diaper targets.':'Dùng cho cảnh báo sốt theo tuổi và mục tiêu tã.',
   'Cloud sync (Google Sheet)':'Đồng bộ (Google Sheet)',
@@ -964,35 +1014,45 @@ function niceTicks(rawMax){
 }
 // Format an hours value as 2h / 2h30.
 function hourLabel(h){ const H=Math.floor(h+1e-9), m=Math.round((h-H)*60); return m? (H+'h'+String(m).padStart(2,'0')) : (H+'h'); }
+// Chart colours: on Kindle everything is black/grey with black outlines so it
+// reads on a grayscale e-ink screen; otherwise the normal colour palette.
+function chartColors(){
+  return kindleOn()
+    ? { grid:'#000', gridW:'0.5', gridText:'#000', axisText:'#000', line:'#000', dot:'#000', barStroke:'#000', barStrokeW:'1' }
+    : { grid:'#eef2f7', gridW:'1', gridText:'#cbd5e1', axisText:'#94a3b8', line:'#0ea5e9', dot:'#0ea5e9', barStroke:'none', barStrokeW:'0' };
+}
+// Grayscale ramp for multi-series bars in Kindle mode (distinct greys, black outline).
+const MONO_SERIES = ['#000000','#9a9a9a','#5a5a5a','#c8c8c8'];
 function barChart(rows, series, opts){
-  opts=opts||{}; const fmtY=opts.fmtY||(v=>String(v));
+  opts=opts||{}; const fmtY=opts.fmtY||(v=>String(v)); const C=chartColors();
   const W=440,H=180,padL=30,padB=22,padT=8;
   const rawMax=Math.max(1,...rows.map(r=>series.reduce((s,se)=>s+(r[se.key]||0),0)));
   const {niceMax, ticks}=niceTicks(rawMax); const max=niceMax;
   const bw=(W-padL)/rows.length;
+  const col=(se,i)=> kindleOn() ? MONO_SERIES[i%MONO_SERIES.length] : se.color;
   let bars='';
   rows.forEach((r,i)=>{
     let y=H-padB; const x=padL+i*bw+bw*0.18; const w=bw*0.64;
-    series.forEach(se=>{ const v=r[se.key]||0; const h=(v/max)*(H-padB-padT); y-=h;
-      if(h>0) bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${se.color}" rx="2"></rect>`; });
-    if(i%2===0||rows.length<=7) bars+=`<text x="${(padL+i*bw+bw/2).toFixed(1)}" y="${H-6}" font-size="9" fill="#94a3b8" text-anchor="middle">${r.label}</text>`;
+    series.forEach((se,si)=>{ const v=r[se.key]||0; const h=(v/max)*(H-padB-padT); y-=h;
+      if(h>0) bars+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${col(se,si)}" stroke="${C.barStroke}" stroke-width="${C.barStrokeW}" rx="2"></rect>`; });
+    if(i%2===0||rows.length<=7) bars+=`<text x="${(padL+i*bw+bw/2).toFixed(1)}" y="${H-6}" font-size="9" fill="${C.axisText}" text-anchor="middle">${r.label}</text>`;
   });
-  const grid=ticks.map(tv=>{ const y=H-padB-(tv/max)*(H-padB-padT); return `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W}" y2="${y.toFixed(1)}" stroke="#eef2f7"></line><text x="0" y="${(y+3).toFixed(1)}" font-size="9" fill="#cbd5e1">${fmtY(tv)}</text>`; }).join('');
-  const legend=`<div class="legend">${series.map(se=>`<span><i style="background:${se.color}"></i>${se.name}</span>`).join('')}</div>`;
+  const grid=ticks.map(tv=>{ const y=H-padB-(tv/max)*(H-padB-padT); return `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W}" y2="${y.toFixed(1)}" stroke="${C.grid}" stroke-width="${C.gridW}"></line><text x="0" y="${(y+3).toFixed(1)}" font-size="9" fill="${C.gridText}">${fmtY(tv)}</text>`; }).join('');
+  const legend=`<div class="legend">${series.map((se,si)=>`<span><i style="background:${col(se,si)}"></i>${se.name}</span>`).join('')}</div>`;
   return `<svg class="chart" viewBox="0 0 ${W} ${H}">${grid}${bars}</svg>${legend}`;
 }
 function lineChart(points){
-  const W=440,H=180,padL=30,padB=22,padT=10;
+  const W=440,H=180,padL=30,padB=22,padT=10; const C=chartColors();
   if(points.length<2) return '<div class="center muted small" style="padding:24px">'+t('Log at least two weight measurements to see a curve.')+'</div>';
   const xs=points.map((p,i)=>i), ys=points.map(p=>p.v);
   const minY=Math.min(...ys), maxY=Math.max(...ys), span=(maxY-minY)||1;
   const X=i=>padL+(i/(points.length-1))*(W-padL-6);
   const Y=v=>H-padB-((v-minY)/span)*(H-padB-padT);
   let d=''; points.forEach((p,i)=>{ d+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.v).toFixed(1)+' '; });
-  const dots=points.map((p,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="3" fill="#0ea5e9"></circle>`).join('');
-  const labels=points.map((p,i)=> (i===0||i===points.length-1)?`<text x="${X(i).toFixed(1)}" y="${H-6}" font-size="9" fill="#94a3b8" text-anchor="middle">${p.label}</text>`:'').join('');
-  const yl=[minY,maxY].map(v=>`<text x="0" y="${(Y(v)+3).toFixed(1)}" font-size="9" fill="#cbd5e1">${v}</text>`).join('');
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${yl}<path d="${d}" fill="none" stroke="#0ea5e9" stroke-width="2"></path>${dots}${labels}</svg>`;
+  const dots=points.map((p,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="3" fill="${C.dot}"></circle>`).join('');
+  const labels=points.map((p,i)=> (i===0||i===points.length-1)?`<text x="${X(i).toFixed(1)}" y="${H-6}" font-size="9" fill="${C.axisText}" text-anchor="middle">${p.label}</text>`:'').join('');
+  const yl=[minY,maxY].map(v=>`<text x="0" y="${(Y(v)+3).toFixed(1)}" font-size="9" fill="${C.gridText}">${v}</text>`).join('');
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${yl}<path d="${d}" fill="none" stroke="${C.line}" stroke-width="2"></path>${dots}${labels}</svg>`;
 }
 // Estimate daily weight gain (g/day) from the last weigh-in vs an earlier one
 // at least ~half a day before (falls back to the first measurement).
@@ -1088,6 +1148,14 @@ function viewSettings(){
       <div class="between">
         <span class="small">😴 ${t('Sleep tracking')}</span>
         <button class="chip ${settings.showSleep!==false?'on':''}" data-act="toggle-sleep">${settings.showSleep!==false?t('On'):t('Off')}</button>
+      </div>
+    </div>
+    <div class="card pad">
+      <h2 style="margin-bottom:4px">${t('E-reader mode')}</h2>
+      <div class="tiny muted" style="margin-bottom:12px">${t('Black-and-white, no animations — for Kindle & e-ink screens.')}</div>
+      <div class="between">
+        <span class="small">📖 ${t('E-reader mode')}</span>
+        <button class="chip ${settings.kindle?'on':''}" data-act="toggle-kindle">${settings.kindle?t('On'):t('Off')}</button>
       </div>
     </div>
     <div class="card pad">
@@ -1324,6 +1392,7 @@ document.addEventListener('click', (ev)=>{
   if(act==='sync-now') return syncNow();
   if(act==='toggle-feedgap') return saveSettings({ feedGapEnabled: !settings.feedGapEnabled });
   if(act==='toggle-sleep') return saveSettings({ showSleep: settings.showSleep===false });
+  if(act==='toggle-kindle') return saveSettings({ kindle: !settings.kindle });
   if(act==='toggle-vitd') return saveSettings({ vitDEnabled: !settings.vitDEnabled });
   if(act==='log-vitd'){ addEvent({type:'medication', at:Date.now(), caregiver:settings.currentCaregiver, data:{name:t('Vitamin D'), dose:'400 IU'}}); render(); return; }
 });
@@ -1353,7 +1422,7 @@ document.addEventListener('input', (ev)=>{
 });
 
 // live tick for running timers on Home
-setInterval(()=>{ if(state.tab==='home' && !state.sheet && (getTimer('breastfeed')||getTimer('sleep'))) render(); }, 1000);
+setInterval(()=>{ if(kindleOn()) return; if(state.tab==='home' && !state.sheet && (getTimer('breastfeed')||getTimer('sleep'))) render(); }, 1000);
 
 /* --------------------------------------------------- self-update notice ----- */
 // Detects when a newer version is deployed (compares the embedded APP_VERSION
