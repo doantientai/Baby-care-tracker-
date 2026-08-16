@@ -182,7 +182,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.15';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.16';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -207,6 +207,7 @@ const DEFAULT_SETTINGS = {
   vitDEnabled: true, vitDTime: '07:00',
   showSleep: true,
   kindle: false,
+  tzOffset: null,   // null = use this device's own clock/zone; else fixed UTC offset in minutes
 };
 function loadJSON(key, fallback){ try{ const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }catch(e){ return fallback; } }
 function saveJSON(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
@@ -415,6 +416,8 @@ const FR = {
   'Tracking':'Suivi','Hide features you don’t use.':'Masquez les fonctions que vous n’utilisez pas.','Sleep tracking':'Suivi du sommeil',
   'E-reader mode':'Mode liseuse','Black-and-white, no animations — for Kindle & e-ink screens.':'Noir et blanc, sans animations — pour Kindle et écrans e-ink.',
   'Since last feed':'Depuis le dernier repas',
+  'Time zone':'Fuseau horaire','Device default':'Réglage de l’appareil',
+  'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Seulement si cet appareil affiche la mauvaise heure (ex. un Kindle bloqué sur UTC). Décalage fixe — à ajuster aux changements d’heure.',
   'Baby':'Bébé','Name':'Nom','Date of birth':'Date de naissance',
   'Used for age-based fever alerts and diaper targets.':"Utilisée pour les alertes de fièvre selon l'âge et les objectifs de couches.",
   'Cloud sync (Google Sheet)':'Synchronisation (Google Sheet)',
@@ -535,6 +538,8 @@ const VI = {
   'Tracking':'Theo dõi','Hide features you don’t use.':'Ẩn các tính năng bạn không dùng.','Sleep tracking':'Theo dõi giấc ngủ',
   'E-reader mode':'Chế độ máy đọc sách','Black-and-white, no animations — for Kindle & e-ink screens.':'Đen trắng, không hoạt ảnh — cho Kindle và màn hình e-ink.',
   'Since last feed':'Từ lần bú trước',
+  'Time zone':'Múi giờ','Device default':'Theo thiết bị',
+  'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Chỉ khi thiết bị hiển thị sai giờ (vd. Kindle bị kẹt ở UTC). Lệch cố định — chỉnh lại khi đổi giờ mùa.',
   'Baby':'Em bé','Name':'Tên','Date of birth':'Ngày sinh',
   'Used for age-based fever alerts and diaper targets.':'Dùng cho cảnh báo sốt theo tuổi và mục tiêu tã.',
   'Cloud sync (Google Sheet)':'Đồng bộ (Google Sheet)',
@@ -710,14 +715,21 @@ function vitDDue(){
 
 /* ----------------------------------------------------------------- time ----- */
 function pad(n){ return String(n).padStart(2,'0'); }
-function clock(ts){ const d=new Date(ts); return pad(d.getHours())+':'+pad(d.getMinutes()); }
-function dateKey(ts){ const d=new Date(ts); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+// Timezone handling: if a fixed UTC offset is set (for a device whose own clock
+// is in the wrong zone, e.g. a Kindle stuck on UTC), shift the epoch so the
+// ordinary device-local formatters below render the intended wall-clock time.
+// Timestamps themselves are always stored as correct UTC epochs — only display
+// is adjusted — so this needs no Intl timezone support (works on old engines).
+function tzOffsetMin(){ return settings.tzOffset==null ? null : settings.tzOffset; }
+function tzShift(ts){ const off=tzOffsetMin(); const base=new Date(ts); if(off==null) return base; const dev=-base.getTimezoneOffset(); return new Date(ts + (off-dev)*60000); }
+function clock(ts){ const d=tzShift(ts); return pad(d.getHours())+':'+pad(d.getMinutes()); }
+function dateKey(ts){ const d=tzShift(ts); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
 function sameDay(a,b){ return dateKey(a)===dateKey(b); }
 function dayLabel(ts){
   const now=Date.now();
   if(sameDay(ts,now)) return t('Today');
   if(sameDay(ts, now-DAY)) return t('Yesterday');
-  return new Date(ts).toLocaleDateString(locale(),{weekday:'short',day:'numeric',month:'short'});
+  return tzShift(ts).toLocaleDateString(locale(),{weekday:'short',day:'numeric',month:'short'});
 }
 function fmtDur(sec){
   if(sec==null || sec<0 || isNaN(sec)) return '—';
@@ -733,8 +745,8 @@ function relTime(ts){
   if(diff<DAY/1000) return t('relHour',{n:Math.floor(diff/3600)});
   return t('relDay',{n:Math.floor(diff/86400)});
 }
-function toLocalInput(ts){ const d=new Date(ts); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes()); }
-function fromLocalInput(v){ return new Date(v).getTime(); }
+function toLocalInput(ts){ const d=tzShift(ts); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes()); }
+function fromLocalInput(v){ const e=new Date(v).getTime(); const off=tzOffsetMin(); if(off==null || isNaN(e)) return e; const dev=-new Date(e).getTimezoneOffset(); return e + (dev-off)*60000; }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 // Kindle e-ink browsers have no emoji font (they render as tofu boxes). Strip
 // emoji from rendered HTML in Kindle mode. Uses surrogate-pair ranges (no \p{}
@@ -914,8 +926,7 @@ function bfCardHtml(){
   if(kindleOn()){
     const lastFeedAny=events.filter(e=>e.type==='breastfeed'||e.type==='bottle').sort((a,b)=>b.at-a.at)[0];
     if(lastFeedAny){
-      const clock=new Date(lastFeedAny.at).toLocaleTimeString(locale(),{hour:'2-digit',minute:'2-digit'});
-      sinceLine=`<div class="banner" style="margin-top:8px;text-align:center;font-weight:700">🍼 ${t('Since last feed')}: ${fmtDur((now-lastFeedAny.at)/1000)} · ${clock}</div>`;
+      sinceLine=`<div class="banner" style="margin-top:8px;text-align:center;font-weight:700">🍼 ${t('Since last feed')}: ${fmtDur((now-lastFeedAny.at)/1000)} · ${clock(lastFeedAny.at)}</div>`;
     }
   }
   const star=K?'':' ✦';
@@ -935,7 +946,7 @@ function viewHomeKindle(){
   const tiles=['breastfeed','bottle','diaper'];
   return `<div class="wrap grid" style="gap:16px">
     <div class="between">
-      <div><h1>${esc(settings.babyName)}</h1><div class="small muted">${new Date().toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'short'})}</div></div>
+      <div><h1>${esc(settings.babyName)}</h1><div class="small muted">${tzShift(Date.now()).toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'short'})}</div></div>
       <div class="tiny" id="syncPill">${syncPillHtml()}</div>
     </div>
 
@@ -1000,7 +1011,7 @@ function viewHome(){
   return `<div class="wrap grid" style="gap:16px">
     <div class="between">
       <div><h1>${esc(settings.babyName)}</h1><div class="small muted">${days!=null?t(days===1?'day_one':'day_other',{n:days}):t('Set date of birth in Settings')}</div></div>
-      <div class="small muted">${new Date().toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'short'})}<div id="syncPill" class="tiny" style="margin-top:2px">${syncPillHtml()}</div></div>
+      <div class="small muted">${tzShift(Date.now()).toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'short'})}<div id="syncPill" class="tiny" style="margin-top:2px">${syncPillHtml()}</div></div>
     </div>
 
     ${vitDDue()?`<div class="banner warn" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
@@ -1244,6 +1255,13 @@ function viewSettings(){
         <span class="small">📖 ${t('E-reader mode')}</span>
         <button class="chip ${settings.kindle?'on':''}" data-act="toggle-kindle">${settings.kindle?t('On'):t('Off')}</button>
       </div>
+    </div>
+    <div class="card pad">
+      <h2 style="margin-bottom:4px">${t('Time zone')}</h2>
+      <div class="tiny muted" style="margin-bottom:12px">${t('Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.')}</div>
+      <select data-set="tzOffset">
+        ${[['',null],['UTC−8',-480],['UTC−7',-420],['UTC−6',-360],['UTC−5',-300],['UTC−3',-180],['UTC',0],['UTC+1',60],['UTC+2',120],['UTC+3',180],['UTC+3:30',210],['UTC+5:30',330],['UTC+7',420],['UTC+8',480],['UTC+9',540],['UTC+10',600]].map(([l,v])=>`<option value="${v==null?'':v}" ${(settings.tzOffset==null?'':String(settings.tzOffset))===(v==null?'':String(v))?'selected':''}>${v==null?t('Device default'):l}</option>`).join('')}
+      </select>
     </div>
     <div class="card pad">
       <h2 style="margin-bottom:12px">${t('Caregivers')}</h2>
@@ -1492,8 +1510,10 @@ document.addEventListener('input', (ev)=>{
     const key=el.dataset.set;
     if(key==='babyDob'){ settings.babyDob = el.value?fromLocalInput(el.value):null; }
     else if(key==='lat'||key==='lon'){ settings[key]=parseFloat(el.value); }
+    else if(key==='tzOffset'){ settings.tzOffset = el.value===''?null:parseInt(el.value,10); }
     else { settings[key]=el.value; }
     saveJSON(LS.settings, settings);
+    if(key==='tzOffset') render();   // refresh all displayed times immediately
     return;
   }
   if(el.dataset && el.dataset.setnum){ settings[el.dataset.setnum]=parseFloat(el.value)||0; saveJSON(LS.settings, settings); return; }
