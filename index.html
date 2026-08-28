@@ -211,6 +211,10 @@
     border-top:1px solid rgba(255,255,255,.055);color:var(--dim);font-size:clamp(.8rem,2.2vw,1.1rem);font-weight:500}
   .disp-foot b{color:var(--ink);font-weight:700}
   .disp-foot .dot{color:var(--dim2)}
+  .disp-fs{position:absolute;right:clamp(12px,2vw,22px);bottom:clamp(10px,1.8vh,18px);z-index:3;
+    width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);color:var(--dim);cursor:pointer;padding:0}
+  .disp-fs:active{background:rgba(255,255,255,.12);color:var(--ink)}
   @media (orientation:portrait){
     .disp-main{flex-direction:column;justify-content:center;text-align:center;gap:clamp(18px,4vh,40px)}
     .disp-hero{flex:none;text-align:center}
@@ -227,7 +231,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.21';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.22';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -495,7 +499,7 @@ const FR = {
   'Time zone':'Fuseau horaire','Device default':'Réglage de l’appareil','Now showing':'Affiche maintenant',
   'Always-on display':'Écran permanent','A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.':'Un tableau d’allaitement en lecture seule pour un téléphone toujours allumé en paysage (écran noir) : temps depuis le dernier repas et prochain sein. Ajoutez la page ouverte aux favoris.','Open display':'Ouvrir l’écran',
   'Next side':'Prochain sein','Last diaper':'Dernière couche','Next':'Prochain','Due':'À donner','Given':'Donnée',
-  'Share this app, already connected':'Partager l’app, déjà connectée','Sends a link that sets up the Sheet automatically. ⚠️ It contains your private key — share only with people you trust.':'Envoie un lien qui configure la feuille automatiquement. ⚠️ Il contient votre clé privée — à ne partager qu’avec des personnes de confiance.','Copy setup link':'Copier le lien','Copy display link':'Copier le lien écran','Copied ✓':'Copié ✓',
+  'Share this app, already connected':'Partager l’app, déjà connectée','Sends a link that sets up the Sheet automatically. ⚠️ It contains your private key — share only with people you trust.':'Envoie un lien qui configure la feuille automatiquement. ⚠️ Il contient votre clé privée — à ne partager qu’avec des personnes de confiance.','Copy setup link':'Copier le lien','Copy display link':'Copier le lien écran','Copied ✓':'Copié ✓','Fullscreen':'Plein écran',
   'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Seulement si cet appareil affiche la mauvaise heure (ex. un Kindle bloqué sur UTC). Décalage fixe — à ajuster aux changements d’heure.',
   'Baby':'Bébé','Name':'Nom','Date of birth':'Date de naissance',
   'Used for age-based fever alerts and diaper targets.':"Utilisée pour les alertes de fièvre selon l'âge et les objectifs de couches.",
@@ -620,7 +624,7 @@ const VI = {
   'Time zone':'Múi giờ','Device default':'Theo thiết bị','Now showing':'Đang hiển thị',
   'Always-on display':'Màn hình luôn bật','A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.':'Bảng cho bú chỉ đọc cho điện thoại luôn bật ở chế độ ngang (nền đen): thời gian từ lần bú trước và bên tiếp theo. Lưu trang mở ra vào dấu trang.','Open display':'Mở màn hình',
   'Next side':'Bên tiếp theo','Last diaper':'Tã gần nhất','Next':'Tiếp theo','Due':'Cần cho','Given':'Đã cho',
-  'Share this app, already connected':'Chia sẻ ứng dụng, đã kết nối sẵn','Sends a link that sets up the Sheet automatically. ⚠️ It contains your private key — share only with people you trust.':'Gửi một liên kết tự động thiết lập Sheet. ⚠️ Liên kết chứa khóa riêng của bạn — chỉ chia sẻ với người bạn tin tưởng.','Copy setup link':'Sao chép liên kết','Copy display link':'Sao chép liên kết màn hình','Copied ✓':'Đã sao chép ✓',
+  'Share this app, already connected':'Chia sẻ ứng dụng, đã kết nối sẵn','Sends a link that sets up the Sheet automatically. ⚠️ It contains your private key — share only with people you trust.':'Gửi một liên kết tự động thiết lập Sheet. ⚠️ Liên kết chứa khóa riêng của bạn — chỉ chia sẻ với người bạn tin tưởng.','Copy setup link':'Sao chép liên kết','Copy display link':'Sao chép liên kết màn hình','Copied ✓':'Đã sao chép ✓','Fullscreen':'Toàn màn hình',
   'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Chỉ khi thiết bị hiển thị sai giờ (vd. Kindle bị kẹt ở UTC). Lệch cố định — chỉnh lại khi đổi giờ mùa.',
   'Baby':'Em bé','Name':'Tên','Date of birth':'Ngày sinh',
   'Used for age-based fever alerts and diaper targets.':'Dùng cho cảnh báo sốt theo tuổi và mục tiêu tã.',
@@ -1156,6 +1160,19 @@ function eventRow(e){
 }
 
 /* ---- ALWAYS-ON DISPLAY — landscape phone, OLED black, breastfeeding-only ---- */
+// Fullscreen (hide the browser chrome) — vendor-prefixed for older engines.
+function isFs(){ return !!(document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement); }
+function toggleFs(){
+  try{
+    if(isFs()){ (document.exitFullscreen||document.webkitExitFullscreen||document.mozCancelFullScreen||function(){}).call(document); }
+    else { const el=document.documentElement; (el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen||function(){}).call(el); }
+  }catch(e){}
+}
+function fsIcon(){
+  return isFs()
+    ? '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>'
+    : '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+}
 // Big duration with small superscript-style units, kept to one line.
 function heroDur(sec){
   sec=Math.max(0,Math.round(sec)); const m=Math.floor(sec/60);
@@ -1204,6 +1221,7 @@ function viewDisplay(){
       <span><b>${fmtDur(s.bfSec)}</b> ${tl('Breast time')}</span>
       ${s.bfCount?`<span class="dot">·</span><span><b>${fmtDur(s.bfSec/s.bfCount)}</b> ${t('avg')}</span>`:''}
     </div>
+    <button class="disp-fs" data-act="fs" aria-label="${t('Fullscreen')}">${fsIcon()}</button>
   </div>`;
 }
 
@@ -1655,6 +1673,7 @@ document.addEventListener('click', (ev)=>{
     return;
   }
   if(act==='pick-link'){ el.focus(); el.select&&el.select(); copyText(el.value); return; }
+  if(act==='fs'){ toggleFs(); return; }
   if(act==='toggle-feedgap') return saveSettings({ feedGapEnabled: !settings.feedGapEnabled });
   if(act==='toggle-sleep') return saveSettings({ showSleep: settings.showSleep===false });
   if(act==='toggle-kindle') return saveSettings({ kindle: !settings.kindle });
@@ -1697,6 +1716,7 @@ if(DISPLAY){
   document.body.classList.add('display');
   setInterval(render, 15000);
   setInterval(()=>{ if(syncReady() && !syncState.syncing) syncNow(); }, 60000);
+  ['fullscreenchange','webkitfullscreenchange'].forEach(function(ev){ document.addEventListener(ev, function(){ render(); }); });
 }
 
 /* --------------------------------------------------- self-update notice ----- */
