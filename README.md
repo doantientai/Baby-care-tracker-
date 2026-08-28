@@ -68,11 +68,12 @@ location, or personal data in the app.
   `index.html?kindle=1`). A Kindle makes a great low-glare, long-battery bedside
   logger. This mode is deliberately focused on **feeding, diapers and vitamin D
   — logging and history only** (no charts/analysis, weather or sleep clutter).
-- **Always-on display** — a read-only dashboard for a wall or bedside tablet
-  (Settings → *Always-on display*, or open `index.html?display=1`). Big
-  glanceable **time since last feed** + next side, today's feed / wet / dirty /
-  vitamin-D status, last-diaper timer, and recent entries. Auto-refreshes and
-  pulls other devices' entries from the shared Sheet — no interaction needed.
+- **Always-on display** — a read-only **breastfeeding** dashboard for an
+  always-on phone in landscape (Settings → *Always-on display*, or open
+  `index.html?display=1`). Pure-**black OLED** screen: a giant **time since last
+  feed**, the **next side** to offer, and a slim feeds / breast-time / average
+  strip. Auto-refreshes and pulls other devices' entries from the shared Sheet —
+  no interaction needed.
 - **Time zone** — a fixed-offset override (Settings → *Time zone*) for a device
   whose own clock is in the wrong zone (e.g. a Kindle stuck on UTC), with a live
   "now showing" preview.

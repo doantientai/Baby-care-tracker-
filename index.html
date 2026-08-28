@@ -172,37 +172,29 @@
   :root[data-kindle="1"] .side.off{background:#fff;color:#000;border:1px solid #000}
   :root[data-kindle="1"] .legend i{border:1px solid #000}
 
-  /* ---- Always-on read-only display (?display=1) ---- */
+  /* ---- Always-on read-only display (?display=1) — OLED black, landscape, breastfeeding ---- */
+  body.display{background:#000}
   body.display .nav{display:none}
-  body.display #app{padding-bottom:24px}
-  .disp{max-width:1000px;margin:0 auto;padding:20px 16px;display:flex;flex-direction:column;gap:18px}
-  .disp-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-  .disp-baby{font-size:2rem;font-weight:800;line-height:1}
-  .disp-age{color:var(--muted);font-size:.95rem;margin-top:4px}
-  .disp-clockbox{text-align:right}
-  .disp-time{font-size:2.4rem;font-weight:800;line-height:1}
-  .disp-date{color:var(--muted);font-size:.9rem;margin-top:2px}
-  .disp-hero{background:var(--card);border:1px solid var(--card-border);border-radius:20px;padding:22px;text-align:center}
-  .disp-hero.urgent{background:var(--warn-l);border-color:#fde68a}
-  .disp-hero-l{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--label)}
-  .disp-hero-v{font-size:4rem;font-weight:800;line-height:1.05;margin:6px 0}
-  .disp-hero.urgent .disp-hero-v{color:var(--warn-ink)}
-  .disp-hero-s{color:var(--muted);font-size:1.05rem}
-  .disp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  .dtile{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:14px;text-align:center}
-  .dtile-l{font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--label)}
-  .dtile-v{font-size:1.8rem;font-weight:800;margin-top:4px}
-  .dtile.good{background:var(--good-l);border-color:#a7f3d0}
-  .dtile.good .dtile-v{color:var(--good-ink)}
-  .dtile.warn{background:var(--warn-l);border-color:#fde68a}
-  .dtile.warn .dtile-v{color:var(--warn-ink)}
-  .disp-recent-h{font-size:.85rem;font-weight:700;color:var(--muted);margin:0 0 8px}
-  @media (min-width:760px){
-    .disp{padding:28px 24px}
-    .disp-baby{font-size:2.6rem}
-    .disp-time{font-size:3rem}
-    .disp-hero-v{font-size:5.5rem}
-    .disp-grid{grid-template-columns:repeat(6,1fr)}
+  body.display #app{padding:0;max-width:none}
+  .disp{min-height:100vh;min-height:100dvh;background:#000;color:#e7ecf3;display:flex;flex-direction:column;
+    padding:14px 22px;gap:8px;font-variant-numeric:tabular-nums}
+  .disp-top{display:flex;align-items:baseline;justify-content:space-between;color:#7b8494}
+  .disp-baby{font-size:1.15rem;font-weight:800;color:#e7ecf3;letter-spacing:.01em}
+  .disp-clock{font-size:1.15rem;font-weight:700;color:#e7ecf3}
+  .disp-main{flex:1;display:flex;align-items:center;gap:26px;min-height:0}
+  .disp-since{flex:1.4;min-width:0}
+  .disp-since .l,.disp-next .l{font-size:.8rem;letter-spacing:.09em;text-transform:uppercase;color:#5f6879;font-weight:800}
+  .disp-since .v{font-size:clamp(3.4rem,17vw,9rem);font-weight:800;line-height:.95;letter-spacing:-.02em;margin:2px 0}
+  .disp-since.urgent .v{color:#fbbf24}
+  .disp-since .s{font-size:clamp(.9rem,3.2vw,1.35rem);color:#9aa3b2}
+  .disp-next{flex:1;text-align:center;border-left:1px solid #1e222b;padding-left:22px}
+  .disp-next .side{font-size:clamp(2.6rem,13vw,7rem);font-weight:800;line-height:1;color:#f472b6;letter-spacing:.01em}
+  .disp-stats{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;border-top:1px solid #14171d;padding-top:8px;
+    color:#8b93a3;font-size:clamp(.85rem,3vw,1.15rem)}
+  .disp-stats b{color:#e7ecf3;font-weight:800}
+  @media (orientation:portrait){
+    .disp-main{flex-direction:column;align-items:stretch;text-align:center;gap:14px}
+    .disp-next{border-left:none;border-top:1px solid #1e222b;padding-left:0;padding-top:14px}
   }
 </style>
 </head>
@@ -215,7 +207,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.18';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.19';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -453,8 +445,8 @@ const FR = {
   'E-reader mode':'Mode liseuse','Black-and-white, no animations — for Kindle & e-ink screens.':'Noir et blanc, sans animations — pour Kindle et écrans e-ink.',
   'Since last feed':'Depuis le dernier repas',
   'Time zone':'Fuseau horaire','Device default':'Réglage de l’appareil','Now showing':'Affiche maintenant',
-  'Always-on display':'Écran permanent','A read-only dashboard for a wall or bedside tablet — last feed, next side, diapers, vitamin D. Bookmark the page it opens.':'Un tableau de bord en lecture seule pour une tablette murale ou de chevet — dernier repas, prochain sein, couches, vitamine D. Ajoutez la page ouverte aux favoris.','Open display':'Ouvrir l’écran',
-  'Last diaper':'Dernière couche','Next':'Prochain','Due':'À donner','Given':'Donnée',
+  'Always-on display':'Écran permanent','A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.':'Un tableau d’allaitement en lecture seule pour un téléphone toujours allumé en paysage (écran noir) : temps depuis le dernier repas et prochain sein. Ajoutez la page ouverte aux favoris.','Open display':'Ouvrir l’écran',
+  'Next side':'Prochain sein','Last diaper':'Dernière couche','Next':'Prochain','Due':'À donner','Given':'Donnée',
   'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Seulement si cet appareil affiche la mauvaise heure (ex. un Kindle bloqué sur UTC). Décalage fixe — à ajuster aux changements d’heure.',
   'Baby':'Bébé','Name':'Nom','Date of birth':'Date de naissance',
   'Used for age-based fever alerts and diaper targets.':"Utilisée pour les alertes de fièvre selon l'âge et les objectifs de couches.",
@@ -577,8 +569,8 @@ const VI = {
   'E-reader mode':'Chế độ máy đọc sách','Black-and-white, no animations — for Kindle & e-ink screens.':'Đen trắng, không hoạt ảnh — cho Kindle và màn hình e-ink.',
   'Since last feed':'Từ lần bú trước',
   'Time zone':'Múi giờ','Device default':'Theo thiết bị','Now showing':'Đang hiển thị',
-  'Always-on display':'Màn hình luôn bật','A read-only dashboard for a wall or bedside tablet — last feed, next side, diapers, vitamin D. Bookmark the page it opens.':'Bảng thông tin chỉ đọc cho máy tính bảng treo tường hoặc đầu giường — lần bú gần nhất, bên tiếp theo, tã, vitamin D. Lưu trang mở ra vào dấu trang.','Open display':'Mở màn hình',
-  'Last diaper':'Tã gần nhất','Next':'Tiếp theo','Due':'Cần cho','Given':'Đã cho',
+  'Always-on display':'Màn hình luôn bật','A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.':'Bảng cho bú chỉ đọc cho điện thoại luôn bật ở chế độ ngang (nền đen): thời gian từ lần bú trước và bên tiếp theo. Lưu trang mở ra vào dấu trang.','Open display':'Mở màn hình',
+  'Next side':'Bên tiếp theo','Last diaper':'Tã gần nhất','Next':'Tiếp theo','Due':'Cần cho','Given':'Đã cho',
   'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Chỉ khi thiết bị hiển thị sai giờ (vd. Kindle bị kẹt ở UTC). Lệch cố định — chỉnh lại khi đổi giờ mùa.',
   'Baby':'Em bé','Name':'Tên','Date of birth':'Ngày sinh',
   'Used for age-based fever alerts and diaper targets.':'Dùng cho cảnh báo sốt theo tuổi và mục tiêu tã.',
@@ -1113,45 +1105,39 @@ function eventRow(e){
   </button>`;
 }
 
-/* ---- ALWAYS-ON DISPLAY (read-only tablet dashboard) ---- */
-function dispTile(label, val, cls){
-  return `<div class="dtile ${cls||''}"><div class="dtile-l">${label}</div><div class="dtile-v">${val}</div></div>`;
-}
+/* ---- ALWAYS-ON DISPLAY — landscape phone, OLED black, breastfeeding-only ---- */
 function viewDisplay(){
   const now=Date.now();
   const list=todays();
   const s=daySummary(list);
-  const target=expectedWet();
-  const lastFeedAny=events.filter(e=>e.type==='breastfeed'||e.type==='bottle').sort((a,b)=>b.at-a.at)[0];
   const lastBf=lastOfType('breastfeed');
   const sug=nextSide(lastBf?lastBf.data.side:null);
-  const lastDiaper=lastOfType('diaper');
-  const vitDone=vitDDoneToday();
-  const days=ageInDays();
+  const bfToday=list.filter(e=>e.type==='breastfeed').length;
   const hr=new Date(now).getHours(); const night=(hr>=22||hr<7);
   const thrH=night?settings.feedGapNightH:settings.feedGapDayH;
-  const urgent=lastFeedAny && (now-lastFeedAny.at)/3600000>=thrH;
+  const urgent=lastBf && (now-lastBf.at)/3600000>=thrH;
+  const sec=lastBf?bfSecOf(lastBf):null;
+  const lastDetail=lastBf?`${clock(lastBf.at)} · ${t('Left')} ${fmtDur(sec.l)} · ${t('Right')} ${fmtDur(sec.r)}`:t('No entries yet today.');
   return `<div class="disp">
     <div class="disp-top">
-      <div class="disp-id"><div class="disp-baby">${esc(settings.babyName)}</div>${days!=null?`<div class="disp-age">${t(days===1?'day_one':'day_other',{n:days})}</div>`:''}</div>
-      <div class="disp-clockbox"><div class="disp-time tabular">${clock(now)}</div><div class="disp-date">${tzShift(now).toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'long'})}</div></div>
+      <div class="disp-baby">${esc(settings.babyName)}</div>
+      <div class="disp-clock tabular">${clock(now)}</div>
     </div>
-    <div class="disp-hero ${urgent?'urgent':''}">
-      <div class="disp-hero-l">${t('Since last feed')}</div>
-      <div class="disp-hero-v tabular">${lastFeedAny?fmtDur((now-lastFeedAny.at)/1000):'—'}</div>
-      <div class="disp-hero-s">${lastFeedAny?`${clock(lastFeedAny.at)} · ${t(META[lastFeedAny.type].label)}`:t('No entries yet today.')}${lastBf?` &nbsp;·&nbsp; ${t('Next')}: <b>${tl(sug==='left'?'Left':'Right')}</b>`:''}</div>
+    <div class="disp-main">
+      <div class="disp-since ${urgent?'urgent':''}">
+        <div class="l">${t('Since last feed')}</div>
+        <div class="v tabular">${lastBf?fmtDur((now-lastBf.at)/1000):'—'}</div>
+        <div class="s">${lastDetail}</div>
+      </div>
+      <div class="disp-next">
+        <div class="l">${t('Next side')}</div>
+        <div class="side">${lastBf?tl(sug==='left'?'Left':'Right'):'—'}</div>
+      </div>
     </div>
-    <div class="disp-grid">
-      ${dispTile(t('Feeds'), s.feeds)}
-      ${dispTile(t('Wet diapers'), s.wet+' / '+target, s.wet>=target?'good':'')}
-      ${dispTile(t('Dirty diapers'), s.dirty)}
-      ${dispTile(t('Vitamin D'), vitDone?t('Given'):t('Due'), vitDone?'good':'warn')}
-      ${dispTile(t('Last diaper'), lastDiaper?fmtDur((now-lastDiaper.at)/1000):'—')}
-      ${dispTile(t('Breast time'), fmtDur(s.bfSec))}
-    </div>
-    <div class="disp-recent">
-      <div class="disp-recent-h">${t('Recent')}</div>
-      <div class="card" style="padding:4px">${list.length?list.slice().sort((a,b)=>b.at-a.at).slice(0,5).map(eventRow).join(''):'<div class="center muted" style="padding:16px">'+t('No entries yet today.')+'</div>'}</div>
+    <div class="disp-stats">
+      <span><b>${bfToday}</b> ${tl('Feeds')}</span>
+      <span><b>${fmtDur(s.bfSec)}</b> ${tl('Breast time')}</span>
+      ${s.bfCount?`<span><b>${fmtDur(s.bfSec/s.bfCount)}</b> ${t('avg')}</span>`:''}
     </div>
   </div>`;
 }
@@ -1351,7 +1337,7 @@ function viewSettings(){
     </div>
     <div class="card pad">
       <h2 style="margin-bottom:4px">${t('Always-on display')}</h2>
-      <div class="tiny muted" style="margin-bottom:12px">${t('A read-only dashboard for a wall or bedside tablet — last feed, next side, diapers, vitamin D. Bookmark the page it opens.')}</div>
+      <div class="tiny muted" style="margin-bottom:12px">${t('A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.')}</div>
       <a class="btn btn-ghost btn-block" href="?display=1">${t('Open display')} →</a>
     </div>
     <div class="card pad">
