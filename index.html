@@ -176,25 +176,45 @@
   body.display{background:#000}
   body.display .nav{display:none}
   body.display #app{padding:0;max-width:none}
-  .disp{min-height:100vh;min-height:100dvh;background:#000;color:#e7ecf3;display:flex;flex-direction:column;
-    padding:14px 22px;gap:8px;font-variant-numeric:tabular-nums}
-  .disp-top{display:flex;align-items:baseline;justify-content:space-between;color:#7b8494}
-  .disp-baby{font-size:1.15rem;font-weight:800;color:#e7ecf3;letter-spacing:.01em}
-  .disp-clock{font-size:1.15rem;font-weight:700;color:#e7ecf3}
-  .disp-main{flex:1;display:flex;align-items:center;gap:26px;min-height:0}
-  .disp-since{flex:1.4;min-width:0}
-  .disp-since .l,.disp-next .l{font-size:.8rem;letter-spacing:.09em;text-transform:uppercase;color:#5f6879;font-weight:800}
-  .disp-since .v{font-size:clamp(3.4rem,17vw,9rem);font-weight:800;line-height:.95;letter-spacing:-.02em;margin:2px 0}
-  .disp-since.urgent .v{color:#fbbf24}
-  .disp-since .s{font-size:clamp(.9rem,3.2vw,1.35rem);color:#9aa3b2}
-  .disp-next{flex:1;text-align:center;border-left:1px solid #1e222b;padding-left:22px}
-  .disp-next .side{font-size:clamp(2.6rem,13vw,7rem);font-weight:800;line-height:1;color:#f472b6;letter-spacing:.01em}
-  .disp-stats{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;border-top:1px solid #14171d;padding-top:8px;
-    color:#8b93a3;font-size:clamp(.85rem,3vw,1.15rem)}
-  .disp-stats b{color:#e7ecf3;font-weight:800}
+  .disp{--rose:#fb7bb0;--rose-d:#e75a97;--ink:#f3f5f9;--dim:#6a7180;--dim2:#333844;--amber:#fbbf24;
+    position:relative;overflow:hidden;min-height:100vh;min-height:100dvh;background:#000;color:var(--ink);
+    display:flex;flex-direction:column;padding:clamp(16px,3.5vh,30px) clamp(22px,4.5vw,52px);
+    font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+  .disp::before{content:'';position:absolute;left:-8%;top:14%;width:62%;height:76%;pointer-events:none;
+    background:radial-gradient(closest-side,rgba(90,100,140,.11),transparent 72%)}
+  .disp.urgent::before{background:radial-gradient(closest-side,rgba(251,191,36,.13),transparent 72%)}
+  .disp-bar{display:flex;align-items:center;justify-content:space-between;z-index:1}
+  .disp-baby{font-size:clamp(.95rem,2.6vw,1.2rem);font-weight:700;letter-spacing:.01em}
+  .disp-baby .disp-age{color:var(--dim);font-weight:600;margin-left:.35em}
+  .disp-now{font-size:clamp(.95rem,2.6vw,1.2rem);font-weight:600;color:var(--dim);letter-spacing:.03em}
+  .disp-main{flex:1;display:flex;align-items:center;gap:5%;min-height:0;z-index:1}
+  .disp-hero{flex:1.5;min-width:0}
+  .disp-cap{font-size:clamp(.62rem,1.7vw,.78rem);font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--dim)}
+  .disp-big{margin:.1em 0 .12em;line-height:.86;white-space:nowrap;font-weight:800;letter-spacing:-.035em}
+  .disp-big .n{font-size:clamp(4rem,18vw,10.5rem)}
+  .disp-big .u{font-size:clamp(1.6rem,6vw,3.6rem);color:var(--dim);font-weight:700;margin:0 .18em 0 .04em;letter-spacing:0}
+  .disp.urgent .disp-big .n{color:var(--amber)}
+  .disp-meta{font-size:clamp(.85rem,2.4vw,1.25rem);color:#9aa1ad;font-weight:500;letter-spacing:.01em}
+  .disp-side{flex:1;display:flex;flex-direction:column;align-items:center;gap:clamp(10px,1.8vh,18px)}
+  .disp-sides{display:flex;gap:clamp(12px,2.6vw,26px)}
+  .sd{width:clamp(62px,12.5vw,124px);height:clamp(62px,12.5vw,124px);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:clamp(1.7rem,5.5vw,3.4rem);font-weight:800;
+    border:2px solid var(--dim2);color:var(--dim);transition:none}
+  .sd.on{border-color:transparent;color:#2a0f1c;
+    background:linear-gradient(145deg,var(--rose),var(--rose-d));
+    box-shadow:0 0 46px rgba(251,123,176,.42),inset 0 2px 2px rgba(255,255,255,.35)}
+  .disp.urgent .sd.on{background:linear-gradient(145deg,#fcd34d,#f59e0b);box-shadow:0 0 46px rgba(251,191,36,.4),inset 0 2px 2px rgba(255,255,255,.4)}
+  .disp-sidelabel{font-size:clamp(1rem,2.8vw,1.55rem);font-weight:700;color:var(--rose);letter-spacing:.01em}
+  .disp.urgent .disp-sidelabel{color:var(--amber)}
+  .disp-foot{display:flex;justify-content:center;align-items:center;gap:.85em;z-index:1;padding-top:clamp(10px,1.6vh,16px);
+    border-top:1px solid rgba(255,255,255,.055);color:var(--dim);font-size:clamp(.8rem,2.2vw,1.1rem);font-weight:500}
+  .disp-foot b{color:var(--ink);font-weight:700}
+  .disp-foot .dot{color:var(--dim2)}
   @media (orientation:portrait){
-    .disp-main{flex-direction:column;align-items:stretch;text-align:center;gap:14px}
-    .disp-next{border-left:none;border-top:1px solid #1e222b;padding-left:0;padding-top:14px}
+    .disp-main{flex-direction:column;justify-content:center;text-align:center;gap:clamp(18px,4vh,40px)}
+    .disp-hero{flex:none;text-align:center}
+    .disp-big{white-space:normal}
   }
 </style>
 </head>
@@ -207,7 +227,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.19';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.20';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -1106,6 +1126,14 @@ function eventRow(e){
 }
 
 /* ---- ALWAYS-ON DISPLAY — landscape phone, OLED black, breastfeeding-only ---- */
+// Big duration with small superscript-style units, kept to one line.
+function heroDur(sec){
+  sec=Math.max(0,Math.round(sec)); const m=Math.floor(sec/60);
+  if(m<60) return `<span class="n">${m}</span><span class="u">m</span>`;
+  const h=Math.floor(m/60), mm=m%60;
+  return `<span class="n">${h}</span><span class="u">h</span><span class="n">${pad(mm)}</span><span class="u">m</span>`;
+}
+function ageShort(days){ if(days==null) return ''; return days<7 ? days+'d' : Math.floor(days/7)+'w'; }
 function viewDisplay(){
   const now=Date.now();
   const list=todays();
@@ -1118,26 +1146,33 @@ function viewDisplay(){
   const urgent=lastBf && (now-lastBf.at)/3600000>=thrH;
   const sec=lastBf?bfSecOf(lastBf):null;
   const lastDetail=lastBf?`${clock(lastBf.at)} · ${t('Left')} ${fmtDur(sec.l)} · ${t('Right')} ${fmtDur(sec.r)}`:t('No entries yet today.');
-  return `<div class="disp">
-    <div class="disp-top">
-      <div class="disp-baby">${esc(settings.babyName)}</div>
-      <div class="disp-clock tabular">${clock(now)}</div>
+  const age=ageShort(ageInDays());
+  const li=t('Left').charAt(0).toUpperCase(), ri=t('Right').charAt(0).toUpperCase();
+  return `<div class="disp${urgent?' urgent':''}">
+    <div class="disp-bar">
+      <div class="disp-baby">${esc(settings.babyName)}${age?`<span class="disp-age">${age}</span>`:''}</div>
+      <div class="disp-now">${clock(now)}</div>
     </div>
     <div class="disp-main">
-      <div class="disp-since ${urgent?'urgent':''}">
-        <div class="l">${t('Since last feed')}</div>
-        <div class="v tabular">${lastBf?fmtDur((now-lastBf.at)/1000):'—'}</div>
-        <div class="s">${lastDetail}</div>
+      <div class="disp-hero">
+        <div class="disp-cap">${t('Since last feed')}</div>
+        <div class="disp-big">${lastBf?heroDur((now-lastBf.at)/1000):'<span class="n">—</span>'}</div>
+        <div class="disp-meta">${lastDetail}</div>
       </div>
-      <div class="disp-next">
-        <div class="l">${t('Next side')}</div>
-        <div class="side">${lastBf?tl(sug==='left'?'Left':'Right'):'—'}</div>
+      <div class="disp-side">
+        <div class="disp-cap">${t('Next side')}</div>
+        <div class="disp-sides">
+          <div class="sd${lastBf&&sug==='left'?' on':''}">${li}</div>
+          <div class="sd${lastBf&&sug==='right'?' on':''}">${ri}</div>
+        </div>
+        <div class="disp-sidelabel">${lastBf?tl(sug==='left'?'Left':'Right'):'—'}</div>
       </div>
     </div>
-    <div class="disp-stats">
+    <div class="disp-foot">
       <span><b>${bfToday}</b> ${tl('Feeds')}</span>
+      <span class="dot">·</span>
       <span><b>${fmtDur(s.bfSec)}</b> ${tl('Breast time')}</span>
-      ${s.bfCount?`<span><b>${fmtDur(s.bfSec/s.bfCount)}</b> ${t('avg')}</span>`:''}
+      ${s.bfCount?`<span class="dot">·</span><span><b>${fmtDur(s.bfSec/s.bfCount)}</b> ${t('avg')}</span>`:''}
     </div>
   </div>`;
 }
