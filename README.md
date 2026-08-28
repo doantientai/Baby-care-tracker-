@@ -48,6 +48,14 @@ back online (last edit wins; deletes propagate).
    → **Sync now**.
 7. Paste the **same URL** in the app on the other phone. Done — both stay in sync.
 
+> **Set up a second device without typing:** on a connected device, go to
+> **Settings → Cloud sync → Copy setup link** (or *Copy display link* for the
+> always-on dashboard). It produces a link that carries the Sheet connection in
+> the URL's `#` fragment; open it on the other phone/tablet and it's instantly
+> connected — the app applies the config and strips the key from the address bar.
+> ⚠️ The link contains your private sync key, so only share it with people you
+> trust.
+
 > The sync uses simple `GET` requests to avoid browser CORS issues. If your
 > browser blocks cross-origin requests from a `file://` page, **host `index.html`**
 > (e.g. GitHub Pages) and open it from there — then sync works everywhere.

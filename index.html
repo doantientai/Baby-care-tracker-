@@ -227,7 +227,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.20';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.21';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -267,6 +267,34 @@ function kindleOn(){ return !!settings.kindle; }
 // Read-only always-on dashboard for a wall/bedside tablet: open index.html?display=1
 // (URL-driven, not persisted, so a normal visit is never stuck in display mode).
 const DISPLAY = /[?&]display=1/.test(location.search);
+
+// A shared "setup link" carries the Google-Sheet sync config in the URL fragment
+// (#setup=<base64url>) so a new device / the other parent opens the app already
+// connected — no typing. The fragment never reaches any server; we apply it once
+// and then strip it from the address bar so the key isn't left lying around.
+(function(){
+  try{
+    const m=(location.hash+'&'+location.search).match(/[#?&]setup=([^&#]+)/);
+    if(!m) return;
+    let b=decodeURIComponent(m[1]).replace(/-/g,'+').replace(/_/g,'/');
+    b+='==='.slice((b.length+3)%4);
+    const cfg=JSON.parse(decodeURIComponent(escape(atob(b))));
+    if(cfg && cfg.u){ settings.syncUrl=cfg.u; settings.syncToken=cfg.t||''; saveJSON(LS.settings, settings); }
+    if(history.replaceState) history.replaceState(null,'',location.pathname+location.search);
+  }catch(e){}
+})();
+// Build a shareable link that embeds the current sync config in the fragment.
+function setupLink(withDisplay){
+  const cfg={u:settings.syncUrl||'', t:settings.syncToken||''};
+  const enc=btoa(unescape(encodeURIComponent(JSON.stringify(cfg)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  const base=(location.origin&&location.origin!=='null'?location.origin+location.pathname:location.href.split(/[?#]/)[0]);
+  return base+(withDisplay?'?display=1':'')+'#setup='+enc;
+}
+function copyText(s){
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(s); return true; } }catch(e){}
+  try{ const ta=document.createElement('textarea'); ta.value=s; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); return true; }catch(e){}
+  return false;
+}
 
 function saveSettings(patch){ settings = Object.assign({}, settings, patch); saveJSON(LS.settings, settings); applyTheme(); render(); }
 
@@ -467,6 +495,7 @@ const FR = {
   'Time zone':'Fuseau horaire','Device default':'Réglage de l’appareil','Now showing':'Affiche maintenant',
   'Always-on display':'Écran permanent','A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.':'Un tableau d’allaitement en lecture seule pour un téléphone toujours allumé en paysage (écran noir) : temps depuis le dernier repas et prochain sein. Ajoutez la page ouverte aux favoris.','Open display':'Ouvrir l’écran',
   'Next side':'Prochain sein','Last diaper':'Dernière couche','Next':'Prochain','Due':'À donner','Given':'Donnée',
+  'Share this app, already connected':'Partager l’app, déjà connectée','Sends a link that sets up the Sheet automatically. ⚠️ It contains your private key — share only with people you trust.':'Envoie un lien qui configure la feuille automatiquement. ⚠️ Il contient votre clé privée — à ne partager qu’avec des personnes de confiance.','Copy setup link':'Copier le lien','Copy display link':'Copier le lien écran','Copied ✓':'Copié ✓',
   'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Seulement si cet appareil affiche la mauvaise heure (ex. un Kindle bloqué sur UTC). Décalage fixe — à ajuster aux changements d’heure.',
   'Baby':'Bébé','Name':'Nom','Date of birth':'Date de naissance',
   'Used for age-based fever alerts and diaper targets.':"Utilisée pour les alertes de fièvre selon l'âge et les objectifs de couches.",
@@ -591,6 +620,7 @@ const VI = {
   'Time zone':'Múi giờ','Device default':'Theo thiết bị','Now showing':'Đang hiển thị',
   'Always-on display':'Màn hình luôn bật','A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.':'Bảng cho bú chỉ đọc cho điện thoại luôn bật ở chế độ ngang (nền đen): thời gian từ lần bú trước và bên tiếp theo. Lưu trang mở ra vào dấu trang.','Open display':'Mở màn hình',
   'Next side':'Bên tiếp theo','Last diaper':'Tã gần nhất','Next':'Tiếp theo','Due':'Cần cho','Given':'Đã cho',
+  'Share this app, already connected':'Chia sẻ ứng dụng, đã kết nối sẵn','Sends a link that sets up the Sheet automatically. ⚠️ It contains your private key — share only with people you trust.':'Gửi một liên kết tự động thiết lập Sheet. ⚠️ Liên kết chứa khóa riêng của bạn — chỉ chia sẻ với người bạn tin tưởng.','Copy setup link':'Sao chép liên kết','Copy display link':'Sao chép liên kết màn hình','Copied ✓':'Đã sao chép ✓',
   'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Chỉ khi thiết bị hiển thị sai giờ (vd. Kindle bị kẹt ở UTC). Lệch cố định — chỉnh lại khi đổi giờ mùa.',
   'Baby':'Em bé','Name':'Tên','Date of birth':'Ngày sinh',
   'Used for age-based fever alerts and diaper targets.':'Dùng cho cảnh báo sốt theo tuổi và mục tiêu tã.',
@@ -1314,6 +1344,15 @@ function viewSettings(){
       <div class="field"><label class="label">${t('Shared secret (optional)')}</label><input data-set="syncToken" value="${esc(settings.syncToken||'')}" placeholder="${t('must match SECRET in the script')}"></div>
       <button class="btn btn-primary" data-act="sync-now">${t('⟳ Sync now')}</button>
       <div id="syncStatus" class="small" style="margin-top:10px">${syncStatusHtml()}</div>
+      ${settings.syncUrl?`<div style="margin-top:16px;border-top:1px solid var(--card-border);padding-top:14px">
+        <div class="small" style="font-weight:600;margin-bottom:2px">${t('Share this app, already connected')}</div>
+        <div class="tiny muted" style="margin-bottom:10px">${t('Sends a link that sets up the Sheet automatically. ⚠️ It contains your private key — share only with people you trust.')}</div>
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          <button class="btn btn-ghost" data-act="share-setup">${t('Copy setup link')}</button>
+          <button class="btn btn-ghost" data-act="share-display">${t('Copy display link')}</button>
+        </div>
+        <input id="setupLinkBox" class="tabular" readonly style="display:none;margin-top:10px;font-size:12px" data-act="pick-link">
+      </div>`:''}
       <details style="margin-top:12px">
         <summary class="small" style="cursor:pointer;color:var(--brand-d)">${t('How to set this up (5 min)')}</summary>
         <ol class="small muted" style="padding-left:18px;line-height:1.5">
@@ -1607,6 +1646,15 @@ document.addEventListener('click', (ev)=>{
   if(act==='export-json') return download('baby-care-backup-'+dateKey(Date.now())+'.json', JSON.stringify({app:'baby-care-tracker',version:1,exportedAt:Date.now(),events:events},null,2), 'application/json');
   if(act==='import'){ const fi=document.createElement('input'); fi.type='file'; fi.accept='application/json,.json'; fi.onchange=()=>{ if(fi.files[0]) importBackup(fi.files[0]); }; fi.click(); return; }
   if(act==='sync-now') return syncNow();
+  if(act==='share-setup'||act==='share-display'){
+    const url=setupLink(act==='share-display');
+    const box=document.getElementById('setupLinkBox');
+    if(box){ box.value=url; box.style.display='block'; box.focus(); box.select&&box.select(); }
+    if(navigator.share){ navigator.share({title:t('Baby Care Tracker'), url:url}).catch(()=>{}); }
+    else { const okc=copyText(url); if(okc){ el.textContent=t('Copied ✓'); setTimeout(()=>{ if(el&&el.dataset.act===act) el.textContent=t(act==='share-display'?'Copy display link':'Copy setup link'); },1500); } }
+    return;
+  }
+  if(act==='pick-link'){ el.focus(); el.select&&el.select(); copyText(el.value); return; }
   if(act==='toggle-feedgap') return saveSettings({ feedGapEnabled: !settings.feedGapEnabled });
   if(act==='toggle-sleep') return saveSettings({ showSleep: settings.showSleep===false });
   if(act==='toggle-kindle') return saveSettings({ kindle: !settings.kindle });
