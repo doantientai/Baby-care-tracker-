@@ -244,7 +244,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.24';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.25';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -1761,6 +1761,9 @@ async function checkUpdate(){
 }
 
 /* ------------------------------------------------------------------- boot --- */
+// The always-on display defaults to French. Set in memory only (never saved),
+// so it doesn't change the device's own language for the normal app.
+if(DISPLAY) settings.lang='fr';
 // Show a readable message instead of a blank screen if the first render throws
 // (helps debug on devices with no dev-tools, e.g. an e-reader browser).
 try{
