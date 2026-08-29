@@ -191,6 +191,8 @@
   .disp-baby{font-size:clamp(.95rem,2.6vw,1.25rem);font-weight:600;letter-spacing:.01em}
   .disp-baby .disp-age{color:var(--cream-faint);font-weight:500;margin-left:.4em}
   .disp-now{font-size:clamp(.95rem,2.6vw,1.25rem);font-weight:500;color:var(--cream-dim);letter-spacing:.02em}
+  .disp-barright{display:flex;align-items:center;gap:clamp(10px,2vw,20px)}
+  .disp-wx{font-size:clamp(.9rem,2.4vw,1.15rem);font-weight:500;color:var(--cream-dim)}
   /* the cosy panel that holds the core */
   .disp-main{flex:1;display:flex;align-items:center;gap:clamp(14px,2.5vw,30px);min-height:0;z-index:1;
     background:var(--surface);border:1px solid var(--line);border-radius:clamp(22px,3vw,34px);
@@ -242,7 +244,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.23';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.24';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -294,13 +296,19 @@ const DISPLAY = /[?&]display=1/.test(location.search);
     let b=decodeURIComponent(m[1]).replace(/-/g,'+').replace(/_/g,'/');
     b+='==='.slice((b.length+3)%4);
     const cfg=JSON.parse(decodeURIComponent(escape(atob(b))));
-    if(cfg && cfg.u){ settings.syncUrl=cfg.u; settings.syncToken=cfg.t||''; saveJSON(LS.settings, settings); }
+    if(cfg && cfg.u){
+      settings.syncUrl=cfg.u; settings.syncToken=cfg.t||'';
+      if(cfg.la!=null) settings.lat=cfg.la;             // carry location so a shared
+      if(cfg.lo!=null) settings.lon=cfg.lo;             // display shows local weather
+      if(cfg.ll) settings.locationLabel=cfg.ll;
+      saveJSON(LS.settings, settings);
+    }
     if(history.replaceState) history.replaceState(null,'',location.pathname+location.search);
   }catch(e){}
 })();
 // Build a shareable link that embeds the current sync config in the fragment.
 function setupLink(withDisplay){
-  const cfg={u:settings.syncUrl||'', t:settings.syncToken||''};
+  const cfg={u:settings.syncUrl||'', t:settings.syncToken||'', la:settings.lat, lo:settings.lon, ll:settings.locationLabel};
   const enc=btoa(unescape(encodeURIComponent(JSON.stringify(cfg)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   const base=(location.origin&&location.origin!=='null'?location.origin+location.pathname:location.href.split(/[?#]/)[0]);
   return base+(withDisplay?'?display=1':'')+'#setup='+enc;
@@ -1209,7 +1217,10 @@ function viewDisplay(){
   return `<div class="disp${urgent?' urgent':''}">
     <div class="disp-bar">
       <div class="disp-baby">${esc(settings.babyName)}${age?`<span class="disp-age">${age}</span>`:''}</div>
-      <div class="disp-now">${clock(now)}</div>
+      <div class="disp-barright">
+        ${weatherCache?`<span class="disp-wx">${WMO[weatherCache.code]?WMO[weatherCache.code][1]+' ':''}${weatherCache.t}°</span>`:''}
+        <span class="disp-now">${clock(now)}</span>
+      </div>
     </div>
     <div class="disp-main">
       <div class="disp-hero">
@@ -1727,6 +1738,7 @@ if(DISPLAY){
   document.body.classList.add('display');
   setInterval(render, 15000);
   setInterval(()=>{ if(syncReady() && !syncState.syncing) syncNow(); }, 60000);
+  setInterval(()=>{ fetchWeather(); }, 1800000);   // refresh outdoor weather every 30 min
   ['fullscreenchange','webkitfullscreenchange'].forEach(function(ev){ document.addEventListener(ev, function(){ render(); }); });
 }
 
