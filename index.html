@@ -455,6 +455,7 @@ const EN = {
   nextFeed:'🤱 Next feed: start on the {side} (last started {last}).',
   feedGap:"🍼 It's been <b>{h}h</b> since the last feed ({when} guide {thr}h). Newborns usually shouldn't go much longer — consider offering a feed.",
   relMin:'{n}m ago', relHour:'{n}h ago', relDay:'{n}d ago',
+  futureWarn:'This entry is dated in the future ({when}). Save anyway?',
   imported:'Imported {n} {label}.',
   outfitVeryWarm:'Very warm — one light layer (short-sleeve bodysuit), sun hat outside, no blanket. Watch for overheating.',
   outfitWarm:'Warm — short-sleeve bodysuit + light trousers or a light sleepsuit; sun hat outside.',
@@ -552,6 +553,7 @@ const FR = {
   // sheet
   'Edit':'Modifier','Log':'Noter','Delete':'Supprimer','Save':'Enregistrer','Save changes':'Enregistrer',
   'Delete this entry?':'Supprimer cette entrée ?','Info':'Info',
+  'futureWarn':'Cette entrée est datée dans le futur ({when}). Enregistrer quand même ?',
   "What's in the diaper?":'Contenu de la couche ?','Amount':'Quantité','Stool color':'Couleur des selles','Texture':'Texture',
   'Started on':'Commencé à','Left (min)':'Gauche (min)','Right (min)':'Droite (min)','Total':'Total','Position':'Position',
   'Content':'Contenu','Volume (ml)':'Volume (ml)','Temperature (°C)':'Température (°C)','Method':'Méthode','Intensity':'Intensité','Side':'Côté',
@@ -677,6 +679,7 @@ const VI = {
   // sheet
   'Edit':'Sửa','Log':'Ghi','Delete':'Xóa','Save':'Lưu','Save changes':'Lưu thay đổi',
   'Delete this entry?':'Xóa mục này?','Info':'Thông tin',
+  'futureWarn':'Mục này có thời gian trong tương lai ({when}). Vẫn lưu?',
   "What's in the diaper?":'Trong tã có gì?','Amount':'Lượng','Stool color':'Màu phân','Texture':'Kết cấu',
   'Started on':'Bắt đầu bên','Left (min)':'Trái (phút)','Right (min)':'Phải (phút)','Total':'Tổng','Position':'Tư thế',
   'Content':'Loại sữa','Volume (ml)':'Thể tích (ml)','Temperature (°C)':'Nhiệt độ (°C)','Method':'Cách đo','Intensity':'Mức độ','Side':'Bên',
@@ -1592,6 +1595,13 @@ function saveSheet(){
   let durationSec = (s.endAt && s.endAt>s.at) ? Math.round((s.endAt-s.at)/1000) : undefined;
   if(s.type==='breastfeed'){ const tot=(d.leftSec||0)+(d.rightSec||0); d.durationSec = tot>0?tot:durationSec; }
   else if(s.type==='sleep'||s.type==='cry'||s.type==='pump'){ if(durationSec!=null) d.durationSec=durationSec; }
+  // Guard against a mis-tapped date picker (e.g. month bumped by one): an entry
+  // more than a few minutes in the future is almost certainly a mistake.
+  const latest=Math.max(s.at||0, s.endAt||0);
+  if(latest > Date.now()+5*60000){
+    const when=tzShift(latest).toLocaleDateString(locale(),{weekday:'short',day:'numeric',month:'short'})+' '+clock(latest);
+    if(!confirm(t('futureWarn',{when}))) return;
+  }
   const payload={ type:s.type, at:s.at, endAt:s.endAt, caregiver:s.caregiver, note:s.note||undefined, data:d };
   if(s.editing) updateEvent(s.editing.id, payload); else addEvent(payload);
   closeSheet(); render();
