@@ -244,7 +244,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.35';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.36';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = '';
 /* ============================================================ Baby Care Tracker
@@ -472,10 +472,6 @@ function updateSyncUI(){
 const EN = {
   day_one:'{n} day old', day_other:'{n} days old',
   occ_weight:'🎉 {name} is back to birth weight!',
-  occ_teaser_weight:'We watched every gram too — and wrote everything on the nurses’ sheet…',
-  occ_teaser_month:'A month ago, it all began. For us, it began with two fans and the windows wide open…',
-  occ_teaser_days100:'This app, too, was born in a maternity ward — on a phone, in Versailles…',
-  occ_teaser_year:'And to think it all began with one line of code, in a heatwave…',
   occ_month:'🎂 {name} is 1 month old! Well done on this first month.',
   occ_days100:'💯 100 days with {name}!',
   occ_days100_n:'💯 100 days with {name}: {feeds} feeds, {diapers} diapers.',
@@ -501,10 +497,6 @@ const FR = {
   // templated
   day_one:'{n} jour', day_other:'{n} jours',
   occ_weight:'🎉 {name} a retrouvé son poids de naissance !',
-  occ_teaser_weight:'Nous aussi, on guettait chaque gramme — et on notait tout sur la feuille des infirmières…',
-  occ_teaser_month:'Il y a un mois, tout commençait. Pour nous, c’était avec deux ventilateurs et les fenêtres grandes ouvertes…',
-  occ_teaser_days100:'Cette appli, elle aussi, est née à la maternité — sur un téléphone, à Versailles…',
-  occ_teaser_year:'Et dire que tout a commencé par une ligne de code, en pleine canicule…',
   occ_month:'🎂 {name} a 1 mois ! Bravo pour ce premier mois.',
   occ_days100:'💯 100 jours avec {name} !',
   occ_days100_n:'💯 100 jours avec {name} : {feeds} tétées, {diapers} couches.',
@@ -570,6 +562,7 @@ const FR = {
   'Here’s to the first 100 days 💛':'Bravo pour ces 100 jours 💛',
   'Thank you for being here 💛':'Merci d’être là 💛',
   'Our story':'Notre histoire','Read our story':'Lire notre histoire','Hide':'Masquer',
+  'Enjoying the app? Here’s how it was born…':'Vous aimez l’appli ? Voici comment elle est née…',
   'This app was born during a feed just like this one, at 3am…':'Cette appli est née pendant une tétée comme celle-ci, à 3 h du matin…','Read':'Lire','🥐 Buy us a croissant':'🥐 Nous offrir un croissant',
   'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.':'Été 2026, en pleine canicule, à la maternité de Versailles (Hôpital André Mignot). Deux ventilateurs, les fenêtres grandes ouvertes, et notre fille A. qui vient de naître.',
   'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?':'Il est 3 h du matin. On note tout sur la feuille donnée par les infirmières et dans les notes du téléphone, mais c’est vite trop limité : quel sein la dernière fois ? Il y a combien de temps ? Et la couleur des selles ?',
@@ -652,10 +645,6 @@ const VI = {
   // templated
   day_one:'{n} ngày tuổi', day_other:'{n} ngày tuổi',
   occ_weight:'🎉 {name} đã lấy lại cân nặng lúc sinh!',
-  occ_teaser_weight:'Chúng tôi cũng từng ngóng từng gram — và ghi mọi thứ vào tờ giấy của các cô y tá…',
-  occ_teaser_month:'Một tháng trước, mọi thứ mới bắt đầu. Với chúng tôi, đó là hai chiếc quạt và cửa sổ mở toang…',
-  occ_teaser_days100:'Ứng dụng này cũng ra đời ở khoa sản — trên một chiếc điện thoại, tại Versailles…',
-  occ_teaser_year:'Ai ngờ mọi chuyện bắt đầu từ một dòng code, giữa đợt nắng nóng…',
   occ_month:'🎂 Chúc mừng đầy tháng {name}! Bạn đã làm rất tốt.',
   occ_days100:'💯 100 ngày bên {name}!',
   occ_days100_n:'💯 100 ngày bên {name}: {feeds} cữ bú, {diapers} lần thay tã.',
@@ -721,6 +710,7 @@ const VI = {
   'Here’s to the first 100 days 💛':'Chúc mừng 100 ngày 💛',
   'Thank you for being here 💛':'Cảm ơn bạn đã ở đây 💛',
   'Our story':'Câu chuyện của chúng tôi','Read our story':'Đọc câu chuyện của chúng tôi','Hide':'Ẩn',
+  'Enjoying the app? Here’s how it was born…':'Bạn thích ứng dụng này chứ? Đây là câu chuyện ra đời của nó…',
   'This app was born during a feed just like this one, at 3am…':'Ứng dụng này ra đời trong một cữ bú như thế này, lúc 3 giờ sáng…','Read':'Đọc','🥐 Buy us a croissant':'🍜 Mời chúng tôi một bát phở',
   'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.':'Mùa hè 2026, giữa đợt nắng nóng, tại khoa sản Versailles (Hôpital André Mignot). Hai chiếc quạt chạy không ngừng, cửa sổ mở toang, và con gái A. của chúng tôi vừa chào đời.',
   'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?':'3 giờ sáng. Chúng tôi ghi mọi thứ vào tờ giấy các cô y tá đưa và vào ghi chú điện thoại, nhưng chẳng mấy chốc đã không đủ: lần trước bú bên nào? Cách đây bao lâu? Phân màu gì?',
@@ -1169,7 +1159,7 @@ function occasionCardHtml(){
         <div style="font-weight:700">${t('occ_'+k+n,{name:esc(settings.babyName),feeds:c.feeds,diapers:c.diapers})}</div>
         <button class="x" data-act="occ-hide" data-occ="${k}" title="${t('Hide')}" style="flex:0 0 auto">✕</button>
       </div>
-      <button data-act="story-open" data-occ="${k}" style="display:block;width:100%;margin-top:8px;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.78rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('occ_teaser_'+k)} <u>›</u></button>
+      <button data-act="story-open" data-occ="${k}" style="display:block;width:100%;margin-top:8px;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.78rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('Enjoying the app? Here’s how it was born…')} <u>›</u></button>
     </div>`;
 }
 // "Our story" link shown under the running breastfeed timer: the parent is
@@ -1221,9 +1211,8 @@ const STORY_SIGN = '— Taï & Alex, parents of A.';
 // The story opens with a line tied to how the reader got here, and closes to match.
 function storySheetHtml(occ){
   const name=esc(settings.babyName), h=tzShift(Date.now()).getHours();
-  // Open with the very line the reader tapped, so the story picks up from it.
-  const intro = occ==='feed' ? t('This app was born during a feed just like this one, at 3am…')
-              : (occ==='weight'||occ==='month'||occ==='days100'||occ==='year') ? t('occ_teaser_'+occ) : '';
+  // From the feed line, open with the line the reader tapped so the story picks up from it.
+  const intro = occ==='feed' ? t('This app was born during a feed just like this one, at 3am…') : '';
   const close = occ==='feed' ? t(h<8||h>=21 ? 'Hang in there tonight 💛' : 'Enjoy the feed 💛')
               : occ==='weight' ? t('Well done! 💛')
               : occ==='month' ? t('sclose_month',{name:name})
