@@ -244,7 +244,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.34';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.35';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = '';
 /* ============================================================ Baby Care Tracker
@@ -472,19 +472,15 @@ function updateSyncUI(){
 const EN = {
   day_one:'{n} day old', day_other:'{n} days old',
   occ_weight:'🎉 {name} is back to birth weight!',
-  occ_teaser_weight:'Those first days weren’t easy for us either…',
-  occ_teaser_month:'Did you know our first month wasn’t easy either?',
-  occ_teaser_days100:'Did you know this app was born on a hard night?',
-  occ_teaser_year:'Do you know how it all started for us?',
+  occ_teaser_weight:'We watched every gram too — and wrote everything on the nurses’ sheet…',
+  occ_teaser_month:'A month ago, it all began. For us, it began with two fans and the windows wide open…',
+  occ_teaser_days100:'This app, too, was born in a maternity ward — on a phone, in Versailles…',
+  occ_teaser_year:'And to think it all began with one line of code, in a heatwave…',
   occ_month:'🎂 {name} is 1 month old! Well done on this first month.',
   occ_days100:'💯 100 days with {name}!',
   occ_days100_n:'💯 100 days with {name}: {feeds} feeds, {diapers} diapers.',
   occ_year:'🎈 {name} is 1 year old!',
   occ_year_n:'🎈 {name} is 1 year old! Year one: {feeds} feeds, {diapers} diapers.',
-  sbridge_weight:'{name} is back to birth weight. We know how much those first grams are waited for — we were there too.',
-  sbridge_month:'One month with {name} already. Ours flew by too, between feeds, diapers and short nights. It all started like this:',
-  sbridge_days100:'100 days with {name}. Every feed, every diaper, every night counts — and for us, it all started like this:',
-  sbridge_year:'One year with {name}. Sleepless nights, smiles, and so many firsts. Thank you for letting this app be part of it. For us, it all started like this:',
   sclose_month:'Happy first month, {name} 💛',
   sclose_year:'Happy birthday, {name} 🎂💛',
   nursery:'🛏️ Keep the nursery at {min}–{max}°C for safe sleep (ideal ~{ideal}°C).',
@@ -505,19 +501,15 @@ const FR = {
   // templated
   day_one:'{n} jour', day_other:'{n} jours',
   occ_weight:'🎉 {name} a retrouvé son poids de naissance !',
-  occ_teaser_weight:'Ces premiers jours n’ont pas été faciles pour nous non plus…',
-  occ_teaser_month:'Vous savez, notre premier mois n’a pas été facile non plus…',
-  occ_teaser_days100:'Saviez-vous que cette appli est née d’une nuit difficile ?',
-  occ_teaser_year:'Vous savez comment tout a commencé pour nous ?',
+  occ_teaser_weight:'Nous aussi, on guettait chaque gramme — et on notait tout sur la feuille des infirmières…',
+  occ_teaser_month:'Il y a un mois, tout commençait. Pour nous, c’était avec deux ventilateurs et les fenêtres grandes ouvertes…',
+  occ_teaser_days100:'Cette appli, elle aussi, est née à la maternité — sur un téléphone, à Versailles…',
+  occ_teaser_year:'Et dire que tout a commencé par une ligne de code, en pleine canicule…',
   occ_month:'🎂 {name} a 1 mois ! Bravo pour ce premier mois.',
   occ_days100:'💯 100 jours avec {name} !',
   occ_days100_n:'💯 100 jours avec {name} : {feeds} tétées, {diapers} couches.',
   occ_year:'🎈 {name} a 1 an !',
   occ_year_n:'🎈 {name} a 1 an ! Sa première année : {feeds} tétées, {diapers} couches.',
-  sbridge_weight:'{name} a retrouvé son poids de naissance. Ces premiers grammes, on sait combien on les attend — on est passés par là aussi.',
-  sbridge_month:'Déjà un mois avec {name}. Le nôtre aussi a filé entre les tétées, les couches et les nuits courtes. Tout a commencé comme ça :',
-  sbridge_days100:'100 jours avec {name}. Chaque tétée, chaque couche, chaque nuit compte — et pour nous, tout a commencé comme ça :',
-  sbridge_year:'Un an avec {name}. Des nuits blanches, des sourires, et tant de premières fois. Merci d’avoir laissé cette appli en faire partie. Pour nous, tout a commencé comme ça :',
   sclose_month:'Joyeux premier mois, {name} 💛',
   sclose_year:'Joyeux anniversaire, {name} 🎂💛',
   nursery:'🛏️ Maintenez la chambre à {min}–{max}°C pour un sommeil sûr (idéal ~{ideal}°C).',
@@ -573,13 +565,12 @@ const FR = {
   'Always-on display':'Écran permanent','A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.':'Un tableau d’allaitement en lecture seule pour un téléphone toujours allumé en paysage (écran noir) : temps depuis le dernier repas et prochain sein. Ajoutez la page ouverte aux favoris.','Open display':'Ouvrir l’écran',
   'Free, no ads, no tracking. If it helps your family, you can pay what you want.':'Gratuite, sans pub ni pistage. Si elle aide votre famille, vous pouvez donner ce que vous voulez.',
   'Support the project':'Soutenir le projet',
-  'While your baby feeds, here’s a short story.':'Pendant la tétée, une petite histoire.',
   'Enjoy the feed 💛':'Bonne tétée 💛',
   'Well done! 💛':'Bravo ! 💛',
   'Here’s to the first 100 days 💛':'Bravo pour ces 100 jours 💛',
   'Thank you for being here 💛':'Merci d’être là 💛',
   'Our story':'Notre histoire','Read our story':'Lire notre histoire','Hide':'Masquer',
-  'This app was born at 3am, in a heatwave…':'Cette appli est née à 3 h du matin, en pleine canicule…','Read':'Lire','🥐 Buy us a croissant':'🥐 Nous offrir un croissant',
+  'This app was born during a feed just like this one, at 3am…':'Cette appli est née pendant une tétée comme celle-ci, à 3 h du matin…','Read':'Lire','🥐 Buy us a croissant':'🥐 Nous offrir un croissant',
   'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.':'Été 2026, en pleine canicule, à la maternité de Versailles (Hôpital André Mignot). Deux ventilateurs, les fenêtres grandes ouvertes, et notre fille A. qui vient de naître.',
   'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?':'Il est 3 h du matin. On note tout sur la feuille donnée par les infirmières et dans les notes du téléphone, mais c’est vite trop limité : quel sein la dernière fois ? Il y a combien de temps ? Et la couleur des selles ?',
   'So while Alex was breastfeeding, Taï started writing this app — on his phone. It has been with us every night since.':'Alors, pendant qu’Alex allaitait, Taï a commencé à écrire cette appli — sur son téléphone. Depuis, elle nous accompagne chaque nuit.',
@@ -661,19 +652,15 @@ const VI = {
   // templated
   day_one:'{n} ngày tuổi', day_other:'{n} ngày tuổi',
   occ_weight:'🎉 {name} đã lấy lại cân nặng lúc sinh!',
-  occ_teaser_weight:'Những ngày đầu cũng chẳng dễ dàng gì với chúng tôi…',
-  occ_teaser_month:'Bạn có biết tháng đầu của chúng tôi cũng không dễ dàng?',
-  occ_teaser_days100:'Bạn có biết ứng dụng này ra đời từ một đêm vất vả?',
-  occ_teaser_year:'Bạn có biết mọi chuyện bắt đầu thế nào với chúng tôi?',
+  occ_teaser_weight:'Chúng tôi cũng từng ngóng từng gram — và ghi mọi thứ vào tờ giấy của các cô y tá…',
+  occ_teaser_month:'Một tháng trước, mọi thứ mới bắt đầu. Với chúng tôi, đó là hai chiếc quạt và cửa sổ mở toang…',
+  occ_teaser_days100:'Ứng dụng này cũng ra đời ở khoa sản — trên một chiếc điện thoại, tại Versailles…',
+  occ_teaser_year:'Ai ngờ mọi chuyện bắt đầu từ một dòng code, giữa đợt nắng nóng…',
   occ_month:'🎂 Chúc mừng đầy tháng {name}! Bạn đã làm rất tốt.',
   occ_days100:'💯 100 ngày bên {name}!',
   occ_days100_n:'💯 100 ngày bên {name}: {feeds} cữ bú, {diapers} lần thay tã.',
   occ_year:'🎈 Chúc mừng thôi nôi {name}!',
   occ_year_n:'🎈 Chúc mừng thôi nôi {name}! Năm đầu tiên: {feeds} cữ bú, {diapers} lần thay tã.',
-  sbridge_weight:'{name} đã lấy lại cân nặng lúc sinh. Chúng tôi hiểu từng gram đầu tiên được mong chờ thế nào — chúng tôi cũng đã trải qua.',
-  sbridge_month:'Đã một tháng bên {name} rồi. Tháng đầu của chúng tôi cũng trôi qua thật nhanh, giữa những cữ bú, những lần thay tã và những đêm ngắn ngủi. Mọi chuyện bắt đầu như thế này:',
-  sbridge_days100:'100 ngày bên {name}. Mỗi cữ bú, mỗi lần thay tã, mỗi đêm đều đáng kể — còn với chúng tôi, mọi chuyện bắt đầu như thế này:',
-  sbridge_year:'Một năm bên {name}. Những đêm thức trắng, những nụ cười, và biết bao lần đầu tiên. Cảm ơn bạn đã để ứng dụng này đồng hành. Với chúng tôi, mọi chuyện bắt đầu như thế này:',
   sclose_month:'Chúc mừng đầy tháng {name} 💛',
   sclose_year:'Chúc mừng thôi nôi {name} 🎂💛',
   nursery:'🛏️ Giữ phòng ở {min}–{max}°C để bé ngủ an toàn (lý tưởng ~{ideal}°C).',
@@ -729,13 +716,12 @@ const VI = {
   'Always-on display':'Màn hình luôn bật','A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.':'Bảng cho bú chỉ đọc cho điện thoại luôn bật ở chế độ ngang (nền đen): thời gian từ lần bú trước và bên tiếp theo. Lưu trang mở ra vào dấu trang.','Open display':'Mở màn hình',
   'Free, no ads, no tracking. If it helps your family, you can pay what you want.':'Miễn phí, không quảng cáo, không theo dõi. Nếu ứng dụng giúp ích cho gia đình bạn, bạn có thể ủng hộ tùy tâm.',
   'Support the project':'Ủng hộ dự án',
-  'While your baby feeds, here’s a short story.':'Trong lúc bé bú, đây là một câu chuyện ngắn.',
   'Enjoy the feed 💛':'Chúc bé bú ngon 💛',
   'Well done! 💛':'Chúc mừng bạn! 💛',
   'Here’s to the first 100 days 💛':'Chúc mừng 100 ngày 💛',
   'Thank you for being here 💛':'Cảm ơn bạn đã ở đây 💛',
   'Our story':'Câu chuyện của chúng tôi','Read our story':'Đọc câu chuyện của chúng tôi','Hide':'Ẩn',
-  'This app was born at 3am, in a heatwave…':'Ứng dụng này ra đời lúc 3 giờ sáng, giữa đợt nắng nóng…','Read':'Đọc','🥐 Buy us a croissant':'🍜 Mời chúng tôi một bát phở',
+  'This app was born during a feed just like this one, at 3am…':'Ứng dụng này ra đời trong một cữ bú như thế này, lúc 3 giờ sáng…','Read':'Đọc','🥐 Buy us a croissant':'🍜 Mời chúng tôi một bát phở',
   'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.':'Mùa hè 2026, giữa đợt nắng nóng, tại khoa sản Versailles (Hôpital André Mignot). Hai chiếc quạt chạy không ngừng, cửa sổ mở toang, và con gái A. của chúng tôi vừa chào đời.',
   'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?':'3 giờ sáng. Chúng tôi ghi mọi thứ vào tờ giấy các cô y tá đưa và vào ghi chú điện thoại, nhưng chẳng mấy chốc đã không đủ: lần trước bú bên nào? Cách đây bao lâu? Phân màu gì?',
   'So while Alex was breastfeeding, Taï started writing this app — on his phone. It has been with us every night since.':'Thế là trong lúc Alex cho con bú, Taï bắt đầu viết ứng dụng này — ngay trên điện thoại. Từ đó, nó đồng hành cùng chúng tôi mỗi đêm.',
@@ -1220,7 +1206,7 @@ function storyNudgeDue(bf){
 }
 function storyNudgeHtml(){
   return `<div style="display:flex;gap:4px;margin-top:10px;align-items:flex-start">
-      <button data-act="story-open" data-occ="feed" style="flex:1;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.72rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('This app was born at 3am, in a heatwave…')} <u>${t('Read')} ›</u></button>
+      <button data-act="story-open" data-occ="feed" style="flex:1;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.72rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('This app was born during a feed just like this one, at 3am…')} <u>${t('Read')} ›</u></button>
       <button data-act="story-hide" title="${t('Hide')}" style="flex:0 0 auto;border:none;background:none;padding:2px 4px;font-size:.72rem;color:var(--muted);cursor:pointer">✕</button>
     </div>`;
 }
@@ -1235,8 +1221,9 @@ const STORY_SIGN = '— Taï & Alex, parents of A.';
 // The story opens with a line tied to how the reader got here, and closes to match.
 function storySheetHtml(occ){
   const name=esc(settings.babyName), h=tzShift(Date.now()).getHours();
-  const intro = occ==='feed' ? t('While your baby feeds, here’s a short story.')
-              : (occ==='weight'||occ==='month'||occ==='days100'||occ==='year') ? t('sbridge_'+occ,{name:name}) : '';
+  // Open with the very line the reader tapped, so the story picks up from it.
+  const intro = occ==='feed' ? t('This app was born during a feed just like this one, at 3am…')
+              : (occ==='weight'||occ==='month'||occ==='days100'||occ==='year') ? t('occ_teaser_'+occ) : '';
   const close = occ==='feed' ? t(h<8||h>=21 ? 'Hang in there tonight 💛' : 'Enjoy the feed 💛')
               : occ==='weight' ? t('Well done! 💛')
               : occ==='month' ? t('sclose_month',{name:name})
