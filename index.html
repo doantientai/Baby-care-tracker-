@@ -244,7 +244,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.27';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.28';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = '';
 /* ============================================================ Baby Care Tracker
@@ -257,6 +257,7 @@ const LS = {
   settings: 'bct.settings',
   events: 'bct.events',
   timers: 'bct.timers',
+  story: 'bct.story',   // {at, feed}: when / during which feed the story link was last shown
   outbox: 'bct.outbox',
   lastSync: 'bct.lastsync',
 };
@@ -271,6 +272,8 @@ const DEFAULT_SETTINGS = {
   vitDEnabled: true, vitDTime: '07:00',
   showSleep: true,
   supportAsked: false,   // the one-time 1-month pay-what-you-want prompt was answered
+  supportOpened: false,  // the pay-what-you-want link was opened → stop all nudges
+  storyHidden: false,    // the "Our story" link during feeds was dismissed (✕)
   kindle: false,
   tzOffset: null,   // null = use this device's own clock/zone; else fixed UTC offset in minutes
 };
@@ -542,6 +545,8 @@ const FR = {
   'This app was built at night by a dad for his baby daughter. It’s free, with no ads and no tracking. If it helped you through these first weeks, you can pay what you want (suggested €5). Thank you!':'Cette appli a été créée la nuit par un papa pour sa fille. Elle est gratuite, sans pub ni pistage. Si elle vous a aidés pendant ces premières semaines, vous pouvez donner ce que vous voulez (suggestion : 5 €). Merci !',
   'Free, no ads, no tracking. If it helps your family, you can pay what you want.':'Gratuite, sans pub ni pistage. Si elle aide votre famille, vous pouvez donner ce que vous voulez.',
   'Pay what you want':'Donner ce que je veux','No thanks':'Non merci','Support the project':'Soutenir le projet',
+  'Our story':'Notre histoire','Read our story':'Lire notre histoire','Made by a first-time dad, at 3am, in the Versailles maternity ward':'Créée par un jeune papa, à 3 h du matin, à la maternité de Versailles','Hide':'Masquer',
+  'This app was started at 3am by a first-time dad, in the maternity ward of the Centre Hospitalier de Versailles – Hôpital André Mignot, just after our daughter was born. We needed a simple way to know which breast was last, when she last ate and how many diapers she had — so I built one. It grew with us, night after night: the feeding timer, the e-reader mode for the bedside, the always-on display. It’s free, with no ads and no tracking: your data stays with you. If it makes your nights a little easier, you can support it with whatever amount you like. Thank you — and courage for tonight 💛':'Cette appli est née à 3 h du matin, écrite par un jeune papa à la maternité du Centre Hospitalier de Versailles – Hôpital André Mignot, juste après la naissance de notre fille. Il nous fallait un moyen simple de savoir quel sein était le dernier, quand elle avait mangé et combien de couches elle avait eues — alors je l’ai construit. L’appli a grandi avec nous, nuit après nuit : le minuteur de tétée, le mode liseuse pour la table de nuit, l’écran toujours allumé. Elle est gratuite, sans pub et sans pistage : vos données restent chez vous. Si elle vous rend les nuits un peu plus douces, vous pouvez la soutenir avec le montant de votre choix. Merci — et courage pour cette nuit 💛',
   'Next side':'Prochain sein','Last diaper':'Dernière couche','Next':'Prochain','Due':'À donner','Given':'Donnée',
   'Share this app, already connected':'Partager l’app, déjà connectée','Sends a link that sets up the Sheet automatically. ⚠️ It contains your private key — share only with people you trust.':'Envoie un lien qui configure la feuille automatiquement. ⚠️ Il contient votre clé privée — à ne partager qu’avec des personnes de confiance.','Copy setup link':'Copier le lien','Copy display link':'Copier le lien écran','Copied ✓':'Copié ✓','Fullscreen':'Plein écran',
   'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Seulement si cet appareil affiche la mauvaise heure (ex. un Kindle bloqué sur UTC). Décalage fixe — à ajuster aux changements d’heure.',
@@ -671,6 +676,8 @@ const VI = {
   'This app was built at night by a dad for his baby daughter. It’s free, with no ads and no tracking. If it helped you through these first weeks, you can pay what you want (suggested €5). Thank you!':'Ứng dụng này do một người bố làm vào những đêm thức khuya cho con gái mình. Ứng dụng miễn phí, không quảng cáo, không theo dõi. Nếu nó đã giúp bạn trong những tuần đầu tiên, bạn có thể ủng hộ tùy tâm (gợi ý 5 €). Cảm ơn bạn!',
   'Free, no ads, no tracking. If it helps your family, you can pay what you want.':'Miễn phí, không quảng cáo, không theo dõi. Nếu ứng dụng giúp ích cho gia đình bạn, bạn có thể ủng hộ tùy tâm.',
   'Pay what you want':'Ủng hộ tùy tâm','No thanks':'Không, cảm ơn','Support the project':'Ủng hộ dự án',
+  'Our story':'Câu chuyện của chúng tôi','Read our story':'Đọc câu chuyện của chúng tôi','Made by a first-time dad, at 3am, in the Versailles maternity ward':'Được làm bởi một ông bố lần đầu, lúc 3 giờ sáng, tại khoa sản Versailles','Hide':'Ẩn',
+  'This app was started at 3am by a first-time dad, in the maternity ward of the Centre Hospitalier de Versailles – Hôpital André Mignot, just after our daughter was born. We needed a simple way to know which breast was last, when she last ate and how many diapers she had — so I built one. It grew with us, night after night: the feeding timer, the e-reader mode for the bedside, the always-on display. It’s free, with no ads and no tracking: your data stays with you. If it makes your nights a little easier, you can support it with whatever amount you like. Thank you — and courage for tonight 💛':'Ứng dụng này ra đời lúc 3 giờ sáng, do một ông bố lần đầu làm cha viết tại khoa sản Bệnh viện Versailles – Hôpital André Mignot, ngay sau khi con gái chúng tôi chào đời. Chúng tôi cần một cách đơn giản để biết lần trước bú bên nào, bé ăn lúc nào và đã thay bao nhiêu tã — nên tôi đã tự làm. Ứng dụng lớn lên cùng chúng tôi, đêm này qua đêm khác: đồng hồ cho bú, chế độ máy đọc sách ở đầu giường, màn hình luôn sáng. Ứng dụng miễn phí, không quảng cáo, không theo dõi: dữ liệu là của bạn. Nếu nó giúp những đêm của bạn nhẹ nhàng hơn, bạn có thể ủng hộ tùy tâm. Cảm ơn bạn — và cố lên cho đêm nay nhé 💛',
   'Next side':'Bên tiếp theo','Last diaper':'Tã gần nhất','Next':'Tiếp theo','Due':'Cần cho','Given':'Đã cho',
   'Share this app, already connected':'Chia sẻ ứng dụng, đã kết nối sẵn','Sends a link that sets up the Sheet automatically. ⚠️ It contains your private key — share only with people you trust.':'Gửi một liên kết tự động thiết lập Sheet. ⚠️ Liên kết chứa khóa riêng của bạn — chỉ chia sẻ với người bạn tin tưởng.','Copy setup link':'Sao chép liên kết','Copy display link':'Sao chép liên kết màn hình','Copied ✓':'Đã sao chép ✓','Fullscreen':'Toàn màn hình',
   'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Chỉ khi thiết bị hiển thị sai giờ (vd. Kindle bị kẹt ở UTC). Lệch cố định — chỉnh lại khi đổi giờ mùa.',
@@ -1054,7 +1061,8 @@ function bfCardHtml(){
         <button class="btn" style="background:var(--pink-l);color:var(--pink-ink)" data-act="bf-pause">${bf.paused?(K?'':'▶ ')+t('Resume'):(K?'':'⏸ ')+t('Pause')}</button>
         <button class="btn" style="background:var(--pink-l);color:var(--pink-ink)" data-act="bf-switch">${K?'':'⇄ '}${t('Switch')}</button>
       </div>
-      <button class="btn btn-block" style="background:var(--pink);color:#fff;margin-top:8px" data-act="bf-stop">${K?'':'■ '}${t('Stop')}</button>`;
+      <button class="btn btn-block" style="background:var(--pink);color:#fff;margin-top:8px" data-act="bf-stop">${K?'':'■ '}${t('Stop')}</button>
+      ${storyNudgeDue(bf)?storyNudgeHtml():''}`;
   }
   // On the Kindle home, show how long since the baby last ate (start time of the
   // most recent breast/bottle feed) right above the Start L/R buttons.
@@ -1086,6 +1094,35 @@ function supportCard(){
         <button class="btn btn-ghost" data-act="support-dismiss">${t('No thanks')}</button>
       </div>
     </div>`;
+}
+// "Our story" link shown under the running breastfeed timer: the parent is
+// holding the baby with a free hand for 15–40 min. Only after 5 min into the
+// feed, at most one feed per week, never on Kindle/display, never within 48 h of
+// a fever/stool alert, and gone for good once dismissed or the link was opened.
+const STORY_WEEK = 7*DAY;
+function storyNudgeDue(bf){
+  if(!SUPPORT_URL || kindleOn() || DISPLAY || settings.storyHidden || settings.supportOpened) return false;
+  const now=Date.now();
+  if(now-bf.startedAt < 5*60000) return false;
+  if(events.some(e=>e.at>now-2*DAY && eventConcerning(e))) return false;
+  const seen=loadJSON(LS.story, {});
+  if(seen.feed===bf.startedAt) return true;            // keep it for the whole feed
+  if(now-(seen.at||0) < STORY_WEEK) return false;
+  saveJSON(LS.story, {at:now, feed:bf.startedAt});     // first time in this feed
+  return true;
+}
+function storyNudgeHtml(){
+  return `<div style="display:flex;gap:4px;margin-top:10px;align-items:flex-start">
+      <button data-act="story-open" style="flex:1;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.72rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('Made by a first-time dad, at 3am, in the Versailles maternity ward')} <u>›</u></button>
+      <button data-act="story-hide" title="${t('Hide')}" style="flex:0 0 auto;border:none;background:none;padding:2px 4px;font-size:.72rem;color:var(--muted);cursor:pointer">✕</button>
+    </div>`;
+}
+function storySheetHtml(){
+  return `<div class="scrim" data-act="close"></div><div class="sheet" role="dialog">
+    <div class="head"><h2>💛 ${t('Our story')}</h2><button class="x" data-act="close">✕</button></div>
+    <p class="small" style="line-height:1.55;margin:0 0 16px">${t('This app was started at 3am by a first-time dad, in the maternity ward of the Centre Hospitalier de Versailles – Hôpital André Mignot, just after our daughter was born. We needed a simple way to know which breast was last, when she last ate and how many diapers she had — so I built one. It grew with us, night after night: the feeding timer, the e-reader mode for the bedside, the always-on display. It’s free, with no ads and no tracking: your data stays with you. If it makes your nights a little easier, you can support it with whatever amount you like. Thank you — and courage for tonight 💛')}</p>
+    ${SUPPORT_URL?`<button class="btn btn-primary btn-block" data-act="support-open">☕ ${t('Pay what you want')}</button>`:''}
+  </div>`;
 }
 function viewHomeKindle(){
   const list=todays();
@@ -1499,11 +1536,12 @@ function viewSettings(){
       <div class="tiny muted" style="margin-bottom:12px">${t('A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.')}</div>
       <a class="btn btn-ghost btn-block" href="?display=1">${t('Open display')} →</a>
     </div>
-    ${SUPPORT_URL?`<div class="card pad">
-      <h2 style="margin-bottom:4px">☕ ${t('Support the project')}</h2>
+    <div class="card pad">
+      <h2 style="margin-bottom:4px">💛 ${t('Our story')}</h2>
       <div class="tiny muted" style="margin-bottom:12px">${t('Free, no ads, no tracking. If it helps your family, you can pay what you want.')}</div>
-      <button class="btn btn-ghost btn-block" data-act="support-link">${t('Pay what you want')}</button>
-    </div>`:''}
+      <button class="btn btn-ghost btn-block" data-act="story-open">${t('Read our story')}</button>
+      ${SUPPORT_URL?`<button class="btn btn-ghost btn-block" style="margin-top:8px" data-act="support-link">☕ ${t('Pay what you want')}</button>`:''}
+    </div>
     <div class="card pad">
       <h2 style="margin-bottom:12px">${t('Caregivers')}</h2>
       <div class="chips" style="margin-bottom:12px">${settings.caregivers.map(c=>`<span class="chip">${esc(c)}${settings.caregivers.length>1?` <button data-rm-care="${esc(c)}" style="border:none;background:none;color:#94a3b8;padding:0 0 0 2px">✕</button>`:''}</span>`).join('')}</div>
@@ -1565,6 +1603,7 @@ function renderSheet(){
   const savedScroll=prev?prev.scrollTop:0;
   const isReRender=!!prev;
   if(!s){ sheetRoot.innerHTML=''; return; }
+  if(s.type==='story'){ setHTML(sheetRoot, storySheetHtml()); return; }
   const m=META[s.type];
   const info=infoText(s.type);
   setHTML(sheetRoot, `<div class="scrim"></div><div class="sheet" role="dialog">
@@ -1751,9 +1790,11 @@ document.addEventListener('click', (ev)=>{
   if(act==='toggle-kindle') return saveSettings({ kindle: !settings.kindle });
   if(act==='set-tz'){ const v=el.dataset.tz; return saveSettings({ tzOffset: v===''?null:parseInt(v,10) }); }
   if(act==='toggle-vitd') return saveSettings({ vitDEnabled: !settings.vitDEnabled });
-  if(act==='support-open'){ try{ window.open(SUPPORT_URL,'_blank','noopener'); }catch(e){} return saveSettings({ supportAsked:true }); }
+  if(act==='support-open'){ try{ window.open(SUPPORT_URL,'_blank','noopener'); }catch(e){} state.sheet=null; return saveSettings({ supportAsked:true, supportOpened:true }); }
+  if(act==='story-open'){ state.sheet={type:'story'}; renderSheet(); return; }
+  if(act==='story-hide') return saveSettings({ storyHidden:true });
   if(act==='support-dismiss') return saveSettings({ supportAsked:true });
-  if(act==='support-link'){ try{ window.open(SUPPORT_URL,'_blank','noopener'); }catch(e){} return; }
+  if(act==='support-link'){ try{ window.open(SUPPORT_URL,'_blank','noopener'); }catch(e){} return saveSettings({ supportOpened:true }); }
   if(act==='log-vitd'){ addEvent({type:'medication', at:Date.now(), caregiver:settings.currentCaregiver, data:{name:t('Vitamin D'), dose:'400 IU'}}); render(); return; }
 });
 
