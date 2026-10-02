@@ -150,6 +150,21 @@
   :root[data-kindle="1"] .chip.on{background:#000;color:#fff;border-color:#000}
   :root[data-kindle="1"] input,:root[data-kindle="1"] textarea,:root[data-kindle="1"] select{border:2px solid #000;border-radius:8px}
   :root[data-kindle="1"] input:focus,:root[data-kindle="1"] textarea:focus,:root[data-kindle="1"] select:focus{box-shadow:none;border-color:#000}
+  /* Sync status, visible on every screen: a moving line on top + a chip above
+     the tab bar while syncing (under open sheets), a banner when offline or failing. */
+  #syncBar{position:sticky;top:0;z-index:35}
+  .sync-line{position:fixed;top:0;left:0;right:0;height:3px;z-index:61;overflow:hidden}
+  .sync-line::before{content:'';position:absolute;top:0;bottom:0;width:40%;background:var(--brand);border-radius:3px;animation:syncline 1.1s ease-in-out infinite}
+  @keyframes syncline{from{left:-40%}to{left:100%}}
+  .sync-chip{position:fixed;bottom:calc(70px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:39;padding:6px 14px;border-radius:999px;font-size:.8rem;font-weight:600;background:var(--card);color:var(--ink);border:1px solid var(--card-border);box-shadow:0 4px 14px rgba(0,0,0,.18);white-space:nowrap;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis}
+  .sync-chip.ok{color:var(--good)}
+  .spin{display:inline-block;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .sync-banner{padding:8px 16px;padding-top:calc(8px + env(safe-area-inset-top));font-size:.82rem;font-weight:600;text-align:center}
+  .sync-banner.warn{background:var(--warn-l);color:var(--warn-ink)}
+  .sync-banner.bad{background:var(--bad-l);color:var(--bad-ink);cursor:pointer}
+  :root[data-kindle="1"] .sync-chip{background:#fff;color:#000;border:2px solid #000;box-shadow:none}
+  :root[data-kindle="1"] .sync-banner{background:#fff;color:#000;border-bottom:2px solid #000}
   :root[data-kindle="1"] .banner{border:2px solid #000;background:#fff!important;color:#000!important;font-weight:600}
   :root[data-kindle="1"] .stat.good,:root[data-kindle="1"] .stat.warn{border:2px solid #000;background:#fff}
   :root[data-kindle="1"] .nav{backdrop-filter:none;background:#fff;border-top:2px solid #000}
@@ -236,6 +251,7 @@
 </style>
 </head>
 <body>
+<div id="syncBar"></div>
 <div id="app"></div>
 <nav class="nav">
   <div class="inner" id="nav"></div>
@@ -244,7 +260,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.38';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.39';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = '';
 /* ============================================================ Baby Care Tracker
@@ -384,7 +400,9 @@ function deleteEvent(id){
 /* -------------------------------------------------- Google Sheet sync ------ */
 // Persists the log to a shared Google Sheet via an Apps Script web app, so both
 // parents see the same data. Fully optional: with no URL set the app is local.
-let syncState = { syncing:false, last: loadJSON(LS.lastSync, null), error:null };
+// fresh: pulled from the Sheet since the app was opened / brought back — until
+// then the screen may be missing the other phone's entries, so say so loudly.
+let syncState = { syncing:false, last: loadJSON(LS.lastSync, null), error:null, fresh:false, loud:false, flashUntil:0 };
 function syncReady(){ return !!(settings.syncUrl && /^https?:\/\//.test(settings.syncUrl)); }
 function loadOutbox(){ return loadJSON(LS.outbox, []); }
 function saveOutbox(b){ saveJSON(LS.outbox, b); }
@@ -431,22 +449,52 @@ function pushSoon(){
   if(!syncReady()){ updateSyncUI(); return; }
   clearTimeout(pushTimer);
   pushTimer = setTimeout(()=>{
-    syncState.syncing = true; updateSyncUI();
+    syncStart();
     flushOutbox()
       .then(()=>{ syncState.last = Date.now(); saveJSON(LS.lastSync, syncState.last); syncState.error = null; })
       .catch(e=>{ syncState.error = e.message; })
-      .finally(()=>{ syncState.syncing = false; updateSyncUI(); });
+      .finally(syncEnd);
   }, 400);
 }
 async function syncNow(){
   if(!syncReady()){ updateSyncUI(); return; }
-  syncState.syncing = true; syncState.error = null; updateSyncUI();
+  syncState.error = null; syncStart();
   try{
     await flushOutbox();
     await pull();
-    syncState.last = Date.now(); saveJSON(LS.lastSync, syncState.last);
+    syncState.last = Date.now(); saveJSON(LS.lastSync, syncState.last); syncState.fresh = true;
   }catch(e){ syncState.error = e.message || 'sync error'; }
-  syncState.syncing = false; updateSyncUI(); render();
+  syncEnd(); render();
+}
+// A sync is "loud" (chip on screen) when it brings the other phone's entries for
+// the first time since opening, or sends entries logged here; quiet otherwise.
+function syncStart(){ syncState.syncing = true; syncState.loud = !syncState.fresh || loadOutbox().length>0; updateSyncUI(); }
+function syncEnd(){
+  syncState.syncing = false;
+  if(syncState.loud && !syncState.error){ syncState.flashUntil = Date.now()+1500; setTimeout(updateSyncUI, 1600); }
+  updateSyncUI();
+}
+// Back to the app after a while → the data may be stale again.
+function resumeSync(){
+  if(!syncReady() || syncState.syncing) return;
+  if(Date.now()-(syncState.last||0) > 120000) syncState.fresh = false;
+  syncNow();
+}
+function syncPlural(k,n){ return t(k+(n===1?'_one':'_other'),{n:n}); }
+function syncBarHtml(){
+  if(!syncReady()) return '';
+  const p=loadOutbox().length, K=kindleOn();
+  if(syncState.syncing){
+    const line = K ? '' : '<div class="sync-line"></div>';   // no animation on e-ink
+    if(DISPLAY || !syncState.loud) return line;
+    const msg = p ? syncPlural('syncSending',p) : t('Getting the latest entries…');
+    return line+`<div class="sync-chip" role="status">${K?'':'<span class="spin">⟳</span> '}${msg}</div>`;
+  }
+  if(DISPLAY) return '';
+  if(navigator.onLine===false) return `<div class="sync-banner warn" role="status">📴 ${p?syncPlural('syncOffline',p):t('Offline — the other phone’s latest entries may be missing')}</div>`;
+  if(syncState.error) return `<div class="sync-banner bad" role="status" data-act="sync-now">⚠ ${t('Sync failed')}${p?' · '+syncPlural('syncPending',p):''} · <u>${t('Retry')}</u></div>`;
+  if(syncState.flashUntil>Date.now()) return `<div class="sync-chip ok" role="status">✓ ${t('Up to date')}</div>`;
+  return '';
 }
 function syncStatusHtml(){
   if(!syncReady()) return '<span class="muted">'+t('Not connected — paste your Google Sheet web-app URL above, then Sync.')+'</span>';
@@ -458,12 +506,14 @@ function syncStatusHtml(){
 function syncPillHtml(){
   if(!syncReady()) return '';
   if(syncState.syncing) return '⟳ '+t('Syncing…');
+  if(navigator.onLine===false) return '<span style="color:var(--warn)">📴 '+t('Offline')+'</span>';
   if(syncState.error) return '<span style="color:#dc2626">⚠ '+t('sync error')+'</span>';
   return '<span style="color:var(--good)">✓ '+t('Sheet synced')+'</span>';
 }
 function updateSyncUI(){
   const s = document.getElementById('syncStatus'); if(s) s.innerHTML = syncStatusHtml();
   const p = document.getElementById('syncPill'); if(p) p.innerHTML = syncPillHtml();
+  const b = document.getElementById('syncBar'); if(b) setHTML(b, syncBarHtml());
 }
 
 /* ----------------------------------------------------------------- i18n ----- */
@@ -471,6 +521,9 @@ function updateSyncUI(){
 // templated strings (with {placeholders}). Unknown keys fall back to themselves.
 const EN = {
   day_one:'{n} day old', day_other:'{n} days old',
+  syncSending_one:'Sending 1 entry…', syncSending_other:'Sending {n} entries…',
+  syncPending_one:'1 entry not sent yet', syncPending_other:'{n} entries not sent yet',
+  syncOffline_one:'Offline — 1 entry will be sent when you’re back online', syncOffline_other:'Offline — {n} entries will be sent when you’re back online',
   occ_weight:'🎉 {name} is back to birth weight!',
   occ_month:'🎂 {name} is 1 month old! Well done on this first month.',
   occ_days100:'💯 100 days with {name}!',
@@ -496,6 +549,9 @@ const EN = {
 const FR = {
   // templated
   day_one:'{n} jour', day_other:'{n} jours',
+  syncSending_one:'Envoi d’1 entrée…', syncSending_other:'Envoi de {n} entrées…',
+  syncPending_one:'1 entrée pas encore envoyée', syncPending_other:'{n} entrées pas encore envoyées',
+  syncOffline_one:'Hors ligne — 1 entrée sera envoyée au retour du réseau', syncOffline_other:'Hors ligne — {n} entrées seront envoyées au retour du réseau',
   occ_weight:'🎉 {name} a retrouvé son poids de naissance !',
   occ_month:'🎂 {name} a 1 mois ! Bravo pour ce premier mois.',
   occ_days100:'💯 100 jours avec {name} !',
@@ -583,6 +639,11 @@ const FR = {
   'Not connected — paste your Google Sheet web-app URL above, then Sync.':"Non connecté — collez l'URL de votre Google Sheet ci-dessus, puis Synchroniser.",
   'Synced':'Synchronisé','Syncing…':'Synchronisation…','pending':'en attente',
   'Sheet synced':'Sheet synchronisé','sync error':'erreur de synchro',
+  'Getting the latest entries…':'Récupération des dernières entrées…',
+  'Up to date':'À jour','Offline':'Hors ligne',
+  'Sync failed':'Échec de la synchronisation',
+  'Retry':'Réessayer',
+  'Offline — the other phone’s latest entries may be missing':'Hors ligne — les dernières entrées de l’autre téléphone peuvent manquer',
   'How to set this up (5 min)':'Comment configurer (5 min)',
   'Create a new Google Sheet.':'Créez un nouveau Google Sheet.',
   'In it: <b>Extensions → Apps Script</b>.':'Dans celui-ci : <b>Extensions → Apps Script</b>.',
@@ -644,6 +705,9 @@ const FR = {
 const VI = {
   // templated
   day_one:'{n} ngày tuổi', day_other:'{n} ngày tuổi',
+  syncSending_one:'Đang gửi 1 mục…', syncSending_other:'Đang gửi {n} mục…',
+  syncPending_one:'1 mục chưa được gửi', syncPending_other:'{n} mục chưa được gửi',
+  syncOffline_one:'Mất kết nối — 1 mục sẽ được gửi khi có mạng lại', syncOffline_other:'Mất kết nối — {n} mục sẽ được gửi khi có mạng lại',
   occ_weight:'🎉 {name} đã lấy lại cân nặng lúc sinh!',
   occ_month:'🎂 Chúc mừng đầy tháng {name}! Bạn đã làm rất tốt.',
   occ_days100:'💯 100 ngày bên {name}!',
@@ -731,6 +795,11 @@ const VI = {
   'Not connected — paste your Google Sheet web-app URL above, then Sync.':'Chưa kết nối — dán URL Google Sheet ở trên, rồi Đồng bộ.',
   'Synced':'Đã đồng bộ','Syncing…':'Đang đồng bộ…','pending':'đang chờ',
   'Sheet synced':'Đã đồng bộ Sheet','sync error':'lỗi đồng bộ',
+  'Getting the latest entries…':'Đang tải các mục mới nhất…',
+  'Up to date':'Đã cập nhật','Offline':'Mất kết nối',
+  'Sync failed':'Đồng bộ thất bại',
+  'Retry':'Thử lại',
+  'Offline — the other phone’s latest entries may be missing':'Mất kết nối — có thể thiếu các mục mới nhất từ điện thoại kia',
   'How to set this up (5 min)':'Cách thiết lập (5 phút)',
   'Create a new Google Sheet.':'Tạo một Google Sheet mới.',
   'In it: <b>Extensions → Apps Script</b>.':'Trong đó: <b>Extensions → Apps Script</b>.',
@@ -1974,7 +2043,10 @@ fetchWeather();
 checkUpdate();
 if(syncReady()) syncNow();
 // keep two phones fresh + check for a new app version when the tab regains focus
-window.addEventListener('focus', ()=>{ if(syncReady() && !syncState.syncing) syncNow(); checkUpdate(); });
+window.addEventListener('focus', ()=>{ resumeSync(); checkUpdate(); });
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') resumeSync(); });
+window.addEventListener('online', resumeSync);
+window.addEventListener('offline', updateSyncUI);
 </script>
 </body>
 </html>
