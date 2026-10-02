@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0ea5e9" />
+<title>Baby Care Tracker — le carnet de bébé pour deux parents</title>
+<meta name="description" content="Tétées, couches, sommeil : notés d'un pouce, partagés entre vos deux téléphones. Gratuit, sans pub, sans compte. Fonctionne aussi sur Kindle et en écran de chevet." />
+<meta property="og:title" content="Baby Care Tracker" />
+<meta property="og:description" content="Le carnet de bébé pensé pour 3 h du matin. Gratuit, sans pub, sans compte." />
+<meta property="og:image" content="site/phone.jpg" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230ea5e9'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle'%3E%F0%9F%8D%BC%3C/text%3E%3C/svg%3E" />
+<style>
+  :root{
+    color-scheme: light;
+    --brand:#0ea5e9; --brand-d:#0284c7; --bg:#f8fafc; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+    --card:#fff; --card-border:#eef2f7; --pink:#ec4899; --pink-l:#fce7f3; --pink-ink:#9d174d;
+    --soft:#f1f5f9; --hero:linear-gradient(160deg,#e0f2fe 0%,#fce7f3 100%);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      color-scheme: dark;
+      --brand:#38bdf8; --brand-d:#7dd3fc; --bg:#0b1220; --ink:#e7ecf3; --muted:#94a3b8; --line:#2a3650;
+      --card:#151d2e; --card-border:#243049; --pink:#ec4899; --pink-l:#3a2230; --pink-ink:#f9a8d4;
+      --soft:#121a2b; --hero:linear-gradient(160deg,#0f2338 0%,#2a1726 100%);
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--brand-d)}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+  header.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;height:58px}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:800;text-decoration:none;color:var(--ink);white-space:nowrap}
+  .logo span.i{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--brand);font-size:18px}
+  nav.links{display:flex;align-items:center;gap:18px;font-size:.92rem}
+  nav.links a{color:var(--muted);text-decoration:none;font-weight:600}
+  nav.links a:hover{color:var(--ink)}
+  .lang{display:flex;gap:2px;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:2px}
+  .lang button{border:0;background:none;color:var(--muted);font:inherit;font-size:.78rem;font-weight:700;padding:4px 9px;border-radius:999px;cursor:pointer}
+  .lang button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  @media (max-width:760px){ nav.links a.hide-s{display:none} }
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;padding:13px 22px;font-weight:700;text-decoration:none;border:0;cursor:pointer;font-size:1rem}
+  .btn.primary{background:var(--brand);color:#fff;box-shadow:0 6px 18px rgba(14,165,233,.3)}
+  .btn.primary:hover{background:var(--brand-d)}
+  .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+  .btn.pink{background:var(--pink);color:#fff;box-shadow:0 6px 18px rgba(236,72,153,.28)}
+  .btn.small{padding:8px 14px;font-size:.88rem;border-radius:11px}
+
+  .hero{background:var(--hero)}
+  .hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding-top:56px;padding-bottom:56px}
+  .hero h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;margin:0 0 16px;letter-spacing:-.02em}
+  .hero p.lead{font-size:1.15rem;color:var(--muted);margin:0 0 26px;max-width:34em}
+  .hero .ctas{display:flex;gap:12px;flex-wrap:wrap}
+  .hero .langs{margin-top:18px;font-size:.88rem;color:var(--muted)}
+  .phone{justify-self:center;width:min(300px,78vw);border-radius:38px;padding:10px;background:#0f172a;box-shadow:0 30px 60px rgba(15,23,42,.28)}
+  .phone img{display:block;width:100%;border-radius:29px}
+  @media (max-width:820px){ .hero .wrap{grid-template-columns:1fr;padding-top:36px} .phone{order:2} }
+
+  section{padding:64px 0}
+  section h2{font-size:clamp(1.5rem,3.4vw,2.1rem);margin:0 0 10px;letter-spacing:-.01em}
+  section p.sub{color:var(--muted);margin:0 0 30px;max-width:40em}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:860px){ .grid3{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width:560px){ .grid3{grid-template-columns:1fr} }
+  .card{background:var(--card);border:1px solid var(--card-border);border-radius:18px;padding:20px}
+  .card .e{font-size:1.7rem}
+  .card h3{margin:8px 0 6px;font-size:1.06rem}
+  .card p{margin:0;color:var(--muted);font-size:.95rem}
+
+  .screens{display:grid;grid-template-columns:minmax(0,340px) 1fr;gap:28px;align-items:center}
+  .screens figure{margin:0}
+  .screens img{display:block;width:100%;border-radius:16px;border:1px solid var(--line);box-shadow:0 10px 30px rgba(15,23,42,.12)}
+  .screens figcaption{font-weight:700;margin-top:10px}
+  .screens figcaption span{display:block;font-weight:400;color:var(--muted);font-size:.92rem}
+  .screens .col{display:grid;gap:18px}
+  @media (max-width:720px){ .screens{grid-template-columns:1fr} .screens > figure img{max-width:340px;margin:0 auto} .screens > figure figcaption{text-align:center} }
+
+  .privacy{background:var(--soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .privacy .wrap{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
+  .privacy .big{font-size:3rem}
+  .privacy ul{margin:10px 0 0;padding-left:20px;color:var(--muted)}
+  @media (max-width:600px){ .privacy .wrap{grid-template-columns:1fr} }
+
+  ol.steps{list-style:none;counter-reset:s;padding:0;margin:0;display:grid;gap:12px}
+  ol.steps li{counter-increment:s;position:relative;padding:16px 18px 16px 62px;background:var(--card);border:1px solid var(--card-border);border-radius:16px}
+  ol.steps li::before{content:counter(s);position:absolute;left:16px;top:14px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--brand);color:#fff;font-weight:800}
+  ol.steps li small{display:block;color:var(--muted);margin-top:2px}
+  details{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:4px 18px;margin-top:14px}
+  details summary{cursor:pointer;font-weight:700;padding:12px 0;list-style:none}
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:'＋';float:right;color:var(--muted)}
+  details[open] summary::after{content:'－'}
+  details ol{margin:0 0 14px;padding-left:22px;color:var(--ink)}
+  details ol li{margin:6px 0}
+  code{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:.88em}
+
+  .story{background:var(--hero)}
+  .story .paper{max-width:680px;margin:0 auto;background:var(--card);border-radius:22px;padding:34px clamp(20px,5vw,44px);box-shadow:0 20px 50px rgba(15,23,42,.10)}
+  .story .paper p{margin:0 0 14px}
+  .story .sign{font-weight:700;margin-top:20px}
+  .story .cta{margin-top:24px;text-align:center}
+
+  .faq .q{font-weight:700;margin:0 0 4px}
+  .faq .a{color:var(--muted);margin:0 0 20px}
+
+  footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);font-size:.88rem}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between}
+  footer p{margin:0}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#"><span class="i">🍼</span>Baby Care Tracker</a>
+    <nav class="links">
+      <a class="hide-s" href="#features" data-i="navFeatures">Fonctionnalités</a>
+      <a class="hide-s" href="#install" data-i="navInstall">Installer</a>
+      <a class="hide-s" href="#story" data-i="navStory">Notre histoire</a>
+      <div class="lang" role="group" aria-label="Langue">
+        <button data-lang="fr">FR</button><button data-lang="en">EN</button><button data-lang="vi">VI</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <div>
+      <h1 data-i="heroTitle">Le carnet de bébé pensé pour 3&nbsp;h du matin.</h1>
+      <p class="lead" data-i="heroLead">Tétées, couches, sommeil, température : notés d’un pouce, partagés entre vos deux téléphones. Gratuit, sans pub, sans compte.</p>
+      <div class="ctas">
+        <a class="btn primary" href="./" data-i="ctaOpen">Ouvrir l’appli</a>
+        <a class="btn ghost" href="#install" data-i="ctaHow">Comment l’installer</a>
+      </div>
+      <div class="langs">🇫🇷 Français · 🇬🇧 English · 🇻🇳 Tiếng Việt</div>
+    </div>
+    <div class="phone"><img src="site/phone.jpg" alt="" data-i-alt="altPhone" width="390" height="760"></div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <h2 data-i="featTitle">Tout ce qu’il faut, rien de plus</h2>
+    <p class="sub" data-i="featSub">Pensé à la maternité, entre deux tétées, pour des parents fatigués qui n’ont qu’une main de libre.</p>
+    <div class="grid3">
+      <div class="card"><div class="e">🤱</div><h3 data-i="f1t">Allaitement des deux côtés</h3><p data-i="f1d">Un minuteur gauche / droite avec pause, et le sein à proposer la prochaine fois.</p></div>
+      <div class="card"><div class="e">🧷</div><h3 data-i="f2t">Couches</h3><p data-i="f2d">Pipi, selles, couleur et texture, avec des repères généraux sur les couleurs qui doivent faire appeler le médecin.</p></div>
+      <div class="card"><div class="e">👫</div><h3 data-i="f3t">Deux téléphones, un seul carnet</h3><p data-i="f3d">Chaque parent note de son côté ; tout se synchronise grâce à votre propre Google Sheet.</p></div>
+      <div class="card"><div class="e">📖</div><h3 data-i="f4t">Mode liseuse</h3><p data-i="f4d">Sur Kindle : grands boutons, noir et blanc, un écran doux pour la table de nuit.</p></div>
+      <div class="card"><div class="e">🌙</div><h3 data-i="f5t">Écran de chevet</h3><p data-i="f5d">Un ancien téléphone reste allumé et affiche depuis combien de temps bébé a mangé, et quel sein proposer.</p></div>
+      <div class="card"><div class="e">💊</div><h3 data-i="f6t">Rappels et courbes</h3><p data-i="f6d">Vitamine D, alerte si le dernier repas date, courbe de poids et tendances de la semaine.</p></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <h2 data-i="scrTitle">Sur tous vos écrans</h2>
+    <p class="sub" data-i="scrSub">Le même carnet, adapté à chaque appareil de la maison.</p>
+    <div class="screens">
+      <figure><img src="site/kindle.jpg" alt="" data-i-alt="altKindle" width="600" height="800"><figcaption data-i="capKindle">Liseuse (Kindle)<span>Grands boutons, sans animation, lisible de nuit.</span></figcaption></figure>
+      <div class="col">
+        <figure><img src="site/display.jpg" alt="" data-i-alt="altDisplay" width="844" height="390"><figcaption data-i="capDisplay">Écran de chevet<span>Fond noir, il se met à jour tout seul. Rien à toucher.</span></figcaption></figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="privacy">
+  <section>
+    <div class="wrap">
+      <div class="big">🔒</div>
+      <div>
+        <h2 data-i="privTitle">Vos données restent chez vous</h2>
+        <p class="sub" style="margin:0" data-i="privText">Pas de compte, pas de pub, pas de pistage. Tout est enregistré dans votre navigateur et, si vous le souhaitez, dans un Google Sheet qui vous appartient. Nous ne voyons rien.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<section id="install">
+  <div class="wrap">
+    <h2 data-i="instTitle">Installer en 2 minutes</h2>
+    <p class="sub" data-i="instSub">Rien à télécharger dans un store : c’est une page web qui s’installe comme une appli.</p>
+    <ol class="steps">
+      <li data-i="s1">Ouvrez l’appli sur votre téléphone, puis ajoutez-la à l’écran d’accueil.<small>iPhone : Partager → « Sur l’écran d’accueil ». Android : menu ⋮ → « Ajouter à l’écran d’accueil ».</small></li>
+      <li data-i="s2">Dans <b>Réglages</b>, indiquez le prénom et la date de naissance de bébé.<small>La date de naissance sert aux repères selon l’âge (fièvre, nombre de couches).</small></li>
+      <li data-i="s3">C’est prêt.<small>Tout fonctionne hors ligne, même dans une chambre de maternité sans réseau.</small></li>
+    </ol>
+    <details>
+      <summary data-i="shareTitle">Partager entre deux téléphones (5 min, facultatif)</summary>
+      <ol data-i="shareSteps">
+        <li>Créez un Google Sheet, puis <b>Extensions → Apps Script</b>.</li>
+        <li>Collez-y <a href="google-apps-script.gs">ce script</a> et enregistrez.</li>
+        <li><b>Déployer → Nouveau déploiement → Application Web</b> — Exécuter en tant que : <i>moi</i> ; Accès : <i>tout le monde</i>.</li>
+        <li>Copiez l’adresse qui finit par <code>/exec</code> dans l’appli : <b>Réglages → Synchronisation (Google Sheet)</b>.</li>
+        <li>Sur ce téléphone, touchez <b>Copier le lien</b> et ouvrez ce lien sur le deuxième téléphone : il est connecté.</li>
+      </ol>
+    </details>
+    <details>
+      <summary data-i="kTitle">Sur une liseuse ou un écran de chevet</summary>
+      <ol data-i="kSteps">
+        <li><b>Kindle</b> : ouvrez l’appli dans le navigateur, puis <b>Réglages → Mode liseuse</b>.</li>
+        <li><b>Écran de chevet</b> : sur un ancien téléphone, <b>Réglages → Écran permanent → Ouvrir l’écran</b>, puis mettez la page en favori et laissez le téléphone branché.</li>
+        <li>Pour les connecter au même carnet, utilisez <b>Copier le lien</b> / <b>Copier le lien écran</b> : le lien est court, pour pouvoir le taper à la main.</li>
+      </ol>
+    </details>
+  </div>
+</section>
+
+<section id="story" class="story">
+  <div class="wrap">
+    <div class="paper">
+      <h2 data-i="storyTitle">💛 Notre histoire</h2>
+      <p data-i="p1">Été 2026, en pleine canicule, à la maternité de Versailles (Hôpital André Mignot). Deux ventilateurs, les fenêtres grandes ouvertes, et notre fille A. qui vient de naître.</p>
+      <p data-i="p2">Il est 3 h du matin. On note tout sur la feuille donnée par les infirmières et dans les notes du téléphone, mais c’est vite trop limité : quel sein la dernière fois ? Il y a combien de temps ? Et la couleur des selles ?</p>
+      <p data-i="p3">Alors, pendant qu’Alex allaitait, Taï a commencé à écrire cette appli — sur son téléphone. Depuis, elle nous accompagne chaque nuit.</p>
+      <p data-i="p4">Elle est gratuite, sans pub, et vos données restent chez vous. Si elle vous aide aussi, vous pouvez nous offrir un croissant 🥐, un biberon de lait 🍼 ou un paquet de couches — ce que vous voulez. Ça nous aide à continuer de l’améliorer.</p>
+      <p class="sign" data-i="sign">— Taï &amp; Alex, parents d’A.</p>
+      <div class="cta"><a class="btn pink" href="https://ko-fi.com/taidoan" target="_blank" rel="noopener" data-i="croissant">🥐 Nous offrir un croissant</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap" style="max-width:760px">
+    <h2 data-i="faqTitle">Questions fréquentes</h2>
+    <p class="q" data-i="q1">C’est vraiment gratuit&nbsp;?</p>
+    <p class="a" data-i="a1">Oui. Pas d’abonnement, pas de pub, pas de version payante. Si vous voulez soutenir le projet, il y a le croissant 🥐.</p>
+    <p class="q" data-i="q2">Est-ce un avis médical&nbsp;?</p>
+    <p class="a" data-i="a2">Non. Les repères affichés (fièvre, couleur des selles, nombre de couches) sont des informations générales et ne remplacent pas l’avis d’un professionnel de santé. En cas de doute, appelez votre médecin, votre sage-femme ou le 15.</p>
+    <p class="q" data-i="q3">Ça marche sans internet&nbsp;?</p>
+    <p class="a" data-i="a3">Oui. Tout se note hors ligne ; les entrées partent vers l’autre téléphone dès le retour du réseau.</p>
+    <p class="q" data-i="q4">Où sont mes données&nbsp;?</p>
+    <p class="a" data-i="a4">Dans le navigateur de votre téléphone et, si vous activez le partage, dans votre propre Google Sheet. Nous n’avons pas de serveur et ne voyons rien.</p>
+    <div style="margin-top:28px"><a class="btn primary" href="./" data-i="ctaOpen">Ouvrir l’appli</a></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p data-i="foot1">Fait avec 💛 à Versailles par Taï &amp; Alex.</p>
+    <p><a href="./" data-i="footApp">L’appli</a> · <a href="https://ko-fi.com/taidoan" target="_blank" rel="noopener">Ko-fi</a> · <a href="https://github.com/doantientai/baby-care-tracker-" target="_blank" rel="noopener" data-i="footCode">Code source</a></p>
+    <p style="flex-basis:100%" data-i="foot2">Informations générales, pas un dispositif médical. En cas de doute, appelez un professionnel de santé.</p>
+  </div>
+</footer>
+
+<script>
+// French is the page's own text; EN and VI replace it. The choice follows the
+// app's language when this browser already uses the app.
+var T = {
+  en: {
+    navFeatures:'Features', navInstall:'Install', navStory:'Our story',
+    heroTitle:'The baby log built for 3am.',
+    heroLead:'Feeds, diapers, sleep, temperature: logged with one thumb, shared between both parents’ phones. Free, no ads, no account.',
+    ctaOpen:'Open the app', ctaHow:'How to install',
+    featTitle:'Everything you need, nothing more',
+    featSub:'Designed in a maternity ward, between feeds, for tired parents with one free hand.',
+    f1t:'Two-sided breastfeeding', f1d:'A left / right timer with pause, and which breast to offer next time.',
+    f2t:'Diapers', f2d:'Pee, poop, colour and texture, with general guidance on which colours mean calling the doctor.',
+    f3t:'Two phones, one log', f3d:'Each parent logs on their own phone; everything syncs through your own Google Sheet.',
+    f4t:'E-reader mode', f4d:'On a Kindle: big buttons, black and white, a gentle screen for the bedside.',
+    f5t:'Bedside display', f5d:'An old phone stays on and shows how long since the last feed, and which breast to offer.',
+    f6t:'Reminders and charts', f6d:'Vitamin D, a nudge when the last feed was a while ago, weight curve and weekly trends.',
+    scrTitle:'On every screen', scrSub:'The same log, adapted to each device in the house.',
+    capKindle:'E-reader (Kindle)<span>Big buttons, no animation, readable at night.</span>',
+    capDisplay:'Bedside display<span>Black background, updates on its own. Nothing to touch.</span>',
+    altPhone:'The app on a phone, with the breastfeeding timer running', altKindle:'The app on a Kindle e-reader', altDisplay:'The bedside display: time since the last feed and the next breast',
+    privTitle:'Your data stays with you',
+    privText:'No account, no ads, no tracking. Everything is stored in your browser and, if you want, in a Google Sheet that you own. We see nothing.',
+    instTitle:'Install in 2 minutes', instSub:'Nothing to download from a store: it’s a web page that installs like an app.',
+    s1:'Open the app on your phone, then add it to your home screen.<small>iPhone: Share → “Add to Home Screen”. Android: menu ⋮ → “Add to Home screen”.</small>',
+    s2:'In <b>Settings</b>, enter your baby’s name and date of birth.<small>The date of birth drives the age-based guidance (fever, number of diapers).</small>',
+    s3:'You’re ready.<small>Everything works offline, even in a maternity room with no signal.</small>',
+    shareTitle:'Share between two phones (5 min, optional)',
+    shareSteps:'<li>Create a Google Sheet, then <b>Extensions → Apps Script</b>.</li><li>Paste <a href="google-apps-script.gs">this script</a> and save.</li><li><b>Deploy → New deployment → Web app</b> — Execute as: <i>Me</i>; Who has access: <i>Anyone</i>.</li><li>Copy the address ending in <code>/exec</code> into the app: <b>Settings → Cloud sync (Google Sheet)</b>.</li><li>On that phone, tap <b>Copy setup link</b> and open the link on the second phone: it’s connected.</li>',
+    kTitle:'On an e-reader or a bedside display',
+    kSteps:'<li><b>Kindle</b>: open the app in the browser, then <b>Settings → E-reader mode</b>.</li><li><b>Bedside display</b>: on an old phone, <b>Settings → Always-on display → Open display</b>, then bookmark the page and keep the phone plugged in.</li><li>To connect them to the same log, use <b>Copy setup link</b> / <b>Copy display link</b>: the link is short so you can type it by hand.</li>',
+    storyTitle:'💛 Our story',
+    p1:'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.',
+    p2:'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?',
+    p3:'So while Alex was breastfeeding, Taï started writing this app — on his phone. It has been with us every night since.',
+    p4:'It’s free, with no ads, and your data stays with you. If it helps you too, you can buy us a croissant 🥐, a bottle of milk 🍼 or a pack of diapers — whatever you like. It helps us keep improving it.',
+    sign:'— Taï &amp; Alex, parents of A.', croissant:'🥐 Buy us a croissant',
+    faqTitle:'Questions',
+    q1:'Is it really free?', a1:'Yes. No subscription, no ads, no paid version. If you’d like to support the project, there’s the croissant 🥐.',
+    q2:'Is it medical advice?', a2:'No. The guidance shown (fever, stool colour, number of diapers) is general information and does not replace a health professional. When in doubt, call your doctor, your midwife or emergency services.',
+    q3:'Does it work without internet?', a3:'Yes. Everything is logged offline; entries go to the other phone as soon as the network is back.',
+    q4:'Where is my data?', a4:'In your phone’s browser and, if you turn on sharing, in your own Google Sheet. We have no server and see nothing.',
+    foot1:'Made with 💛 in Versailles by Taï &amp; Alex.', footApp:'The app', footCode:'Source code',
+    foot2:'General information, not a medical device. When in doubt, call a health professional.',
+    title:'Baby Care Tracker — the baby log for two parents'
+  },
+  vi: {
+    navFeatures:'Tính năng', navInstall:'Cài đặt', navStory:'Câu chuyện',
+    heroTitle:'Sổ theo dõi em bé dành cho lúc 3 giờ sáng.',
+    heroLead:'Cữ bú, tã, giấc ngủ, nhiệt độ: ghi bằng một ngón tay, chia sẻ giữa điện thoại của cả bố và mẹ. Miễn phí, không quảng cáo, không cần tài khoản.',
+    ctaOpen:'Mở ứng dụng', ctaHow:'Cách cài đặt',
+    featTitle:'Đủ những gì cần, không hơn',
+    featSub:'Được nghĩ ra ở khoa sản, giữa những cữ bú, cho những ông bố bà mẹ mệt mỏi chỉ còn một tay rảnh.',
+    f1t:'Cho bú hai bên', f1d:'Đồng hồ trái / phải có tạm dừng, và gợi ý bên nào cho bú lần sau.',
+    f2t:'Tã', f2d:'Tè, ị, màu sắc và độ đặc, kèm thông tin chung về những màu cần gọi bác sĩ.',
+    f3t:'Hai điện thoại, một cuốn sổ', f3d:'Mỗi người ghi trên điện thoại của mình; mọi thứ đồng bộ qua Google Sheet của chính bạn.',
+    f4t:'Chế độ máy đọc sách', f4d:'Trên Kindle: nút lớn, đen trắng, màn hình dịu nhẹ cho đầu giường.',
+    f5t:'Màn hình đầu giường', f5d:'Một chiếc điện thoại cũ luôn bật, cho biết bé ăn cách đây bao lâu và nên cho bú bên nào.',
+    f6t:'Nhắc nhở và biểu đồ', f6d:'Vitamin D, nhắc khi cữ bú trước đã lâu, biểu đồ cân nặng và xu hướng trong tuần.',
+    scrTitle:'Trên mọi màn hình', scrSub:'Cùng một cuốn sổ, phù hợp với từng thiết bị trong nhà.',
+    capKindle:'Máy đọc sách (Kindle)<span>Nút lớn, không hiệu ứng, dễ đọc ban đêm.</span>',
+    capDisplay:'Màn hình đầu giường<span>Nền đen, tự cập nhật. Không cần chạm vào.</span>',
+    altPhone:'Ứng dụng trên điện thoại, đồng hồ cho bú đang chạy', altKindle:'Ứng dụng trên máy đọc sách Kindle', altDisplay:'Màn hình đầu giường: thời gian từ cữ bú trước và bên cho bú tiếp theo',
+    privTitle:'Dữ liệu là của bạn',
+    privText:'Không tài khoản, không quảng cáo, không theo dõi. Mọi thứ được lưu trong trình duyệt và, nếu bạn muốn, trong một Google Sheet của riêng bạn. Chúng tôi không thấy gì cả.',
+    instTitle:'Cài đặt trong 2 phút', instSub:'Không cần tải từ kho ứng dụng: đây là một trang web cài như một ứng dụng.',
+    s1:'Mở ứng dụng trên điện thoại, rồi thêm vào màn hình chính.<small>iPhone: Chia sẻ → “Thêm vào MH chính”. Android: menu ⋮ → “Thêm vào màn hình chính”.</small>',
+    s2:'Trong <b>Cài đặt</b>, nhập tên và ngày sinh của bé.<small>Ngày sinh dùng cho các gợi ý theo tuổi (sốt, số tã mỗi ngày).</small>',
+    s3:'Xong rồi.<small>Mọi thứ hoạt động không cần mạng, kể cả trong phòng sinh không có sóng.</small>',
+    shareTitle:'Chia sẻ giữa hai điện thoại (5 phút, không bắt buộc)',
+    shareSteps:'<li>Tạo một Google Sheet, rồi <b>Tiện ích mở rộng → Apps Script</b>.</li><li>Dán <a href="google-apps-script.gs">đoạn mã này</a> và lưu.</li><li><b>Triển khai → Tùy chọn triển khai mới → Ứng dụng web</b> — Thực thi với tư cách: <i>Tôi</i>; Người có quyền truy cập: <i>Bất kỳ ai</i>.</li><li>Sao chép địa chỉ kết thúc bằng <code>/exec</code> vào ứng dụng: <b>Cài đặt → Đồng bộ (Google Sheet)</b>.</li><li>Trên điện thoại này, chạm <b>Sao chép liên kết</b> và mở liên kết đó trên điện thoại thứ hai: thế là đã kết nối.</li>',
+    kTitle:'Trên máy đọc sách hoặc màn hình đầu giường',
+    kSteps:'<li><b>Kindle</b>: mở ứng dụng trong trình duyệt, rồi <b>Cài đặt → Chế độ máy đọc sách</b>.</li><li><b>Màn hình đầu giường</b>: trên một điện thoại cũ, <b>Cài đặt → Màn hình luôn bật → Mở màn hình</b>, rồi lưu trang vào dấu trang và cắm sạc.</li><li>Để kết nối vào cùng một cuốn sổ, dùng <b>Sao chép liên kết</b> / <b>Sao chép liên kết màn hình</b>: liên kết ngắn để có thể gõ tay.</li>',
+    storyTitle:'💛 Câu chuyện của chúng tôi',
+    p1:'Mùa hè 2026, giữa đợt nắng nóng, tại khoa sản Versailles (Hôpital André Mignot). Hai chiếc quạt chạy không ngừng, cửa sổ mở toang, và con gái A. của chúng tôi vừa chào đời.',
+    p2:'3 giờ sáng. Chúng tôi ghi mọi thứ vào tờ giấy các cô y tá đưa và vào ghi chú điện thoại, nhưng chẳng mấy chốc đã không đủ: lần trước bú bên nào? Cách đây bao lâu? Phân màu gì?',
+    p3:'Thế là trong lúc Alex cho con bú, Taï bắt đầu viết ứng dụng này — ngay trên điện thoại. Từ đó, nó đồng hành cùng chúng tôi mỗi đêm.',
+    p4:'Ứng dụng miễn phí, không quảng cáo, và dữ liệu là của bạn. Nếu nó cũng giúp được bạn, bạn có thể mời chúng tôi một bát phở 🍜, một bình sữa 🍼 hay một bịch tã — tùy tâm. Nhờ vậy chúng tôi có thể tiếp tục cải thiện nó.',
+    sign:'— Taï &amp; Alex, bố mẹ của A.', croissant:'🍜 Mời chúng tôi một bát phở',
+    faqTitle:'Câu hỏi thường gặp',
+    q1:'Có thật sự miễn phí không?', a1:'Có. Không thuê bao, không quảng cáo, không có bản trả phí. Nếu muốn ủng hộ dự án, bạn có thể mời chúng tôi một bát phở 🍜.',
+    q2:'Đây có phải lời khuyên y tế không?', a2:'Không. Các gợi ý (sốt, màu phân, số tã) là thông tin chung và không thay thế ý kiến của nhân viên y tế. Khi có nghi ngờ, hãy gọi bác sĩ, nữ hộ sinh hoặc cấp cứu.',
+    q3:'Có dùng được khi không có mạng không?', a3:'Có. Mọi thứ được ghi khi không có mạng; các mục sẽ được gửi sang điện thoại kia ngay khi có mạng lại.',
+    q4:'Dữ liệu của tôi nằm ở đâu?', a4:'Trong trình duyệt trên điện thoại của bạn và, nếu bật chia sẻ, trong Google Sheet của chính bạn. Chúng tôi không có máy chủ và không thấy gì cả.',
+    foot1:'Làm với 💛 tại Versailles bởi Taï &amp; Alex.', footApp:'Ứng dụng', footCode:'Mã nguồn',
+    foot2:'Thông tin chung, không phải thiết bị y tế. Khi có nghi ngờ, hãy gọi nhân viên y tế.',
+    title:'Baby Care Tracker — sổ theo dõi em bé cho bố mẹ'
+  }
+};
+// Keep the French originals so switching back works without a reload.
+var FR = { title: document.title };
+Array.prototype.forEach.call(document.querySelectorAll('[data-i]'), function(el){ FR[el.getAttribute('data-i')] = el.innerHTML; });
+Array.prototype.forEach.call(document.querySelectorAll('[data-i-alt]'), function(el){ FR[el.getAttribute('data-i-alt')] = el.getAttribute('alt') || ''; });
+FR.altPhone = 'L’appli sur un téléphone, minuteur de tétée en cours';
+FR.altKindle = 'L’appli sur une liseuse Kindle';
+FR.altDisplay = 'L’écran de chevet : temps depuis le dernier repas et prochain sein';
+
+function setLang(lang){
+  var d = lang === 'fr' ? FR : (T[lang] || FR);
+  Array.prototype.forEach.call(document.querySelectorAll('[data-i]'), function(el){ var k = el.getAttribute('data-i'); if(d[k] != null) el.innerHTML = d[k]; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-i-alt]'), function(el){ var k = el.getAttribute('data-i-alt'); if(d[k] != null) el.setAttribute('alt', d[k]); });
+  document.title = d.title || FR.title;
+  document.documentElement.lang = lang;
+  Array.prototype.forEach.call(document.querySelectorAll('.lang button'), function(b){ b.classList.toggle('on', b.getAttribute('data-lang') === lang); });
+  try{ localStorage.setItem('bct.siteLang', lang); }catch(e){}
+}
+function initialLang(){
+  try{ var s = localStorage.getItem('bct.siteLang'); if(s) return s; }catch(e){}
+  try{ var a = JSON.parse(localStorage.getItem('bct.settings') || '{}'); if(a.lang && a.lang !== 'en') return a.lang; }catch(e){}
+  var n = (navigator.language || 'fr').slice(0,2).toLowerCase();
+  return n === 'vi' ? 'vi' : n === 'en' ? 'en' : 'fr';
+}
+Array.prototype.forEach.call(document.querySelectorAll('.lang button'), function(b){ b.addEventListener('click', function(){ setLang(b.getAttribute('data-lang')); }); });
+setLang(initialLang());
+</script>
+</body>
+</html>

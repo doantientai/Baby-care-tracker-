@@ -262,7 +262,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.42';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.43';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = 'https://ko-fi.com/taidoan';
 /* ============================================================ Baby Care Tracker
@@ -538,6 +538,7 @@ const EN = {
   syncSending_one:'Sending 1 entry…', syncSending_other:'Sending {n} entries…',
   syncPending_one:'1 entry not sent yet', syncPending_other:'{n} entries not sent yet',
   syncOffline_one:'Offline — 1 entry will be sent when you’re back online', syncOffline_other:'Offline — {n} entries will be sent when you’re back online',
+  ageShort_d:'{n}d', ageShort_w:'{n}w',
   occ_weight:'🎉 {name} is back to birth weight!',
   occ_month:'🎂 {name} is 1 month old! Well done on this first month.',
   occ_days100:'💯 100 days with {name}!',
@@ -566,6 +567,7 @@ const FR = {
   syncSending_one:'Envoi d’1 entrée…', syncSending_other:'Envoi de {n} entrées…',
   syncPending_one:'1 entrée pas encore envoyée', syncPending_other:'{n} entrées pas encore envoyées',
   syncOffline_one:'Hors ligne — 1 entrée sera envoyée au retour du réseau', syncOffline_other:'Hors ligne — {n} entrées seront envoyées au retour du réseau',
+  ageShort_d:'{n} j', ageShort_w:'{n} sem.',
   occ_weight:'🎉 {name} a retrouvé son poids de naissance !',
   occ_month:'🎂 {name} a 1 mois ! Bravo pour ce premier mois.',
   occ_days100:'💯 100 jours avec {name} !',
@@ -722,6 +724,7 @@ const VI = {
   syncSending_one:'Đang gửi 1 mục…', syncSending_other:'Đang gửi {n} mục…',
   syncPending_one:'1 mục chưa được gửi', syncPending_other:'{n} mục chưa được gửi',
   syncOffline_one:'Mất kết nối — 1 mục sẽ được gửi khi có mạng lại', syncOffline_other:'Mất kết nối — {n} mục sẽ được gửi khi có mạng lại',
+  ageShort_d:'{n} ngày', ageShort_w:'{n} tuần',
   occ_weight:'🎉 {name} đã lấy lại cân nặng lúc sinh!',
   occ_month:'🎂 Chúc mừng đầy tháng {name}! Bạn đã làm rất tốt.',
   occ_days100:'💯 100 ngày bên {name}!',
@@ -1465,7 +1468,7 @@ function heroDur(sec){
   const h=Math.floor(m/60), mm=m%60;
   return `<span class="n">${h}</span><span class="u">h</span><span class="n">${pad(mm)}</span><span class="u">m</span>`;
 }
-function ageShort(days){ if(days==null) return ''; return days<7 ? days+'d' : Math.floor(days/7)+'w'; }
+function ageShort(days){ if(days==null) return ''; return days<7 ? t('ageShort_d',{n:days}) : t('ageShort_w',{n:Math.floor(days/7)}); }
 function viewDisplay(){
   const now=Date.now();
   const list=todays();
