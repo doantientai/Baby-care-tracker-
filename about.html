@@ -244,7 +244,7 @@
 <footer>
   <div class="wrap">
     <p data-i="foot1">Fait avec 💛 à Versailles par Taï &amp; Alex.</p>
-    <p><a href="./" data-i="footApp">L’appli</a> · <a href="https://ko-fi.com/taidoan" target="_blank" rel="noopener">Ko-fi</a> · <a href="https://github.com/doantientai/baby-care-tracker-" target="_blank" rel="noopener" data-i="footCode">Code source</a></p>
+    <p><a href="./" data-i="footApp">L’appli</a> · <a href="site/leaflet-fr.pdf" data-i="footLeaflet" data-i-href="leafletHref">Flyer à imprimer (PDF)</a> · <a href="https://ko-fi.com/taidoan" target="_blank" rel="noopener">Ko-fi</a> · <a href="https://github.com/doantientai/baby-care-tracker-" target="_blank" rel="noopener" data-i="footCode">Code source</a></p>
     <p style="flex-basis:100%" data-i="foot2">Informations générales, pas un dispositif médical. En cas de doute, appelez un professionnel de santé.</p>
   </div>
 </footer>
@@ -291,7 +291,7 @@ var T = {
     q2:'Is it medical advice?', a2:'No. The guidance shown (fever, stool colour, number of diapers) is general information and does not replace a health professional. When in doubt, call your doctor, your midwife or emergency services.',
     q3:'Does it work without internet?', a3:'Yes. Everything is logged offline; entries go to the other phone as soon as the network is back.',
     q4:'Where is my data?', a4:'In your phone’s browser and, if you turn on sharing, in your own Google Sheet. We have no server and see nothing.',
-    foot1:'Made with 💛 in Versailles by Taï &amp; Alex.', footApp:'The app', footCode:'Source code',
+    foot1:'Made with 💛 in Versailles by Taï &amp; Alex.', footApp:'The app', footLeaflet:'Printable leaflet (PDF)', leafletHref:'site/leaflet-en.pdf', footCode:'Source code',
     foot2:'General information, not a medical device. When in doubt, call a health professional.',
     title:'Baby Care Tracker — the baby log for two parents'
   },
@@ -333,7 +333,7 @@ var T = {
     q2:'Đây có phải lời khuyên y tế không?', a2:'Không. Các gợi ý (sốt, màu phân, số tã) là thông tin chung và không thay thế ý kiến của nhân viên y tế. Khi có nghi ngờ, hãy gọi bác sĩ, nữ hộ sinh hoặc cấp cứu.',
     q3:'Có dùng được khi không có mạng không?', a3:'Có. Mọi thứ được ghi khi không có mạng; các mục sẽ được gửi sang điện thoại kia ngay khi có mạng lại.',
     q4:'Dữ liệu của tôi nằm ở đâu?', a4:'Trong trình duyệt trên điện thoại của bạn và, nếu bật chia sẻ, trong Google Sheet của chính bạn. Chúng tôi không có máy chủ và không thấy gì cả.',
-    foot1:'Làm với 💛 tại Versailles bởi Taï &amp; Alex.', footApp:'Ứng dụng', footCode:'Mã nguồn',
+    foot1:'Làm với 💛 tại Versailles bởi Taï &amp; Alex.', footApp:'Ứng dụng', footLeaflet:'Tờ rơi để in (PDF)', leafletHref:'site/leaflet-vi.pdf', footCode:'Mã nguồn',
     foot2:'Thông tin chung, không phải thiết bị y tế. Khi có nghi ngờ, hãy gọi nhân viên y tế.',
     title:'Baby Care Tracker — sổ theo dõi em bé cho bố mẹ'
   }
@@ -342,6 +342,7 @@ var T = {
 var FR = { title: document.title };
 Array.prototype.forEach.call(document.querySelectorAll('[data-i]'), function(el){ FR[el.getAttribute('data-i')] = el.innerHTML; });
 Array.prototype.forEach.call(document.querySelectorAll('[data-i-alt]'), function(el){ FR[el.getAttribute('data-i-alt')] = el.getAttribute('alt') || ''; });
+FR.leafletHref = 'site/leaflet-fr.pdf';
 FR.altPhone = 'L’appli sur un téléphone, minuteur de tétée en cours';
 FR.altKindle = 'L’appli sur une liseuse Kindle';
 FR.altDisplay = 'L’écran de chevet : temps depuis le dernier repas et prochain sein';
@@ -350,6 +351,7 @@ function setLang(lang){
   var d = lang === 'fr' ? FR : (T[lang] || FR);
   Array.prototype.forEach.call(document.querySelectorAll('[data-i]'), function(el){ var k = el.getAttribute('data-i'); if(d[k] != null) el.innerHTML = d[k]; });
   Array.prototype.forEach.call(document.querySelectorAll('[data-i-alt]'), function(el){ var k = el.getAttribute('data-i-alt'); if(d[k] != null) el.setAttribute('alt', d[k]); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-i-href]'), function(el){ var k = el.getAttribute('data-i-href'); if(d[k] != null) el.setAttribute('href', d[k]); });
   document.title = d.title || FR.title;
   document.documentElement.lang = lang;
   Array.prototype.forEach.call(document.querySelectorAll('.lang button'), function(b){ b.classList.toggle('on', b.getAttribute('data-lang') === lang); });
