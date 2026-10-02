@@ -244,7 +244,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.32';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.33';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = '';
 /* ============================================================ Baby Care Tracker
@@ -271,7 +271,6 @@ const DEFAULT_SETTINGS = {
   lang: 'en', theme: 'system',
   vitDEnabled: true, vitDTime: '07:00',
   showSleep: true,
-  supportAsked: false,   // the one-time 1-month pay-what-you-want prompt was answered
   supportOpened: false,  // the pay-what-you-want link was opened → stop all nudges
   storyHidden: false,    // the "Our story" link during feeds was dismissed (✕)
   kindle: false,
@@ -472,7 +471,18 @@ function updateSyncUI(){
 // templated strings (with {placeholders}). Unknown keys fall back to themselves.
 const EN = {
   day_one:'{n} day old', day_other:'{n} days old',
-  supportTitle_one:'{name} is 1 month old!', supportTitle_other:'{name} is {n} months old!',
+  occ_weight:'🎉 {name} is back to birth weight!',
+  occ_month:'🎂 {name} is 1 month old! Well done on this first month.',
+  occ_days100:'💯 100 days with {name}!',
+  occ_days100_n:'💯 100 days with {name}: {feeds} feeds, {diapers} diapers.',
+  occ_year:'🎈 {name} is 1 year old!',
+  occ_year_n:'🎈 {name} is 1 year old! Year one: {feeds} feeds, {diapers} diapers.',
+  sbridge_weight:'{name} is back to birth weight. We know how much those first grams are waited for — we were there too.',
+  sbridge_month:'One month with {name} already. Ours flew by too, between feeds, diapers and short nights. It all started like this:',
+  sbridge_days100:'100 days with {name}. Every feed, every diaper, every night counts — and for us, it all started like this:',
+  sbridge_year:'One year with {name}. Sleepless nights, smiles, and so many firsts. Thank you for letting this app be part of it. For us, it all started like this:',
+  sclose_month:'Happy first month, {name} 💛',
+  sclose_year:'Happy birthday, {name} 🎂💛',
   nursery:'🛏️ Keep the nursery at {min}–{max}°C for safe sleep (ideal ~{ideal}°C).',
   target:'target ≥ {n}/day',
   lastRel:'last {rel}',
@@ -490,7 +500,18 @@ const EN = {
 const FR = {
   // templated
   day_one:'{n} jour', day_other:'{n} jours',
-  supportTitle_one:'{name} a 1 mois !', supportTitle_other:'{name} a {n} mois !',
+  occ_weight:'🎉 {name} a retrouvé son poids de naissance !',
+  occ_month:'🎂 {name} a 1 mois ! Bravo pour ce premier mois.',
+  occ_days100:'💯 100 jours avec {name} !',
+  occ_days100_n:'💯 100 jours avec {name} : {feeds} tétées, {diapers} couches.',
+  occ_year:'🎈 {name} a 1 an !',
+  occ_year_n:'🎈 {name} a 1 an ! Sa première année : {feeds} tétées, {diapers} couches.',
+  sbridge_weight:'{name} a retrouvé son poids de naissance. Ces premiers grammes, on sait combien on les attend — on est passés par là aussi.',
+  sbridge_month:'Déjà un mois avec {name}. Le nôtre aussi a filé entre les tétées, les couches et les nuits courtes. Tout a commencé comme ça :',
+  sbridge_days100:'100 jours avec {name}. Chaque tétée, chaque couche, chaque nuit compte — et pour nous, tout a commencé comme ça :',
+  sbridge_year:'Un an avec {name}. Des nuits blanches, des sourires, et tant de premières fois. Merci d’avoir laissé cette appli en faire partie. Pour nous, tout a commencé comme ça :',
+  sclose_month:'Joyeux premier mois, {name} 💛',
+  sclose_year:'Joyeux anniversaire, {name} 🎂💛',
   nursery:'🛏️ Maintenez la chambre à {min}–{max}°C pour un sommeil sûr (idéal ~{ideal}°C).',
   target:'objectif ≥ {n}/jour',
   lastRel:'dernier {rel}',
@@ -542,9 +563,13 @@ const FR = {
   'Since last feed':'Depuis le dernier repas',
   'Time zone':'Fuseau horaire','Device default':'Réglage de l’appareil','Now showing':'Affiche maintenant',
   'Always-on display':'Écran permanent','A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.':'Un tableau d’allaitement en lecture seule pour un téléphone toujours allumé en paysage (écran noir) : temps depuis le dernier repas et prochain sein. Ajoutez la page ouverte aux favoris.','Open display':'Ouvrir l’écran',
-  'This app was built at 3am by a first-time dad, while his baby daughter fed. It’s free, with no ads and no tracking. If it helped you through these first weeks, you can buy us a croissant — or whatever you like. Thank you!':'Cette appli a été créée à 3 h du matin par un papa pour la première fois, pendant que sa fille tétait. Elle est gratuite, sans pub ni pistage. Si elle vous a aidés pendant ces premières semaines, vous pouvez nous offrir un croissant — ou ce que vous voulez. Merci !',
   'Free, no ads, no tracking. If it helps your family, you can pay what you want.':'Gratuite, sans pub ni pistage. Si elle aide votre famille, vous pouvez donner ce que vous voulez.',
-  'No thanks':'Non merci','Support the project':'Soutenir le projet',
+  'Support the project':'Soutenir le projet',
+  'While your baby feeds, here’s a short story.':'Pendant la tétée, une petite histoire.',
+  'Enjoy the feed 💛':'Bonne tétée 💛',
+  'Well done! 💛':'Bravo ! 💛',
+  'Here’s to the first 100 days 💛':'Bravo pour ces 100 jours 💛',
+  'Thank you for being here 💛':'Merci d’être là 💛',
   'Our story':'Notre histoire','Read our story':'Lire notre histoire','Hide':'Masquer',
   'This app was born at 3am, in a heatwave…':'Cette appli est née à 3 h du matin, en pleine canicule…','Read':'Lire','🥐 Buy us a croissant':'🥐 Nous offrir un croissant',
   'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.':'Été 2026, en pleine canicule, à la maternité de Versailles (Hôpital André Mignot). Deux ventilateurs, les fenêtres grandes ouvertes, et notre fille A. qui vient de naître.',
@@ -627,7 +652,18 @@ const FR = {
 const VI = {
   // templated
   day_one:'{n} ngày tuổi', day_other:'{n} ngày tuổi',
-  supportTitle_one:'{name} đã được 1 tháng!', supportTitle_other:'{name} đã được {n} tháng!',
+  occ_weight:'🎉 {name} đã lấy lại cân nặng lúc sinh!',
+  occ_month:'🎂 Chúc mừng đầy tháng {name}! Bạn đã làm rất tốt.',
+  occ_days100:'💯 100 ngày bên {name}!',
+  occ_days100_n:'💯 100 ngày bên {name}: {feeds} cữ bú, {diapers} lần thay tã.',
+  occ_year:'🎈 Chúc mừng thôi nôi {name}!',
+  occ_year_n:'🎈 Chúc mừng thôi nôi {name}! Năm đầu tiên: {feeds} cữ bú, {diapers} lần thay tã.',
+  sbridge_weight:'{name} đã lấy lại cân nặng lúc sinh. Chúng tôi hiểu từng gram đầu tiên được mong chờ thế nào — chúng tôi cũng đã trải qua.',
+  sbridge_month:'Đã một tháng bên {name} rồi. Tháng đầu của chúng tôi cũng trôi qua thật nhanh, giữa những cữ bú, những lần thay tã và những đêm ngắn ngủi. Mọi chuyện bắt đầu như thế này:',
+  sbridge_days100:'100 ngày bên {name}. Mỗi cữ bú, mỗi lần thay tã, mỗi đêm đều đáng kể — còn với chúng tôi, mọi chuyện bắt đầu như thế này:',
+  sbridge_year:'Một năm bên {name}. Những đêm thức trắng, những nụ cười, và biết bao lần đầu tiên. Cảm ơn bạn đã để ứng dụng này đồng hành. Với chúng tôi, mọi chuyện bắt đầu như thế này:',
+  sclose_month:'Chúc mừng đầy tháng {name} 💛',
+  sclose_year:'Chúc mừng thôi nôi {name} 🎂💛',
   nursery:'🛏️ Giữ phòng ở {min}–{max}°C để bé ngủ an toàn (lý tưởng ~{ideal}°C).',
   target:'mục tiêu ≥ {n}/ngày',
   lastRel:'gần nhất {rel}',
@@ -679,9 +715,13 @@ const VI = {
   'Since last feed':'Từ lần bú trước',
   'Time zone':'Múi giờ','Device default':'Theo thiết bị','Now showing':'Đang hiển thị',
   'Always-on display':'Màn hình luôn bật','A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.':'Bảng cho bú chỉ đọc cho điện thoại luôn bật ở chế độ ngang (nền đen): thời gian từ lần bú trước và bên tiếp theo. Lưu trang mở ra vào dấu trang.','Open display':'Mở màn hình',
-  'This app was built at 3am by a first-time dad, while his baby daughter fed. It’s free, with no ads and no tracking. If it helped you through these first weeks, you can buy us a croissant — or whatever you like. Thank you!':'Ứng dụng này được một ông bố lần đầu làm cha viết lúc 3 giờ sáng, trong khi con gái đang bú. Ứng dụng miễn phí, không quảng cáo, không theo dõi. Nếu nó đã giúp bạn trong những tuần đầu tiên, bạn có thể mời chúng tôi một bát phở — hoặc tùy tâm. Cảm ơn bạn!',
   'Free, no ads, no tracking. If it helps your family, you can pay what you want.':'Miễn phí, không quảng cáo, không theo dõi. Nếu ứng dụng giúp ích cho gia đình bạn, bạn có thể ủng hộ tùy tâm.',
-  'No thanks':'Không, cảm ơn','Support the project':'Ủng hộ dự án',
+  'Support the project':'Ủng hộ dự án',
+  'While your baby feeds, here’s a short story.':'Trong lúc bé bú, đây là một câu chuyện ngắn.',
+  'Enjoy the feed 💛':'Chúc bé bú ngon 💛',
+  'Well done! 💛':'Chúc mừng bạn! 💛',
+  'Here’s to the first 100 days 💛':'Chúc mừng 100 ngày 💛',
+  'Thank you for being here 💛':'Cảm ơn bạn đã ở đây 💛',
   'Our story':'Câu chuyện của chúng tôi','Read our story':'Đọc câu chuyện của chúng tôi','Hide':'Ẩn',
   'This app was born at 3am, in a heatwave…':'Ứng dụng này ra đời lúc 3 giờ sáng, giữa đợt nắng nóng…','Read':'Đọc','🥐 Buy us a croissant':'🍜 Mời chúng tôi một bát phở',
   'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.':'Mùa hè 2026, giữa đợt nắng nóng, tại khoa sản Versailles (Hôpital André Mignot). Hai chiếc quạt chạy không ngừng, cửa sổ mở toang, và con gái A. của chúng tôi vừa chào đời.',
@@ -1093,18 +1133,45 @@ function bfCardHtml(){
 }
 // Kindle home: focused on feeding, diaper and vitamin D — logging + recent
 // history only, no weather/sleep/stats/analysis.
-// One-time pay-what-you-want prompt, shown on Home once the baby is ~1 month old
-// (needs a DOB and a configured SUPPORT_URL). Answered once → never shown again.
-function supportDue(){ const m=ageInMonths(); return !!SUPPORT_URL && !settings.supportAsked && m!=null && m>=1; }
-function supportCard(){
-  const n=Math.max(1,Math.floor(ageInMonths()));
+// Happy moments that open "Our story" from a Home card — each shown once, only in
+// its window (back to birth weight, 1 month, 100 days, 1 year), in the daytime
+// (8–21h), never within 48 h of a fever/stool alert, and never on Kindle/display
+// or once the support link has been opened.
+function careCounts(){
+  let feeds=0, diapers=0;
+  events.forEach(e=>{ if(e.type==='breastfeed'||e.type==='bottle') feeds++; else if(e.type==='diaper') diapers++; });
+  return {feeds, diapers};
+}
+// Birth weight = the first weight logged within 3 days of birth; "back" when a
+// later weight logged in the last 3 days (and before 45 days old) reaches it.
+function birthWeightBack(){
+  if(settings.babyDob==null) return false;
+  const w=events.filter(e=>e.type==='growth'&&e.data&&e.data.weightKg!=null).sort((a,b)=>a.at-b.at);
+  if(w.length<2 || w[0].at>settings.babyDob+3*DAY) return false;
+  const birth=+w[0].data.weightKg, now=Date.now();
+  const back=w.slice(1).find(e=>+e.data.weightKg>=birth);
+  return !!back && back.at>now-3*DAY && back.at<settings.babyDob+45*DAY;
+}
+function noRecentAlert(){ const now=Date.now(); return !events.some(e=>e.at>now-2*DAY && eventConcerning(e)); }
+function storyOccasion(){
+  if(!SUPPORT_URL || kindleOn() || DISPLAY || settings.supportOpened) return null;
+  const h=tzShift(Date.now()).getHours();
+  if(h<8 || h>=21 || !noRecentAlert()) return null;
+  const done=loadJSON(LS.story, {}).done||[], d=ageInDays();
+  const due=[['weight',birthWeightBack()], ['month',d!=null&&d>=30&&d<45], ['days100',d!=null&&d>=100&&d<110], ['year',d!=null&&d>=365&&d<380]];
+  for(const [k,ok] of due) if(ok && done.indexOf(k)<0) return k;
+  return null;
+}
+function storyDone(k){ const st=loadJSON(LS.story, {}); st.done=(st.done||[]).concat(k); saveJSON(LS.story, st); }
+function occasionCardHtml(){
+  const k=storyOccasion(); if(!k) return '';
+  const c=careCounts(), n=(k==='days100'||k==='year')&&c.feeds>=100 ? '_n' : '';
   return `<div class="card pad">
-      <div style="font-weight:700;margin-bottom:4px">🎉 ${t(n===1?'supportTitle_one':'supportTitle_other',{name:esc(settings.babyName),n:n})}</div>
-      <div class="small muted" style="margin-bottom:12px">${t('This app was built at 3am by a first-time dad, while his baby daughter fed. It’s free, with no ads and no tracking. If it helped you through these first weeks, you can buy us a croissant — or whatever you like. Thank you!')}</div>
-      <div class="row" style="gap:8px;flex-wrap:wrap">
-        <button class="btn btn-primary" data-act="support-open">${t('🥐 Buy us a croissant')}</button>
-        <button class="btn btn-ghost" data-act="support-dismiss">${t('No thanks')}</button>
+      <div class="between" style="align-items:flex-start;gap:8px">
+        <div style="font-weight:700">${t('occ_'+k+n,{name:esc(settings.babyName),feeds:c.feeds,diapers:c.diapers})}</div>
+        <button class="x" data-act="occ-hide" data-occ="${k}" title="${t('Hide')}" style="flex:0 0 auto">✕</button>
       </div>
+      <button class="btn btn-ghost btn-block" style="margin-top:10px" data-act="story-open" data-occ="${k}">💛 ${t('Read our story')} ›</button>
     </div>`;
 }
 // "Our story" link shown under the running breastfeed timer: the parent is
@@ -1136,12 +1203,12 @@ function storyNudgeDue(bf){
   const side=bf.currentSide==='right'?'rightSec':'leftSec';
   const live=(bf[side]||0)+(bf.paused?0:Math.max(0,(now-(bf.lastSwitchAt||now))/1000));
   if(live < medianSideSec()/2) return false;
-  saveJSON(LS.story, {at:now, feed:bf.startedAt});     // first time in this feed
+  seen.at=now; seen.feed=bf.startedAt; saveJSON(LS.story, seen);   // first time in this feed
   return true;
 }
 function storyNudgeHtml(){
   return `<div style="display:flex;gap:4px;margin-top:10px;align-items:flex-start">
-      <button data-act="story-open" style="flex:1;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.72rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('This app was born at 3am, in a heatwave…')} <u>${t('Read')} ›</u></button>
+      <button data-act="story-open" data-occ="feed" style="flex:1;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.72rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('This app was born at 3am, in a heatwave…')} <u>${t('Read')} ›</u></button>
       <button data-act="story-hide" title="${t('Hide')}" style="flex:0 0 auto;border:none;background:none;padding:2px 4px;font-size:.72rem;color:var(--muted);cursor:pointer">✕</button>
     </div>`;
 }
@@ -1151,13 +1218,25 @@ const STORY = [
   'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?',
   'So while Alex was breastfeeding, Taï started writing this app — on his phone. It has been with us every night since.',
   'It’s free, with no ads, and your data stays with you. If it helps you too, you can buy us a croissant 🥐, a bottle of milk 🍼 or a pack of diapers — whatever you like. It helps us keep improving it.',
-  'Hang in there tonight 💛',
-  '— Taï & Alex, parents of A.',
 ];
-function storySheetHtml(){
+const STORY_SIGN = '— Taï & Alex, parents of A.';
+// The story opens with a line tied to how the reader got here, and closes to match.
+function storySheetHtml(occ){
+  const name=esc(settings.babyName), h=tzShift(Date.now()).getHours();
+  const intro = occ==='feed' ? t('While your baby feeds, here’s a short story.')
+              : (occ==='weight'||occ==='month'||occ==='days100'||occ==='year') ? t('sbridge_'+occ,{name:name}) : '';
+  const close = occ==='feed' ? t(h<8||h>=21 ? 'Hang in there tonight 💛' : 'Enjoy the feed 💛')
+              : occ==='weight' ? t('Well done! 💛')
+              : occ==='month' ? t('sclose_month',{name:name})
+              : occ==='days100' ? t('Here’s to the first 100 days 💛')
+              : occ==='year' ? t('sclose_year',{name:name})
+              : t('Thank you for being here 💛');
+  const para=(txt,last,bold)=>`<p class="small" style="line-height:1.55;margin:0 0 ${last?16:10}px${bold?';font-weight:600':''}">${txt}</p>`;
   return `<div class="scrim" data-act="close"></div><div class="sheet" role="dialog">
     <div class="head"><h2>💛 ${t('Our story')}</h2><button class="x" data-act="close">✕</button></div>
-    ${STORY.map((k,i)=>`<p class="small" style="line-height:1.55;margin:0 0 ${i===STORY.length-1?16:10}px${i>=STORY.length-2?';font-weight:600':''}">${t(k)}</p>`).join('')}
+    ${intro?para(`<i>${intro}</i>`):''}
+    ${STORY.map(k=>para(t(k))).join('')}
+    ${para(close,false,true)}${para(t(STORY_SIGN),true,true)}
     ${SUPPORT_URL?`<button class="btn btn-primary btn-block" data-act="support-open">${t('🥐 Buy us a croissant')}</button>`:''}
   </div>`;
 }
@@ -1243,7 +1322,7 @@ function viewHome(){
       <button class="btn" style="background:var(--brand);color:#fff;padding:7px 14px;flex:0 0 auto" data-act="log-vitd">${t('Log it')}</button>
     </div>`:''}
 
-    ${supportDue()?supportCard():''}
+    ${occasionCardHtml()}
 
     <div class="card pad">
       <div class="between">
@@ -1576,7 +1655,7 @@ function viewSettings(){
     <div class="card pad">
       <h2 style="margin-bottom:4px">💛 ${t('Our story')}</h2>
       <div class="tiny muted" style="margin-bottom:12px">${t('Free, no ads, no tracking. If it helps your family, you can pay what you want.')}</div>
-      <button class="btn btn-ghost btn-block" data-act="story-open">${t('Read our story')}</button>
+      <button class="btn btn-ghost btn-block" data-act="story-open" data-occ="about">${t('Read our story')}</button>
       ${SUPPORT_URL?`<button class="btn btn-ghost btn-block" style="margin-top:8px" data-act="support-link">${t('🥐 Buy us a croissant')}</button>`:''}
     </div>
     <div class="card pad">
@@ -1640,7 +1719,7 @@ function renderSheet(){
   const savedScroll=prev?prev.scrollTop:0;
   const isReRender=!!prev;
   if(!s){ sheetRoot.innerHTML=''; return; }
-  if(s.type==='story'){ setHTML(sheetRoot, storySheetHtml()); return; }
+  if(s.type==='story'){ setHTML(sheetRoot, storySheetHtml(s.occ)); return; }
   const m=META[s.type];
   const info=infoText(s.type);
   setHTML(sheetRoot, `<div class="scrim"></div><div class="sheet" role="dialog">
@@ -1827,10 +1906,10 @@ document.addEventListener('click', (ev)=>{
   if(act==='toggle-kindle') return saveSettings({ kindle: !settings.kindle });
   if(act==='set-tz'){ const v=el.dataset.tz; return saveSettings({ tzOffset: v===''?null:parseInt(v,10) }); }
   if(act==='toggle-vitd') return saveSettings({ vitDEnabled: !settings.vitDEnabled });
-  if(act==='support-open'){ try{ window.open(SUPPORT_URL,'_blank','noopener'); }catch(e){} state.sheet=null; return saveSettings({ supportAsked:true, supportOpened:true }); }
-  if(act==='story-open'){ state.sheet={type:'story'}; renderSheet(); return; }
+  if(act==='support-open'){ try{ window.open(SUPPORT_URL,'_blank','noopener'); }catch(e){} state.sheet=null; return saveSettings({ supportOpened:true }); }
+  if(act==='story-open'){ const o=el.dataset.occ||'about'; if(o!=='feed'&&o!=='about') storyDone(o); state.sheet={type:'story',occ:o}; renderSheet(); return; }
+  if(act==='occ-hide'){ storyDone(el.dataset.occ); render(); return; }
   if(act==='story-hide') return saveSettings({ storyHidden:true });
-  if(act==='support-dismiss') return saveSettings({ supportAsked:true });
   if(act==='support-link'){ try{ window.open(SUPPORT_URL,'_blank','noopener'); }catch(e){} return saveSettings({ supportOpened:true }); }
   if(act==='log-vitd'){ addEvent({type:'medication', at:Date.now(), caregiver:settings.currentCaregiver, data:{name:t('Vitamin D'), dose:'400 IU'}}); render(); return; }
 });
