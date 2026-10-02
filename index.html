@@ -244,7 +244,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.36';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.37';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = '';
 /* ============================================================ Baby Care Tracker
@@ -562,8 +562,8 @@ const FR = {
   'Here’s to the first 100 days 💛':'Bravo pour ces 100 jours 💛',
   'Thank you for being here 💛':'Merci d’être là 💛',
   'Our story':'Notre histoire','Read our story':'Lire notre histoire','Hide':'Masquer',
-  'Enjoying the app? Here’s how it was born…':'Vous aimez l’appli ? Voici comment elle est née…',
-  'This app was born during a feed just like this one, at 3am…':'Cette appli est née pendant une tétée comme celle-ci, à 3 h du matin…','Read':'Lire','🥐 Buy us a croissant':'🥐 Nous offrir un croissant',
+  'Enjoying the app? Here’s how it was born…':'Vous aimez l’appli ? Voici comment elle est née…',
+  '🥐 Buy us a croissant':'🥐 Nous offrir un croissant',
   'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.':'Été 2026, en pleine canicule, à la maternité de Versailles (Hôpital André Mignot). Deux ventilateurs, les fenêtres grandes ouvertes, et notre fille A. qui vient de naître.',
   'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?':'Il est 3 h du matin. On note tout sur la feuille donnée par les infirmières et dans les notes du téléphone, mais c’est vite trop limité : quel sein la dernière fois ? Il y a combien de temps ? Et la couleur des selles ?',
   'So while Alex was breastfeeding, Taï started writing this app — on his phone. It has been with us every night since.':'Alors, pendant qu’Alex allaitait, Taï a commencé à écrire cette appli — sur son téléphone. Depuis, elle nous accompagne chaque nuit.',
@@ -711,7 +711,7 @@ const VI = {
   'Thank you for being here 💛':'Cảm ơn bạn đã ở đây 💛',
   'Our story':'Câu chuyện của chúng tôi','Read our story':'Đọc câu chuyện của chúng tôi','Hide':'Ẩn',
   'Enjoying the app? Here’s how it was born…':'Bạn thích ứng dụng này chứ? Đây là câu chuyện ra đời của nó…',
-  'This app was born during a feed just like this one, at 3am…':'Ứng dụng này ra đời trong một cữ bú như thế này, lúc 3 giờ sáng…','Read':'Đọc','🥐 Buy us a croissant':'🍜 Mời chúng tôi một bát phở',
+  '🥐 Buy us a croissant':'🍜 Mời chúng tôi một bát phở',
   'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.':'Mùa hè 2026, giữa đợt nắng nóng, tại khoa sản Versailles (Hôpital André Mignot). Hai chiếc quạt chạy không ngừng, cửa sổ mở toang, và con gái A. của chúng tôi vừa chào đời.',
   'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?':'3 giờ sáng. Chúng tôi ghi mọi thứ vào tờ giấy các cô y tá đưa và vào ghi chú điện thoại, nhưng chẳng mấy chốc đã không đủ: lần trước bú bên nào? Cách đây bao lâu? Phân màu gì?',
   'So while Alex was breastfeeding, Taï started writing this app — on his phone. It has been with us every night since.':'Thế là trong lúc Alex cho con bú, Taï bắt đầu viết ứng dụng này — ngay trên điện thoại. Từ đó, nó đồng hành cùng chúng tôi mỗi đêm.',
@@ -1196,7 +1196,7 @@ function storyNudgeDue(bf){
 }
 function storyNudgeHtml(){
   return `<div style="display:flex;gap:4px;margin-top:10px;align-items:flex-start">
-      <button data-act="story-open" data-occ="feed" style="flex:1;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.72rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('This app was born during a feed just like this one, at 3am…')} <u>${t('Read')} ›</u></button>
+      <button data-act="story-open" data-occ="feed" style="flex:1;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.72rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('Enjoying the app? Here’s how it was born…')} <u>›</u></button>
       <button data-act="story-hide" title="${t('Hide')}" style="flex:0 0 auto;border:none;background:none;padding:2px 4px;font-size:.72rem;color:var(--muted);cursor:pointer">✕</button>
     </div>`;
 }
@@ -1211,8 +1211,6 @@ const STORY_SIGN = '— Taï & Alex, parents of A.';
 // The story opens with a line tied to how the reader got here, and closes to match.
 function storySheetHtml(occ){
   const name=esc(settings.babyName), h=tzShift(Date.now()).getHours();
-  // From the feed line, open with the line the reader tapped so the story picks up from it.
-  const intro = occ==='feed' ? t('This app was born during a feed just like this one, at 3am…') : '';
   const close = occ==='feed' ? t(h<8||h>=21 ? 'Hang in there tonight 💛' : 'Enjoy the feed 💛')
               : occ==='weight' ? t('Well done! 💛')
               : occ==='month' ? t('sclose_month',{name:name})
@@ -1222,7 +1220,6 @@ function storySheetHtml(occ){
   const para=(txt,last,bold)=>`<p class="small" style="line-height:1.55;margin:0 0 ${last?16:10}px${bold?';font-weight:600':''}">${txt}</p>`;
   return `<div class="scrim" data-act="close"></div><div class="sheet" role="dialog">
     <div class="head"><h2>💛 ${t('Our story')}</h2><button class="x" data-act="close">✕</button></div>
-    ${intro?para(`<i>${intro}</i>`):''}
     ${STORY.map(k=>para(t(k))).join('')}
     ${para(close,false,true)}${para(t(STORY_SIGN),true,true)}
     ${SUPPORT_URL?`<button class="btn btn-primary btn-block" data-act="support-open">${t('🥐 Buy us a croissant')}</button>`:''}
