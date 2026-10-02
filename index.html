@@ -156,7 +156,7 @@
   .sync-line{position:fixed;top:0;left:0;right:0;height:3px;z-index:61;overflow:hidden}
   .sync-line::before{content:'';position:absolute;top:0;bottom:0;width:40%;background:var(--brand);border-radius:3px;animation:syncline 1.1s ease-in-out infinite}
   @keyframes syncline{from{left:-40%}to{left:100%}}
-  .sync-chip{position:fixed;bottom:calc(70px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:39;padding:6px 14px;border-radius:999px;font-size:.8rem;font-weight:600;background:var(--card);color:var(--ink);border:1px solid var(--card-border);box-shadow:0 4px 14px rgba(0,0,0,.18);white-space:nowrap;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis}
+  .sync-chip{position:fixed;bottom:70px;bottom:calc(70px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:39;padding:6px 14px;border-radius:999px;font-size:.8rem;font-weight:600;background:var(--card);color:var(--ink);border:1px solid var(--card-border);box-shadow:0 4px 14px rgba(0,0,0,.18);white-space:nowrap;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis}
   .sync-chip.ok{color:var(--good)}
   .spin{display:inline-block;animation:spin 1s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
@@ -164,7 +164,9 @@
   .sync-banner.warn{background:var(--warn-l);color:var(--warn-ink)}
   .sync-banner.bad{background:var(--bad-l);color:var(--bad-ink);cursor:pointer}
   :root[data-kindle="1"] .sync-chip{background:#fff;color:#000;border:2px solid #000;box-shadow:none}
-  :root[data-kindle="1"] .sync-banner{background:#fff;color:#000;border-bottom:2px solid #000}
+  :root[data-kindle="1"] .sync-banner{background:#fff;color:#000;border-bottom:2px solid #000;padding-top:8px}
+  :root[data-kindle="1"] .sync-banner.k-busy{background:#000;color:#fff}
+  :root[data-kindle="1"] .sync-banner.k-idle{font-size:.75rem;padding:4px 16px;border-bottom-width:1px}
   :root[data-kindle="1"] .banner{border:2px solid #000;background:#fff!important;color:#000!important;font-weight:600}
   :root[data-kindle="1"] .stat.good,:root[data-kindle="1"] .stat.warn{border:2px solid #000;background:#fff}
   :root[data-kindle="1"] .nav{backdrop-filter:none;background:#fff;border-top:2px solid #000}
@@ -260,7 +262,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.39';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.40';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = '';
 /* ============================================================ Baby Care Tracker
@@ -442,8 +444,9 @@ function mergeRemote(remote){
     if(!local || (r.updatedAt||0) > (local.updatedAt||0)){ byId[id] = r; changed=true; }
   });
   if(changed){ events = Object.values(byId).filter(e=>!e.deleted); persistEvents(); }
+  return changed;
 }
-async function pull(){ if(!syncReady()) return; const j = await apiCall({ action:'list' }); mergeRemote(j.events || []); }
+async function pull(){ if(!syncReady()) return false; const j = await apiCall({ action:'list' }); return mergeRemote(j.events || []); }
 let pushTimer = null;
 function pushSoon(){
   if(!syncReady()){ updateSyncUI(); return; }
@@ -459,12 +462,14 @@ function pushSoon(){
 async function syncNow(){
   if(!syncReady()){ updateSyncUI(); return; }
   syncState.error = null; syncStart();
+  let changed = false;
   try{
     await flushOutbox();
-    await pull();
+    changed = await pull();
     syncState.last = Date.now(); saveJSON(LS.lastSync, syncState.last); syncState.fresh = true;
   }catch(e){ syncState.error = e.message || 'sync error'; }
-  syncEnd(); render();
+  syncEnd();
+  if(!kindleOn() || changed) render();   // e-ink: only redraw when the data actually changed
 }
 // A sync is "loud" (chip on screen) when it brings the other phone's entries for
 // the first time since opening, or sends entries logged here; quiet otherwise.
@@ -483,12 +488,20 @@ function resumeSync(){
 function syncPlural(k,n){ return t(k+(n===1?'_one':'_other'),{n:n}); }
 function syncBarHtml(){
   if(!syncReady()) return '';
-  const p=loadOutbox().length, K=kindleOn();
+  const p=loadOutbox().length;
+  if(kindleOn()){
+    // E-ink: a still bar at the top of every screen, always there while connected,
+    // so the state can be read at a glance without catching a short-lived chip.
+    if(syncState.syncing && syncState.loud) return `<div class="sync-banner k-busy" role="status">${p?syncPlural('syncSending',p):t('Getting the latest entries…')}</div>`;
+    if(navigator.onLine===false) return `<div class="sync-banner warn" role="status">${p?syncPlural('syncOffline',p):t('Offline — the other phone’s latest entries may be missing')}</div>`;
+    if(syncState.error) return `<div class="sync-banner bad" role="status" data-act="sync-now">${t('Sync failed')}${p?' · '+syncPlural('syncPending',p):''} · <u>${t('Retry')}</u></div>`;
+    return `<div class="sync-banner k-idle" role="status">✓ ${t('Up to date')}</div>`;
+  }
   if(syncState.syncing){
-    const line = K ? '' : '<div class="sync-line"></div>';   // no animation on e-ink
+    const line = '<div class="sync-line"></div>';
     if(DISPLAY || !syncState.loud) return line;
     const msg = p ? syncPlural('syncSending',p) : t('Getting the latest entries…');
-    return line+`<div class="sync-chip" role="status">${K?'':'<span class="spin">⟳</span> '}${msg}</div>`;
+    return line+`<div class="sync-chip" role="status"><span class="spin">⟳</span> ${msg}</div>`;
   }
   if(DISPLAY) return '';
   if(navigator.onLine===false) return `<div class="sync-banner warn" role="status">📴 ${p?syncPlural('syncOffline',p):t('Offline — the other phone’s latest entries may be missing')}</div>`;
@@ -504,7 +517,7 @@ function syncStatusHtml(){
   return '<span style="color:var(--good)">✓ '+t('Synced')+'</span>'+(syncState.last?(' · '+relTime(syncState.last)):'')+(p?(' · '+p+' '+t('pending')):'');
 }
 function syncPillHtml(){
-  if(!syncReady()) return '';
+  if(!syncReady() || kindleOn()) return '';   // the Kindle has the status bar on top instead
   if(syncState.syncing) return '⟳ '+t('Syncing…');
   if(navigator.onLine===false) return '<span style="color:var(--warn)">📴 '+t('Offline')+'</span>';
   if(syncState.error) return '<span style="color:#dc2626">⚠ '+t('sync error')+'</span>';
@@ -513,7 +526,8 @@ function syncPillHtml(){
 function updateSyncUI(){
   const s = document.getElementById('syncStatus'); if(s) s.innerHTML = syncStatusHtml();
   const p = document.getElementById('syncPill'); if(p) p.innerHTML = syncPillHtml();
-  const b = document.getElementById('syncBar'); if(b) setHTML(b, syncBarHtml());
+  const b = document.getElementById('syncBar'), h = syncBarHtml();
+  if(b && b.__html!==h){ b.__html=h; setHTML(b, h); }   // skip no-op writes (e-ink repaints)
 }
 
 /* ----------------------------------------------------------------- i18n ----- */
@@ -2047,6 +2061,9 @@ window.addEventListener('focus', ()=>{ resumeSync(); checkUpdate(); });
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') resumeSync(); });
 window.addEventListener('online', resumeSync);
 window.addEventListener('offline', updateSyncUI);
+// The Kindle doesn't report waking from sleep: check the Sheet every minute (quiet
+// unless the last sync is over 2 min old, e.g. right after waking up).
+setInterval(()=>{ if(kindleOn() && !DISPLAY) resumeSync(); }, 60000);
 </script>
 </body>
 </html>
