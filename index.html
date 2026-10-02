@@ -244,7 +244,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.25';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.26';   // bumped on each deploy to trigger the update banner
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -291,6 +291,18 @@ const DISPLAY = /[?&]display=1/.test(location.search);
 // and then strip it from the address bar so the key isn't left lying around.
 (function(){
   try{
+    // Short form: #k=<Apps Script deployment ID>[&t=<secret>] — far less to type
+    // on a Kindle / camera-less tablet. Only the ID varies in the /exec URL.
+    const ks=location.hash.match(/[#&]k=([A-Za-z0-9_-]+)/);
+    if(ks){
+      const ts=location.hash.match(/[#&]t=([^&#]+)/);
+      settings.syncUrl='https://script.google.com/macros/s/'+ks[1]+'/exec';
+      settings.syncToken=ts?decodeURIComponent(ts[1]):'';
+      saveJSON(LS.settings, settings);
+      if(history.replaceState) history.replaceState(null,'',location.pathname+location.search);
+      return;
+    }
+    // Long form (older links): #setup=<base64url JSON> — still supported.
     const m=(location.hash+'&'+location.search).match(/[#?&]setup=([^&#]+)/);
     if(!m) return;
     let b=decodeURIComponent(m[1]).replace(/-/g,'+').replace(/_/g,'/');
@@ -308,6 +320,11 @@ const DISPLAY = /[?&]display=1/.test(location.search);
 })();
 // Build a shareable link that embeds the current sync config in the fragment.
 function setupLink(withDisplay){
+  const base0=(location.origin&&location.origin!=='null'?location.origin+location.pathname:location.href.split(/[?#]/)[0]);
+  const id=(settings.syncUrl||'').match(/^https:\/\/script\.google\.com\/macros\/s\/([A-Za-z0-9_-]+)\/exec\/?$/);
+  if(id){   // short, hand-typeable form
+    return base0+(withDisplay?'?display=1':'')+'#k='+id[1]+(settings.syncToken?'&t='+encodeURIComponent(settings.syncToken):'');
+  }
   const cfg={u:settings.syncUrl||'', t:settings.syncToken||'', la:settings.lat, lo:settings.lon, ll:settings.locationLabel};
   const enc=btoa(unescape(encodeURIComponent(JSON.stringify(cfg)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
   const base=(location.origin&&location.origin!=='null'?location.origin+location.pathname:location.href.split(/[?#]/)[0]);
