@@ -244,7 +244,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.37';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.38';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = '';
 /* ============================================================ Baby Care Tracker
@@ -562,7 +562,7 @@ const FR = {
   'Here’s to the first 100 days 💛':'Bravo pour ces 100 jours 💛',
   'Thank you for being here 💛':'Merci d’être là 💛',
   'Our story':'Notre histoire','Read our story':'Lire notre histoire','Hide':'Masquer',
-  'Enjoying the app? Here’s how it was born…':'Vous aimez l’appli ? Voici comment elle est née…',
+  'Enjoying the app? Read the story':'Vous aimez l’appli ? Lisez son histoire',
   '🥐 Buy us a croissant':'🥐 Nous offrir un croissant',
   'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.':'Été 2026, en pleine canicule, à la maternité de Versailles (Hôpital André Mignot). Deux ventilateurs, les fenêtres grandes ouvertes, et notre fille A. qui vient de naître.',
   'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?':'Il est 3 h du matin. On note tout sur la feuille donnée par les infirmières et dans les notes du téléphone, mais c’est vite trop limité : quel sein la dernière fois ? Il y a combien de temps ? Et la couleur des selles ?',
@@ -710,7 +710,7 @@ const VI = {
   'Here’s to the first 100 days 💛':'Chúc mừng 100 ngày 💛',
   'Thank you for being here 💛':'Cảm ơn bạn đã ở đây 💛',
   'Our story':'Câu chuyện của chúng tôi','Read our story':'Đọc câu chuyện của chúng tôi','Hide':'Ẩn',
-  'Enjoying the app? Here’s how it was born…':'Bạn thích ứng dụng này chứ? Đây là câu chuyện ra đời của nó…',
+  'Enjoying the app? Read the story':'Bạn thích ứng dụng này chứ? Đọc câu chuyện của nó',
   '🥐 Buy us a croissant':'🍜 Mời chúng tôi một bát phở',
   'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.':'Mùa hè 2026, giữa đợt nắng nóng, tại khoa sản Versailles (Hôpital André Mignot). Hai chiếc quạt chạy không ngừng, cửa sổ mở toang, và con gái A. của chúng tôi vừa chào đời.',
   'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?':'3 giờ sáng. Chúng tôi ghi mọi thứ vào tờ giấy các cô y tá đưa và vào ghi chú điện thoại, nhưng chẳng mấy chốc đã không đủ: lần trước bú bên nào? Cách đây bao lâu? Phân màu gì?',
@@ -1159,7 +1159,7 @@ function occasionCardHtml(){
         <div style="font-weight:700">${t('occ_'+k+n,{name:esc(settings.babyName),feeds:c.feeds,diapers:c.diapers})}</div>
         <button class="x" data-act="occ-hide" data-occ="${k}" title="${t('Hide')}" style="flex:0 0 auto">✕</button>
       </div>
-      <button data-act="story-open" data-occ="${k}" style="display:block;width:100%;margin-top:8px;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.78rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('Enjoying the app? Here’s how it was born…')} <u>›</u></button>
+      <button data-act="story-open" data-occ="${k}" style="display:block;width:100%;margin-top:8px;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.78rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('Enjoying the app? Read the story')} <u>›</u></button>
     </div>`;
 }
 // "Our story" link shown under the running breastfeed timer: the parent is
@@ -1196,7 +1196,7 @@ function storyNudgeDue(bf){
 }
 function storyNudgeHtml(){
   return `<div style="display:flex;gap:4px;margin-top:10px;align-items:flex-start">
-      <button data-act="story-open" data-occ="feed" style="flex:1;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.72rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('Enjoying the app? Here’s how it was born…')} <u>›</u></button>
+      <button data-act="story-open" data-occ="feed" style="flex:1;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.72rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('Enjoying the app? Read the story')} <u>›</u></button>
       <button data-act="story-hide" title="${t('Hide')}" style="flex:0 0 auto;border:none;background:none;padding:2px 4px;font-size:.72rem;color:var(--muted);cursor:pointer">✕</button>
     </div>`;
 }
