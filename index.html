@@ -244,7 +244,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.29';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.30';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = '';
 /* ============================================================ Baby Care Tracker
@@ -542,11 +542,17 @@ const FR = {
   'Since last feed':'Depuis le dernier repas',
   'Time zone':'Fuseau horaire','Device default':'Réglage de l’appareil','Now showing':'Affiche maintenant',
   'Always-on display':'Écran permanent','A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.':'Un tableau d’allaitement en lecture seule pour un téléphone toujours allumé en paysage (écran noir) : temps depuis le dernier repas et prochain sein. Ajoutez la page ouverte aux favoris.','Open display':'Ouvrir l’écran',
-  'This app was built at night by a dad for his baby daughter. It’s free, with no ads and no tracking. If it helped you through these first weeks, you can pay what you want (suggested €5). Thank you!':'Cette appli a été créée la nuit par un papa pour sa fille. Elle est gratuite, sans pub ni pistage. Si elle vous a aidés pendant ces premières semaines, vous pouvez donner ce que vous voulez (suggestion : 5 €). Merci !',
+  'This app was built at 3am by a first-time dad, while his baby daughter fed. It’s free, with no ads and no tracking. If it helped you through these first weeks, you can buy us a croissant — or whatever you like. Thank you!':'Cette appli a été créée à 3 h du matin par un papa pour la première fois, pendant que sa fille tétait. Elle est gratuite, sans pub ni pistage. Si elle vous a aidés pendant ces premières semaines, vous pouvez nous offrir un croissant — ou ce que vous voulez. Merci !',
   'Free, no ads, no tracking. If it helps your family, you can pay what you want.':'Gratuite, sans pub ni pistage. Si elle aide votre famille, vous pouvez donner ce que vous voulez.',
-  'Pay what you want':'Donner ce que je veux','No thanks':'Non merci','Support the project':'Soutenir le projet',
-  'Our story':'Notre histoire','Read our story':'Lire notre histoire','Made by a first-time dad, at 3am, in the Versailles maternity ward':'Créée par un jeune papa, à 3 h du matin, à la maternité de Versailles','Hide':'Masquer',
-  'This app was started at 3am, in the middle of a heatwave, by a first-time dad in the maternity ward of the Centre Hospitalier de Versailles – Hôpital André Mignot, just after our daughter was born. We needed a simple way to know which breast was last, when she last ate and how many diapers she had — so I built one. It grew with us, night after night: the feeding timer, the e-reader mode for the bedside, the always-on display. It’s free, with no ads and no tracking: your data stays with you. If it makes your nights a little easier, you can support it with whatever amount you like. Thank you — and courage for tonight 💛':'Cette appli est née à 3 h du matin, en pleine canicule, écrite par un jeune papa à la maternité du Centre Hospitalier de Versailles – Hôpital André Mignot, juste après la naissance de notre fille. Il nous fallait un moyen simple de savoir quel sein était le dernier, quand elle avait mangé et combien de couches elle avait eues — alors je l’ai construit. L’appli a grandi avec nous, nuit après nuit : le minuteur de tétée, le mode liseuse pour la table de nuit, l’écran toujours allumé. Elle est gratuite, sans pub et sans pistage : vos données restent chez vous. Si elle vous rend les nuits un peu plus douces, vous pouvez la soutenir avec le montant de votre choix. Merci — et courage pour cette nuit 💛',
+  'No thanks':'Non merci','Support the project':'Soutenir le projet',
+  'Our story':'Notre histoire','Read our story':'Lire notre histoire','Hide':'Masquer',
+  'This app was born at 3am, in a heatwave…':'Cette appli est née à 3 h du matin, en pleine canicule…','Read':'Lire','Buy us a croissant':'Nous offrir un croissant',
+  'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.':'Été 2026, en pleine canicule, à la maternité de Versailles (Hôpital André Mignot). Deux ventilateurs, les fenêtres grandes ouvertes, et notre fille A. qui vient de naître.',
+  'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?':'Il est 3 h du matin. On note tout sur la feuille donnée par les infirmières et dans les notes du téléphone, mais c’est vite trop limité : quel sein la dernière fois ? Il y a combien de temps ? Et la couleur des selles ?',
+  'So while Alex was breastfeeding, Taï started writing this app — on his phone. It has been with us every night since.':'Alors, pendant qu’Alex allaitait, Taï a commencé à écrire cette appli — sur son téléphone. Depuis, elle nous accompagne chaque nuit.',
+  'It’s free, with no ads, and your data stays with you. If it helps you too, you can buy us a croissant 🥐, a bottle of milk 🍼 or a pack of diapers — whatever you like. It helps us keep improving it.':'Elle est gratuite, sans pub, et vos données restent chez vous. Si elle vous aide aussi, vous pouvez nous offrir un croissant 🥐, un biberon de lait 🍼 ou un paquet de couches — ce que vous voulez. Ça nous aide à continuer de l’améliorer.',
+  'Hang in there tonight 💛':'Courage pour cette nuit 💛',
+  '— Taï & Alex, parents of A.':'— Taï & Alex, parents d’A.',
   'Next side':'Prochain sein','Last diaper':'Dernière couche','Next':'Prochain','Due':'À donner','Given':'Donnée',
   'Share this app, already connected':'Partager l’app, déjà connectée','Sends a link that sets up the Sheet automatically. ⚠️ It contains your private key — share only with people you trust.':'Envoie un lien qui configure la feuille automatiquement. ⚠️ Il contient votre clé privée — à ne partager qu’avec des personnes de confiance.','Copy setup link':'Copier le lien','Copy display link':'Copier le lien écran','Copied ✓':'Copié ✓','Fullscreen':'Plein écran',
   'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Seulement si cet appareil affiche la mauvaise heure (ex. un Kindle bloqué sur UTC). Décalage fixe — à ajuster aux changements d’heure.',
@@ -673,11 +679,17 @@ const VI = {
   'Since last feed':'Từ lần bú trước',
   'Time zone':'Múi giờ','Device default':'Theo thiết bị','Now showing':'Đang hiển thị',
   'Always-on display':'Màn hình luôn bật','A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.':'Bảng cho bú chỉ đọc cho điện thoại luôn bật ở chế độ ngang (nền đen): thời gian từ lần bú trước và bên tiếp theo. Lưu trang mở ra vào dấu trang.','Open display':'Mở màn hình',
-  'This app was built at night by a dad for his baby daughter. It’s free, with no ads and no tracking. If it helped you through these first weeks, you can pay what you want (suggested €5). Thank you!':'Ứng dụng này do một người bố làm vào những đêm thức khuya cho con gái mình. Ứng dụng miễn phí, không quảng cáo, không theo dõi. Nếu nó đã giúp bạn trong những tuần đầu tiên, bạn có thể ủng hộ tùy tâm (gợi ý 5 €). Cảm ơn bạn!',
+  'This app was built at 3am by a first-time dad, while his baby daughter fed. It’s free, with no ads and no tracking. If it helped you through these first weeks, you can buy us a croissant — or whatever you like. Thank you!':'Ứng dụng này được một ông bố lần đầu làm cha viết lúc 3 giờ sáng, trong khi con gái đang bú. Ứng dụng miễn phí, không quảng cáo, không theo dõi. Nếu nó đã giúp bạn trong những tuần đầu tiên, bạn có thể mời chúng tôi một chiếc croissant — hoặc tùy tâm. Cảm ơn bạn!',
   'Free, no ads, no tracking. If it helps your family, you can pay what you want.':'Miễn phí, không quảng cáo, không theo dõi. Nếu ứng dụng giúp ích cho gia đình bạn, bạn có thể ủng hộ tùy tâm.',
-  'Pay what you want':'Ủng hộ tùy tâm','No thanks':'Không, cảm ơn','Support the project':'Ủng hộ dự án',
-  'Our story':'Câu chuyện của chúng tôi','Read our story':'Đọc câu chuyện của chúng tôi','Made by a first-time dad, at 3am, in the Versailles maternity ward':'Được làm bởi một ông bố lần đầu, lúc 3 giờ sáng, tại khoa sản Versailles','Hide':'Ẩn',
-  'This app was started at 3am, in the middle of a heatwave, by a first-time dad in the maternity ward of the Centre Hospitalier de Versailles – Hôpital André Mignot, just after our daughter was born. We needed a simple way to know which breast was last, when she last ate and how many diapers she had — so I built one. It grew with us, night after night: the feeding timer, the e-reader mode for the bedside, the always-on display. It’s free, with no ads and no tracking: your data stays with you. If it makes your nights a little easier, you can support it with whatever amount you like. Thank you — and courage for tonight 💛':'Ứng dụng này ra đời lúc 3 giờ sáng, giữa đợt nắng nóng, do một ông bố lần đầu làm cha viết tại khoa sản Bệnh viện Versailles – Hôpital André Mignot, ngay sau khi con gái chúng tôi chào đời. Chúng tôi cần một cách đơn giản để biết lần trước bú bên nào, bé ăn lúc nào và đã thay bao nhiêu tã — nên tôi đã tự làm. Ứng dụng lớn lên cùng chúng tôi, đêm này qua đêm khác: đồng hồ cho bú, chế độ máy đọc sách ở đầu giường, màn hình luôn sáng. Ứng dụng miễn phí, không quảng cáo, không theo dõi: dữ liệu là của bạn. Nếu nó giúp những đêm của bạn nhẹ nhàng hơn, bạn có thể ủng hộ tùy tâm. Cảm ơn bạn — và cố lên cho đêm nay nhé 💛',
+  'No thanks':'Không, cảm ơn','Support the project':'Ủng hộ dự án',
+  'Our story':'Câu chuyện của chúng tôi','Read our story':'Đọc câu chuyện của chúng tôi','Hide':'Ẩn',
+  'This app was born at 3am, in a heatwave…':'Ứng dụng này ra đời lúc 3 giờ sáng, giữa đợt nắng nóng…','Read':'Đọc','Buy us a croissant':'Mời chúng tôi một chiếc croissant',
+  'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.':'Mùa hè 2026, giữa đợt nắng nóng, tại khoa sản Versailles (Hôpital André Mignot). Hai chiếc quạt chạy không ngừng, cửa sổ mở toang, và con gái A. của chúng tôi vừa chào đời.',
+  'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?':'3 giờ sáng. Chúng tôi ghi mọi thứ vào tờ giấy các cô y tá đưa và vào ghi chú điện thoại, nhưng chẳng mấy chốc đã không đủ: lần trước bú bên nào? Cách đây bao lâu? Phân màu gì?',
+  'So while Alex was breastfeeding, Taï started writing this app — on his phone. It has been with us every night since.':'Thế là trong lúc Alex cho con bú, Taï bắt đầu viết ứng dụng này — ngay trên điện thoại. Từ đó, nó đồng hành cùng chúng tôi mỗi đêm.',
+  'It’s free, with no ads, and your data stays with you. If it helps you too, you can buy us a croissant 🥐, a bottle of milk 🍼 or a pack of diapers — whatever you like. It helps us keep improving it.':'Ứng dụng miễn phí, không quảng cáo, và dữ liệu là của bạn. Nếu nó cũng giúp được bạn, bạn có thể mời chúng tôi một chiếc croissant 🥐, một bình sữa 🍼 hay một bịch tã — tùy tâm. Nhờ vậy chúng tôi có thể tiếp tục cải thiện nó.',
+  'Hang in there tonight 💛':'Cố lên cho đêm nay nhé 💛',
+  '— Taï & Alex, parents of A.':'— Taï & Alex, bố mẹ của A.',
   'Next side':'Bên tiếp theo','Last diaper':'Tã gần nhất','Next':'Tiếp theo','Due':'Cần cho','Given':'Đã cho',
   'Share this app, already connected':'Chia sẻ ứng dụng, đã kết nối sẵn','Sends a link that sets up the Sheet automatically. ⚠️ It contains your private key — share only with people you trust.':'Gửi một liên kết tự động thiết lập Sheet. ⚠️ Liên kết chứa khóa riêng của bạn — chỉ chia sẻ với người bạn tin tưởng.','Copy setup link':'Sao chép liên kết','Copy display link':'Sao chép liên kết màn hình','Copied ✓':'Đã sao chép ✓','Fullscreen':'Toàn màn hình',
   'Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.':'Chỉ khi thiết bị hiển thị sai giờ (vd. Kindle bị kẹt ở UTC). Lệch cố định — chỉnh lại khi đổi giờ mùa.',
@@ -1088,9 +1100,9 @@ function supportCard(){
   const n=Math.max(1,Math.floor(ageInMonths()));
   return `<div class="card pad">
       <div style="font-weight:700;margin-bottom:4px">🎉 ${t(n===1?'supportTitle_one':'supportTitle_other',{name:esc(settings.babyName),n:n})}</div>
-      <div class="small muted" style="margin-bottom:12px">${t('This app was built at night by a dad for his baby daughter. It’s free, with no ads and no tracking. If it helped you through these first weeks, you can pay what you want (suggested €5). Thank you!')}</div>
+      <div class="small muted" style="margin-bottom:12px">${t('This app was built at 3am by a first-time dad, while his baby daughter fed. It’s free, with no ads and no tracking. If it helped you through these first weeks, you can buy us a croissant — or whatever you like. Thank you!')}</div>
       <div class="row" style="gap:8px;flex-wrap:wrap">
-        <button class="btn btn-primary" data-act="support-open">☕ ${t('Pay what you want')}</button>
+        <button class="btn btn-primary" data-act="support-open">🥐 ${t('Buy us a croissant')}</button>
         <button class="btn btn-ghost" data-act="support-dismiss">${t('No thanks')}</button>
       </div>
     </div>`;
@@ -1113,15 +1125,24 @@ function storyNudgeDue(bf){
 }
 function storyNudgeHtml(){
   return `<div style="display:flex;gap:4px;margin-top:10px;align-items:flex-start">
-      <button data-act="story-open" style="flex:1;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.72rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('Made by a first-time dad, at 3am, in the Versailles maternity ward')} <u>›</u></button>
+      <button data-act="story-open" style="flex:1;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.72rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('This app was born at 3am, in a heatwave…')} <u>${t('Read')} ›</u></button>
       <button data-act="story-hide" title="${t('Hide')}" style="flex:0 0 auto;border:none;background:none;padding:2px 4px;font-size:.72rem;color:var(--muted);cursor:pointer">✕</button>
     </div>`;
 }
+// "Our story" paragraphs (English text = i18n key; FR/VI in the dictionaries).
+const STORY = [
+  'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.',
+  'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?',
+  'So while Alex was breastfeeding, Taï started writing this app — on his phone. It has been with us every night since.',
+  'It’s free, with no ads, and your data stays with you. If it helps you too, you can buy us a croissant 🥐, a bottle of milk 🍼 or a pack of diapers — whatever you like. It helps us keep improving it.',
+  'Hang in there tonight 💛',
+  '— Taï & Alex, parents of A.',
+];
 function storySheetHtml(){
   return `<div class="scrim" data-act="close"></div><div class="sheet" role="dialog">
     <div class="head"><h2>💛 ${t('Our story')}</h2><button class="x" data-act="close">✕</button></div>
-    <p class="small" style="line-height:1.55;margin:0 0 16px">${t('This app was started at 3am, in the middle of a heatwave, by a first-time dad in the maternity ward of the Centre Hospitalier de Versailles – Hôpital André Mignot, just after our daughter was born. We needed a simple way to know which breast was last, when she last ate and how many diapers she had — so I built one. It grew with us, night after night: the feeding timer, the e-reader mode for the bedside, the always-on display. It’s free, with no ads and no tracking: your data stays with you. If it makes your nights a little easier, you can support it with whatever amount you like. Thank you — and courage for tonight 💛')}</p>
-    ${SUPPORT_URL?`<button class="btn btn-primary btn-block" data-act="support-open">☕ ${t('Pay what you want')}</button>`:''}
+    ${STORY.map((k,i)=>`<p class="small" style="line-height:1.55;margin:0 0 ${i===STORY.length-1?16:10}px${i>=STORY.length-2?';font-weight:600':''}">${t(k)}</p>`).join('')}
+    ${SUPPORT_URL?`<button class="btn btn-primary btn-block" data-act="support-open">🥐 ${t('Buy us a croissant')}</button>`:''}
   </div>`;
 }
 function viewHomeKindle(){
@@ -1540,7 +1561,7 @@ function viewSettings(){
       <h2 style="margin-bottom:4px">💛 ${t('Our story')}</h2>
       <div class="tiny muted" style="margin-bottom:12px">${t('Free, no ads, no tracking. If it helps your family, you can pay what you want.')}</div>
       <button class="btn btn-ghost btn-block" data-act="story-open">${t('Read our story')}</button>
-      ${SUPPORT_URL?`<button class="btn btn-ghost btn-block" style="margin-top:8px" data-act="support-link">☕ ${t('Pay what you want')}</button>`:''}
+      ${SUPPORT_URL?`<button class="btn btn-ghost btn-block" style="margin-top:8px" data-act="support-link">🥐 ${t('Buy us a croissant')}</button>`:''}
     </div>
     <div class="card pad">
       <h2 style="margin-bottom:12px">${t('Caregivers')}</h2>
