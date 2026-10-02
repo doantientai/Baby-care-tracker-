@@ -244,7 +244,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.31';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.32';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = '';
 /* ============================================================ Baby Care Tracker
@@ -1108,18 +1108,34 @@ function supportCard(){
     </div>`;
 }
 // "Our story" link shown under the running breastfeed timer: the parent is
-// holding the baby with a free hand for 15–40 min. Only after 5 min into the
-// feed, at most one feed per week, never on Kindle/display, never within 48 h of
-// a fever/stool alert, and gone for good once dismissed or the link was opened.
+// holding the baby with a free hand. It appears once the current side has run
+// half of this baby's usual (median) time per side — settled mid-feed, not
+// while latching or switching. At most one feed per week, never on
+// Kindle/display, never within 48 h of a fever/stool alert, and gone for good
+// once dismissed or the support link was opened.
 const STORY_WEEK = 7*DAY;
+// Median seconds on one side over the last 14 days (sides ≥ 1 min only, last
+// 30 sides); 10 min until there are at least 4 to go on.
+function medianSideSec(){
+  const now=Date.now(), xs=[];
+  events.filter(e=>e.type==='breastfeed' && e.at>now-14*DAY).sort((a,b)=>b.at-a.at).forEach(e=>{
+    const s=bfSecOf(e); if(s.l>=60) xs.push(s.l); if(s.r>=60) xs.push(s.r);
+  });
+  const v=xs.slice(0,30).sort((a,b)=>a-b);
+  if(v.length<4) return 600;
+  const m=v.length>>1;
+  return v.length%2 ? v[m] : (v[m-1]+v[m])/2;
+}
 function storyNudgeDue(bf){
   if(!SUPPORT_URL || kindleOn() || DISPLAY || settings.storyHidden || settings.supportOpened) return false;
   const now=Date.now();
-  if(now-bf.startedAt < 5*60000) return false;
   if(events.some(e=>e.at>now-2*DAY && eventConcerning(e))) return false;
   const seen=loadJSON(LS.story, {});
-  if(seen.feed===bf.startedAt) return true;            // keep it for the whole feed
+  if(seen.feed===bf.startedAt) return true;            // keep it for the rest of the feed
   if(now-(seen.at||0) < STORY_WEEK) return false;
+  const side=bf.currentSide==='right'?'rightSec':'leftSec';
+  const live=(bf[side]||0)+(bf.paused?0:Math.max(0,(now-(bf.lastSwitchAt||now))/1000));
+  if(live < medianSideSec()/2) return false;
   saveJSON(LS.story, {at:now, feed:bf.startedAt});     // first time in this feed
   return true;
 }
