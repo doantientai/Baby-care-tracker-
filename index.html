@@ -244,7 +244,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.33';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.34';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = '';
 /* ============================================================ Baby Care Tracker
@@ -472,6 +472,10 @@ function updateSyncUI(){
 const EN = {
   day_one:'{n} day old', day_other:'{n} days old',
   occ_weight:'🎉 {name} is back to birth weight!',
+  occ_teaser_weight:'Those first days weren’t easy for us either…',
+  occ_teaser_month:'Did you know our first month wasn’t easy either?',
+  occ_teaser_days100:'Did you know this app was born on a hard night?',
+  occ_teaser_year:'Do you know how it all started for us?',
   occ_month:'🎂 {name} is 1 month old! Well done on this first month.',
   occ_days100:'💯 100 days with {name}!',
   occ_days100_n:'💯 100 days with {name}: {feeds} feeds, {diapers} diapers.',
@@ -501,6 +505,10 @@ const FR = {
   // templated
   day_one:'{n} jour', day_other:'{n} jours',
   occ_weight:'🎉 {name} a retrouvé son poids de naissance !',
+  occ_teaser_weight:'Ces premiers jours n’ont pas été faciles pour nous non plus…',
+  occ_teaser_month:'Vous savez, notre premier mois n’a pas été facile non plus…',
+  occ_teaser_days100:'Saviez-vous que cette appli est née d’une nuit difficile ?',
+  occ_teaser_year:'Vous savez comment tout a commencé pour nous ?',
   occ_month:'🎂 {name} a 1 mois ! Bravo pour ce premier mois.',
   occ_days100:'💯 100 jours avec {name} !',
   occ_days100_n:'💯 100 jours avec {name} : {feeds} tétées, {diapers} couches.',
@@ -653,6 +661,10 @@ const VI = {
   // templated
   day_one:'{n} ngày tuổi', day_other:'{n} ngày tuổi',
   occ_weight:'🎉 {name} đã lấy lại cân nặng lúc sinh!',
+  occ_teaser_weight:'Những ngày đầu cũng chẳng dễ dàng gì với chúng tôi…',
+  occ_teaser_month:'Bạn có biết tháng đầu của chúng tôi cũng không dễ dàng?',
+  occ_teaser_days100:'Bạn có biết ứng dụng này ra đời từ một đêm vất vả?',
+  occ_teaser_year:'Bạn có biết mọi chuyện bắt đầu thế nào với chúng tôi?',
   occ_month:'🎂 Chúc mừng đầy tháng {name}! Bạn đã làm rất tốt.',
   occ_days100:'💯 100 ngày bên {name}!',
   occ_days100_n:'💯 100 ngày bên {name}: {feeds} cữ bú, {diapers} lần thay tã.',
@@ -1171,7 +1183,7 @@ function occasionCardHtml(){
         <div style="font-weight:700">${t('occ_'+k+n,{name:esc(settings.babyName),feeds:c.feeds,diapers:c.diapers})}</div>
         <button class="x" data-act="occ-hide" data-occ="${k}" title="${t('Hide')}" style="flex:0 0 auto">✕</button>
       </div>
-      <button class="btn btn-ghost btn-block" style="margin-top:10px" data-act="story-open" data-occ="${k}">💛 ${t('Read our story')} ›</button>
+      <button data-act="story-open" data-occ="${k}" style="display:block;width:100%;margin-top:8px;border:none;background:none;padding:2px 0;text-align:left;font:inherit;font-size:.78rem;line-height:1.35;color:var(--muted);cursor:pointer">💛 ${t('occ_teaser_'+k)} <u>›</u></button>
     </div>`;
 }
 // "Our story" link shown under the running breastfeed timer: the parent is
