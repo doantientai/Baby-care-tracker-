@@ -93,6 +93,15 @@
   .updbar{position:fixed;left:12px;right:12px;bottom:72px;z-index:60;max-width:456px;margin:0 auto;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.25);font-weight:600;cursor:pointer}
   .ev:active{background:var(--ev-active)}
   .ev+.ev{border-top:1px solid var(--card-border)}
+  .setlist{padding:4px}
+  .setrow{display:flex;align-items:center;gap:12px;width:100%;padding:12px;text-align:left;border:none;background:none;color:inherit;font:inherit;border-radius:12px;cursor:pointer}
+  .setrow+.setrow{border-top:1px solid var(--card-border);border-radius:0}
+  .setrow .ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;background:var(--ghost-bg);flex:0 0 auto}
+  .setrow .mid{display:flex;flex-direction:column;min-width:0;flex:1}
+  .setrow .ttl{font-weight:700}
+  .setrow .sub{font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .setrow .chev{color:var(--muted);font-size:1.5rem;line-height:1}
+  .setback{background:none;border:none;color:var(--brand-d);font:inherit;font-weight:700;padding:4px 0;cursor:pointer}
   .ev .ic{width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex:0 0 auto}
   .ev .mid{display:flex;flex-direction:column;min-width:0;flex:1}
   .ev .ttl{font-weight:700}
@@ -167,6 +176,9 @@
   :root[data-kindle="1"] .sync-banner{background:#fff;color:#000;border-bottom:2px solid #000;font-size:1.05rem;font-weight:700;padding:12px 16px}
   :root[data-kindle="1"] .sync-banner.k-busy{background:#000;color:#fff;font-size:1.15rem;padding:14px 16px}
   :root[data-kindle="1"] .sync-banner.k-idle{font-size:1rem;padding:8px 16px}
+  :root[data-kindle="1"] .setrow .ic{display:none}
+  :root[data-kindle="1"] .setrow+.setrow{border-top:2px solid #000}
+  :root[data-kindle="1"] .setback{color:#000;text-decoration:underline}
   :root[data-kindle="1"] .banner{border:2px solid #000;background:#fff!important;color:#000!important;font-weight:600}
   :root[data-kindle="1"] .stat.good,:root[data-kindle="1"] .stat.warn{border:2px solid #000;background:#fff}
   :root[data-kindle="1"] .nav{backdrop-filter:none;background:#fff;border-top:2px solid #000}
@@ -262,7 +274,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.44';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.45';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = 'https://ko-fi.com/taidoan';
 // Public website shared by "Share the app with a friend" (never the sync link).
@@ -540,7 +552,7 @@ const EN = {
   syncSending_one:'Sending 1 entry…', syncSending_other:'Sending {n} entries…',
   syncPending_one:'1 entry not sent yet', syncPending_other:'{n} entries not sent yet',
   syncOffline_one:'Offline — 1 entry will be sent when you’re back online', syncOffline_other:'Offline — {n} entries will be sent when you’re back online',
-  ageShort_d:'{n}d', ageShort_w:'{n}w',
+  ageShort_d:'{n}d', ageShort_w:'{n}w', setVitD:'Vitamin D at {time}',
   occ_weight:'🎉 {name} is back to birth weight!',
   occ_month:'🎂 {name} is 1 month old! Well done on this first month.',
   occ_days100:'💯 100 days with {name}!',
@@ -569,7 +581,7 @@ const FR = {
   syncSending_one:'Envoi d’1 entrée…', syncSending_other:'Envoi de {n} entrées…',
   syncPending_one:'1 entrée pas encore envoyée', syncPending_other:'{n} entrées pas encore envoyées',
   syncOffline_one:'Hors ligne — 1 entrée sera envoyée au retour du réseau', syncOffline_other:'Hors ligne — {n} entrées seront envoyées au retour du réseau',
-  ageShort_d:'{n} j', ageShort_w:'{n} sem.',
+  ageShort_d:'{n} j', ageShort_w:'{n} sem.', setVitD:'Vitamine D à {time}',
   occ_weight:'🎉 {name} a retrouvé son poids de naissance !',
   occ_month:'🎂 {name} a 1 mois ! Bravo pour ce premier mois.',
   occ_days100:'💯 100 jours avec {name} !',
@@ -659,6 +671,17 @@ const FR = {
   'Sheet synced':'Sheet synchronisé','sync error':'erreur de synchro',
   'Getting the latest entries…':'Récupération des dernières entrées…',
   'Up to date':'À jour','Offline':'Hors ligne',
+  'Baby & family':'Bébé & famille',
+  'Sharing between phones':'Partage entre téléphones',
+  'Reminders & tracking':'Rappels & suivi',
+  'Display':'Affichage',
+  'Devices':'Appareils',
+  'Data & about':'Données & à propos',
+  'Not connected':'Non connecté',
+  'Connected':'Connecté',
+  'Help & links':'Aide & liens',
+  'Step-by-step guide':'Guide pas à pas',
+  'Website':'Le site',
   'Share the app with a friend':'Partager l’appli avec un ami',
   'Baby Care Tracker: the baby log made by parents, for parents. Free, no ads, no account.':'Baby Care Tracker : le carnet de bébé fait par des parents, pour des parents. Gratuit, sans pub, sans compte.',
   'Link copied ✓':'Lien copié ✓',
@@ -729,7 +752,7 @@ const VI = {
   syncSending_one:'Đang gửi 1 mục…', syncSending_other:'Đang gửi {n} mục…',
   syncPending_one:'1 mục chưa được gửi', syncPending_other:'{n} mục chưa được gửi',
   syncOffline_one:'Mất kết nối — 1 mục sẽ được gửi khi có mạng lại', syncOffline_other:'Mất kết nối — {n} mục sẽ được gửi khi có mạng lại',
-  ageShort_d:'{n} ngày', ageShort_w:'{n} tuần',
+  ageShort_d:'{n} ngày', ageShort_w:'{n} tuần', setVitD:'Vitamin D lúc {time}',
   occ_weight:'🎉 {name} đã lấy lại cân nặng lúc sinh!',
   occ_month:'🎂 Chúc mừng đầy tháng {name}! Bạn đã làm rất tốt.',
   occ_days100:'💯 100 ngày bên {name}!',
@@ -819,6 +842,17 @@ const VI = {
   'Sheet synced':'Đã đồng bộ Sheet','sync error':'lỗi đồng bộ',
   'Getting the latest entries…':'Đang tải các mục mới nhất…',
   'Up to date':'Đã cập nhật','Offline':'Mất kết nối',
+  'Baby & family':'Em bé & gia đình',
+  'Sharing between phones':'Chia sẻ giữa các điện thoại',
+  'Reminders & tracking':'Nhắc nhở & theo dõi',
+  'Display':'Hiển thị',
+  'Devices':'Thiết bị',
+  'Data & about':'Dữ liệu & giới thiệu',
+  'Not connected':'Chưa kết nối',
+  'Connected':'Đã kết nối',
+  'Help & links':'Trợ giúp & liên kết',
+  'Step-by-step guide':'Hướng dẫn từng bước',
+  'Website':'Trang web',
   'Share the app with a friend':'Chia sẻ ứng dụng với bạn bè',
   'Baby Care Tracker: the baby log made by parents, for parents. Free, no ads, no account.':'Baby Care Tracker: sổ theo dõi em bé do bố mẹ làm, cho bố mẹ. Miễn phí, không quảng cáo, không cần tài khoản.',
   'Link copied ✓':'Đã sao chép liên kết ✓',
@@ -1125,7 +1159,7 @@ function fetchWeather(){
 }
 
 /* ------------------------------------------------------------------ state --- */
-const state = { tab:'home', filter:'all', sheet:null /* {type, editing, initial, draft} */ };
+const state = { tab:'home', filter:'all', sheet:null /* {type, editing, initial, draft} */, setSec:null /* open Settings section */ };
 
 /* --------------------------------------------------------------- rendering -- */
 const app = document.getElementById('app');
@@ -1636,28 +1670,33 @@ function viewTrends(){
 }
 
 /* ---- SETTINGS ---- */
-function viewSettings(){
-  return `<div class="wrap grid" style="gap:16px">
-    <h1>${t('Settings')}</h1>
-    <div class="card pad">
-      <div class="between"><h2>${t('Language')}</h2>
-        <div class="chips"><button class="chip ${settings.lang==='en'?'on':''}" data-lang="en">English</button><button class="chip ${settings.lang==='fr'?'on':''}" data-lang="fr">Français</button><button class="chip ${settings.lang==='vi'?'on':''}" data-lang="vi">Tiếng Việt</button></div>
-      </div>
-    </div>
-    <div class="card pad">
-      <div class="between"><h2>${t('Appearance')}</h2>
-        <div class="chips">
-          <button class="chip ${settings.theme==='system'?'on':''}" data-themeset="system">${t('Auto')}</button>
-          <button class="chip ${settings.theme==='light'?'on':''}" data-themeset="light">☀️ ${t('Light')}</button>
-          <button class="chip ${settings.theme==='dark'?'on':''}" data-themeset="dark">🌙 ${t('Dark')}</button>
-        </div>
-      </div>
-    </div>
+// Settings: a short menu of sections, each opening its own page (‹ back).
+const SET_SECTIONS=[['baby','👶','Baby & family'],['sync','🔄','Sharing between phones'],['care','🔔','Reminders & tracking'],['display','🎨','Display'],['devices','📱','Devices'],['data','💾','Data & about']];
+function setSummary(id){
+  const onOff=v=>v?t('On'):t('Off');
+  const col=settings.lang==='fr'?' : ':': ';   // French puts a space before ':'
+  if(id==='baby'){ const d=ageInDays(); return esc(settings.babyName)+(d!=null?' · '+t(d===1?'day_one':'day_other',{n:d}):'')+' · '+settings.caregivers.map(esc).join(', '); }
+  if(id==='sync') return !syncReady() ? t('Not connected') : syncState.error ? '⚠ '+t('sync error') : '✓ '+t('Connected');
+  if(id==='care') return (settings.vitDEnabled ? t('setVitD',{time:settings.vitDTime||'07:00'}) : t('Vitamin D reminder')+col+t('Off'))+(settings.feedGapEnabled?' · '+t('Long-gap nudge'):'');
+  if(id==='display') return ({en:'English',fr:'Français',vi:'Tiếng Việt'}[settings.lang]||'')+' · '+t(settings.theme==='light'?'Light':settings.theme==='dark'?'Dark':'Auto')+' · '+esc(settings.locationLabel||'');
+  if(id==='devices') return t('E-reader mode')+col+onOff(settings.kindle)+(settings.tzOffset!=null?' · '+t('Time zone'):'');
+  if(id==='data') return t('Backup & share')+' · '+t('Our story');
+  return '';
+}
+function settingsSection(id){
+  if(id==='baby') return `
     <div class="card pad">
       <h2 style="margin-bottom:12px">${t('Baby')}</h2>
       <div class="field"><label class="label">${t('Name')}</label><input data-set="babyName" value="${esc(settings.babyName)}"></div>
       <div class="field"><label class="label">${t('Date of birth')}</label><input type="datetime-local" data-set="babyDob" value="${settings.babyDob?toLocalInput(settings.babyDob):''}"><div class="tiny muted" style="margin-top:4px">${t('Used for age-based fever alerts and diaper targets.')}</div></div>
     </div>
+    <div class="card pad">
+      <h2 style="margin-bottom:12px">${t('Caregivers')}</h2>
+      <div class="chips" style="margin-bottom:12px">${settings.caregivers.map(c=>`<span class="chip">${esc(c)}${settings.caregivers.length>1?` <button data-rm-care="${esc(c)}" style="border:none;background:none;color:#94a3b8;padding:0 0 0 2px">✕</button>`:''}</span>`).join('')}</div>
+      <div class="row"><input id="newCare" placeholder="${t('Add caregiver…')}"><button class="btn btn-ghost" data-act="add-care">${t('Add')}</button></div>
+    </div>
+`;
+  if(id==='sync') return `
     <div class="card pad">
       <h2>${t('Cloud sync (Google Sheet)')}</h2>
       <div class="tiny muted" style="margin:4px 0 12px">${t('Save the log to a shared Google Sheet so you and your wife see the same data on both phones. The app still works offline and syncs when online.')}</div>
@@ -1686,6 +1725,16 @@ function viewSettings(){
         </ol>
       </details>
     </div>
+`;
+  if(id==='care') return `
+    <div class="card pad">
+      <h2 style="margin-bottom:4px">${t('Reminders')}</h2>
+      <div class="between" style="margin-bottom:${settings.vitDEnabled?'12px':'0'}">
+        <span class="small">💊 ${t('Vitamin D reminder')}</span>
+        <button class="chip ${settings.vitDEnabled?'on':''}" data-act="toggle-vitd">${settings.vitDEnabled?t('On'):t('Off')}</button>
+      </div>
+      ${settings.vitDEnabled?`<div class="field" style="margin:0"><label class="label">${t('From')}</label><input type="time" data-set="vitDTime" value="${settings.vitDTime||'07:00'}"></div>`:''}
+    </div>
     <div class="card pad">
       <h2 style="margin-bottom:4px">${t('Feeding')}</h2>
       <div class="tiny muted" style="margin-bottom:12px">${t('Feeding is on demand. Optionally show a gentle nudge only when an unusually long gap passes — a safety floor, not a schedule.')}</div>
@@ -1699,14 +1748,6 @@ function viewSettings(){
       </div><div class="tiny muted" style="margin-top:8px">${t('Night counted as 10pm–7am. Typical guides: ~3h day, ~5h night in the early weeks.')}</div>`:''}
     </div>
     <div class="card pad">
-      <h2 style="margin-bottom:4px">${t('Reminders')}</h2>
-      <div class="between" style="margin-bottom:${settings.vitDEnabled?'12px':'0'}">
-        <span class="small">💊 ${t('Vitamin D reminder')}</span>
-        <button class="chip ${settings.vitDEnabled?'on':''}" data-act="toggle-vitd">${settings.vitDEnabled?t('On'):t('Off')}</button>
-      </div>
-      ${settings.vitDEnabled?`<div class="field" style="margin:0"><label class="label">${t('From')}</label><input type="time" data-set="vitDTime" value="${settings.vitDTime||'07:00'}"></div>`:''}
-    </div>
-    <div class="card pad">
       <h2 style="margin-bottom:4px">${t('Tracking')}</h2>
       <div class="tiny muted" style="margin-bottom:12px">${t('Hide features you don’t use.')}</div>
       <div class="between">
@@ -1714,6 +1755,30 @@ function viewSettings(){
         <button class="chip ${settings.showSleep!==false?'on':''}" data-act="toggle-sleep">${settings.showSleep!==false?t('On'):t('Off')}</button>
       </div>
     </div>
+`;
+  if(id==='display') return `
+    <div class="card pad">
+      <div class="between"><h2>${t('Language')}</h2>
+        <div class="chips"><button class="chip ${settings.lang==='en'?'on':''}" data-lang="en">English</button><button class="chip ${settings.lang==='fr'?'on':''}" data-lang="fr">Français</button><button class="chip ${settings.lang==='vi'?'on':''}" data-lang="vi">Tiếng Việt</button></div>
+      </div>
+    </div>
+    <div class="card pad">
+      <div class="between"><h2>${t('Appearance')}</h2>
+        <div class="chips">
+          <button class="chip ${settings.theme==='system'?'on':''}" data-themeset="system">${t('Auto')}</button>
+          <button class="chip ${settings.theme==='light'?'on':''}" data-themeset="light">☀️ ${t('Light')}</button>
+          <button class="chip ${settings.theme==='dark'?'on':''}" data-themeset="dark">🌙 ${t('Dark')}</button>
+        </div>
+      </div>
+    </div>
+    <div class="card pad">
+      <h2 style="margin-bottom:12px">${t('Location & units')}</h2>
+      <div class="field"><label class="label">${t('Location label')}</label><input data-set="locationLabel" value="${esc(settings.locationLabel)}"></div>
+      <div class="grid g2"><div class="field"><label class="label">Latitude</label><input type="number" step="0.0001" data-set="lat" value="${settings.lat}"></div><div class="field"><label class="label">Longitude</label><input type="number" step="0.0001" data-set="lon" value="${settings.lon}"></div></div>
+      <div class="field"><label class="label">${t('Temperature unit')}</label><div class="chips"><button class="chip ${settings.tempUnit==='C'?'on':''}" data-unit="C">°C</button><button class="chip ${settings.tempUnit==='F'?'on':''}" data-unit="F">°F</button></div></div>
+    </div>
+`;
+  if(id==='devices') return `
     <div class="card pad">
       <h2 style="margin-bottom:4px">${t('E-reader mode')}</h2>
       <div class="tiny muted" style="margin-bottom:12px">${t('Black-and-white, no animations — for Kindle & e-ink screens.')}</div>
@@ -1723,6 +1788,11 @@ function viewSettings(){
       </div>
     </div>
     <div class="card pad">
+      <h2 style="margin-bottom:4px">${t('Always-on display')}</h2>
+      <div class="tiny muted" style="margin-bottom:12px">${t('A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.')}</div>
+      <a class="btn btn-ghost btn-block" href="?display=1">${t('Open display')} →</a>
+    </div>
+    <div class="card pad">
       <h2 style="margin-bottom:4px">${t('Time zone')}</h2>
       <div class="tiny muted" style="margin-bottom:12px">${t('Only if this device shows the wrong time (e.g. a Kindle stuck on UTC). Fixed offset — adjust at daylight-saving changes.')}</div>
       <div class="chips">
@@ -1730,28 +1800,8 @@ function viewSettings(){
       </div>
       <div class="tiny muted" style="margin-top:10px">${t('Now showing')}: <b>${clock(Date.now())}</b></div>
     </div>
-    <div class="card pad">
-      <h2 style="margin-bottom:4px">${t('Always-on display')}</h2>
-      <div class="tiny muted" style="margin-bottom:12px">${t('A read-only breastfeeding dashboard for an always-on phone in landscape (black screen): time since last feed and next side. Bookmark the page it opens.')}</div>
-      <a class="btn btn-ghost btn-block" href="?display=1">${t('Open display')} →</a>
-    </div>
-    <div class="card pad">
-      <h2 style="margin-bottom:4px">💛 ${t('Our story')}</h2>
-      <div class="tiny muted" style="margin-bottom:12px">${t('Free, no ads, no tracking. If it helps your family, you can pay what you want.')}</div>
-      <button class="btn btn-ghost btn-block" data-act="story-open" data-occ="about">${t('Read our story')}</button>
-      ${SUPPORT_URL?`<button class="btn btn-ghost btn-block" style="margin-top:8px" data-act="support-link">${t('🥐 Buy us a croissant')}</button>`:''}
-    </div>
-    <div class="card pad">
-      <h2 style="margin-bottom:12px">${t('Caregivers')}</h2>
-      <div class="chips" style="margin-bottom:12px">${settings.caregivers.map(c=>`<span class="chip">${esc(c)}${settings.caregivers.length>1?` <button data-rm-care="${esc(c)}" style="border:none;background:none;color:#94a3b8;padding:0 0 0 2px">✕</button>`:''}</span>`).join('')}</div>
-      <div class="row"><input id="newCare" placeholder="${t('Add caregiver…')}"><button class="btn btn-ghost" data-act="add-care">${t('Add')}</button></div>
-    </div>
-    <div class="card pad">
-      <h2 style="margin-bottom:12px">${t('Location & units')}</h2>
-      <div class="field"><label class="label">${t('Location label')}</label><input data-set="locationLabel" value="${esc(settings.locationLabel)}"></div>
-      <div class="grid g2"><div class="field"><label class="label">Latitude</label><input type="number" step="0.0001" data-set="lat" value="${settings.lat}"></div><div class="field"><label class="label">Longitude</label><input type="number" step="0.0001" data-set="lon" value="${settings.lon}"></div></div>
-      <div class="field"><label class="label">${t('Temperature unit')}</label><div class="chips"><button class="chip ${settings.tempUnit==='C'?'on':''}" data-unit="C">°C</button><button class="chip ${settings.tempUnit==='F'?'on':''}" data-unit="F">°F</button></div></div>
-    </div>
+`;
+  if(id==='data') return `
     <div class="card pad">
       <h2>${t('Backup & share')}</h2>
       <div class="tiny muted" style="margin:4px 0 12px">${t("Export a CSV for your pediatrician, or a JSON backup to move data to the other parent's phone (imports are de-duplicated).")}</div>
@@ -1762,6 +1812,33 @@ function viewSettings(){
       </div>
       <div id="ioMsg" class="small" style="color:var(--brand-d);margin-top:10px"></div>
     </div>
+    <div class="card pad">
+      <h2 style="margin-bottom:4px">💛 ${t('Our story')}</h2>
+      <div class="tiny muted" style="margin-bottom:12px">${t('Free, no ads, no tracking. If it helps your family, you can pay what you want.')}</div>
+      <button class="btn btn-ghost btn-block" data-act="story-open" data-occ="about">${t('Read our story')}</button>
+      ${SUPPORT_URL?`<button class="btn btn-ghost btn-block" style="margin-top:8px" data-act="support-link">${t('🥐 Buy us a croissant')}</button>`:''}
+    </div>
+    <div class="card pad">
+      <h2 style="margin-bottom:12px">${t('Help & links')}</h2>
+      <div class="grid" style="gap:8px">
+        <a class="btn btn-ghost btn-block" href="guide.html">📖 ${t('Step-by-step guide')}</a>
+        <a class="btn btn-ghost btn-block" href="about.html">🌐 ${t('Website')}</a>
+        <button class="btn btn-ghost btn-block" data-act="share-app">💌 ${t('Share the app with a friend')}</button>
+      </div>
+    </div>
+    <div class="center tiny muted" style="padding:0 8px">${t('Baby Care Tracker · stored privately in this browser. Guidance is general and not a substitute for medical advice.')}</div>
+    <div class="center tiny muted">v${APP_VERSION}</div>`;
+  return '';
+}
+function viewSettings(){
+  const sec=SET_SECTIONS.find(x=>x[0]===state.setSec);
+  if(sec) return `<div class="wrap grid" style="gap:16px">
+    <div><button class="setback" data-act="set-back">‹ ${t('Settings')}</button><h1 style="margin-top:4px">${sec[1]} ${t(sec[2])}</h1></div>
+    ${settingsSection(sec[0])}
+  </div>`;
+  return `<div class="wrap grid" style="gap:16px">
+    <h1>${t('Settings')}</h1>
+    <div class="card setlist">${SET_SECTIONS.map(([id,ic,l])=>`<button class="setrow" data-act="set-open" data-sec="${id}"><span class="ic">${ic}</span><span class="mid"><span class="ttl">${t(l)}</span><span class="sub">${setSummary(id)}</span></span><span class="chev">›</span></button>`).join('')}</div>
     <div class="center tiny muted" style="padding:0 8px">${t('Baby Care Tracker · stored privately in this browser. Guidance is general and not a substitute for medical advice.')}</div>
   </div>`;
 }
@@ -1934,7 +2011,7 @@ document.addEventListener('click', (ev)=>{
     return;
   }
 
-  if(el.dataset.tab){ state.tab=el.dataset.tab; render(); if(el.dataset.tab==='home' && !weatherCache) fetchWeather(); return; }
+  if(el.dataset.tab){ state.tab=el.dataset.tab; state.setSec=null; render(); if(el.dataset.tab==='home' && !weatherCache) fetchWeather(); return; }
   if(el.dataset.log){ openSheet(el.dataset.log,null,null); return; }
   if(el.dataset.edit){ const e=findEvent(el.dataset.edit); if(e) openSheet(null,e,null); return; }
   if(el.dataset.filter){ state.filter=el.dataset.filter; render(); return; }
@@ -1982,6 +2059,8 @@ document.addEventListener('click', (ev)=>{
     else { const okc=copyText(url); if(okc){ el.textContent=t('Copied ✓'); setTimeout(()=>{ if(el&&el.dataset.act===act) el.textContent=t(act==='share-display'?'Copy display link':'Copy setup link'); },1500); } }
     return;
   }
+  if(act==='set-open'){ state.setSec=el.dataset.sec; render(); window.scrollTo(0,0); return; }
+  if(act==='set-back'){ state.setSec=null; render(); window.scrollTo(0,0); return; }
   if(act==='share-app'){
     // Shares the public website only — never the private sync link.
     const txt=t('Baby Care Tracker: the baby log made by parents, for parents. Free, no ads, no account.');
