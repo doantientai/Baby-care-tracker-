@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0ea5e9" />
+<title>Guide — Baby Care Tracker</title>
+<meta name="description" content="Le guide pas à pas de Baby Care Tracker : installer, noter, connecter le deuxième téléphone, Kindle, écran de chevet, et que faire en cas de souci." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230ea5e9'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle'%3E%F0%9F%8D%BC%3C/text%3E%3C/svg%3E" />
+<style>
+  :root{
+    color-scheme: light;
+    --brand:#0ea5e9; --brand-d:#0284c7; --bg:#f8fafc; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+    --card:#fff; --card-border:#eef2f7; --pink:#ec4899; --soft:#f1f5f9; --tip:#ecfdf5; --tip-ink:#065f46; --warn:#fffbeb; --warn-ink:#92400e;
+    --hero:linear-gradient(160deg,#e0f2fe 0%,#fce7f3 100%);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      color-scheme: dark;
+      --brand:#38bdf8; --brand-d:#7dd3fc; --bg:#0b1220; --ink:#e7ecf3; --muted:#94a3b8; --line:#2a3650;
+      --card:#151d2e; --card-border:#243049; --soft:#121a2b; --tip:#0f2a22; --tip-ink:#86efac; --warn:#2c2410; --warn-ink:#fcd34d;
+      --hero:linear-gradient(160deg,#0f2338 0%,#2a1726 100%);
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--brand-d)}
+  img{max-width:100%;height:auto}
+  .wrap{max-width:820px;margin:0 auto;padding:0 20px}
+  header.top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;height:58px;max-width:1040px}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:800;text-decoration:none;color:var(--ink);white-space:nowrap}
+  .logo span.i{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--brand);font-size:18px}
+  nav.links{display:flex;align-items:center;gap:16px;font-size:.92rem}
+  nav.links a{color:var(--muted);text-decoration:none;font-weight:600}
+  @media (max-width:640px){ nav.links a.hide-s{display:none} }
+  .lang{display:flex;gap:2px;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:2px}
+  .lang button{border:0;background:none;color:var(--muted);font:inherit;font-size:.78rem;font-weight:700;padding:4px 9px;border-radius:999px;cursor:pointer}
+  .lang button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .hero{background:var(--hero);padding:44px 0 36px}
+  .hero h1{font-size:clamp(1.9rem,5vw,2.7rem);line-height:1.1;margin:0 0 10px;letter-spacing:-.02em}
+  .hero p{color:var(--muted);margin:0;font-size:1.08rem}
+  .toc{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:22px;padding:0;list-style:none;counter-reset:t}
+  .toc li{counter-increment:t}
+  .toc a{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:10px 14px;text-decoration:none;color:var(--ink);font-weight:600;font-size:.95rem}
+  .toc a::before{content:counter(t);display:grid;place-items:center;flex:0 0 26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;font-size:.82rem}
+  @media (max-width:560px){ .toc{grid-template-columns:1fr} }
+  section.ch{padding:44px 0 8px;scroll-margin-top:60px}
+  section.ch h2{font-size:clamp(1.4rem,3.4vw,1.8rem);margin:0 0 6px;display:flex;gap:10px;align-items:baseline}
+  section.ch h2 .n{color:var(--brand);font-size:.9em}
+  section.ch > .wrap > p.sub{color:var(--muted);margin:0 0 18px}
+  h3{font-size:1.1rem;margin:26px 0 10px}
+  ol.steps{list-style:none;counter-reset:s;padding:0;margin:0 0 6px;display:grid;gap:10px}
+  ol.steps > li{counter-increment:s;position:relative;padding:12px 16px 12px 56px;background:var(--card);border:1px solid var(--card-border);border-radius:14px}
+  ol.steps > li::before{content:counter(s);position:absolute;left:14px;top:11px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--brand);color:#fff;font-weight:800;font-size:.85rem}
+  ol.steps small{display:block;color:var(--muted);margin-top:2px;font-size:.88rem}
+  .shot{margin:14px 0 4px;text-align:center}
+  .shot img{border-radius:14px;border:1px solid var(--line);box-shadow:0 8px 24px rgba(15,23,42,.10);max-width:min(100%,360px)}
+  .shot.wide img{max-width:100%}
+  .shot.small img{max-width:min(100%,300px)}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  .pair .shot{margin-top:0}
+  @media (max-width:560px){ .pair{grid-template-columns:1fr} }
+  .tip,.warn{border-radius:12px;padding:10px 14px;margin:12px 0;font-size:.95rem}
+  .tip{background:var(--tip);color:var(--tip-ink)}
+  .warn{background:var(--warn);color:var(--warn-ink)}
+  b.ui{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:0 6px;font-weight:700;white-space:nowrap}
+  code{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:.88em}
+  .faq dt{font-weight:700;margin-top:16px}
+  .faq dd{margin:4px 0 0;color:var(--muted)}
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:28px 0 40px;color:var(--muted);font-size:.88rem}
+  footer p{margin:0 0 6px}
+  .totop{display:inline-block;margin-top:14px;font-size:.88rem}
+  @media print{
+    header.top,.lang,.totop{display:none} body{background:#fff;color:#000} section.ch{break-inside:auto} .shot{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="about.html"><span class="i">🍼</span>Baby Care Tracker</a>
+    <nav class="links">
+      <a class="hide-s" href="about.html" data-i="navSite">Le site</a>
+      <a class="hide-s" href="./" data-i="navApp">Ouvrir l’appli</a>
+      <div class="lang" role="group" aria-label="Langue">
+        <button data-lang="fr">FR</button><button data-lang="en">EN</button><button data-lang="vi">VI</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <h1 data-i="h1">Le guide, pas à pas</h1>
+    <p data-i="intro">Tout ce qu’il faut pour bien démarrer, avec des captures d’écran. Comptez 2 minutes pour l’essentiel, 5 de plus pour connecter le deuxième téléphone.</p>
+    <p style="margin-top:16px"><a href="./" data-i="navApp" style="display:inline-block;background:var(--brand);color:#fff;font-weight:700;text-decoration:none;border-radius:12px;padding:10px 18px">Ouvrir l’appli</a></p>
+    <ol class="toc">
+      <li><a href="#install" data-i="toc1">Installer sur le téléphone</a></li>
+      <li><a href="#setup" data-i="toc2">Premiers réglages</a></li>
+      <li><a href="#log" data-i="toc3">Noter au quotidien</a></li>
+      <li><a href="#sync" data-i="toc4">Connecter le deuxième téléphone</a></li>
+      <li><a href="#kindle" data-i="toc5">Sur une liseuse Kindle</a></li>
+      <li><a href="#display" data-i="toc6">Écran de chevet</a></li>
+      <li><a href="#help" data-i="toc7">En cas de souci</a></li>
+    </ol>
+  </div>
+</div>
+
+<!-- 1 -->
+<section class="ch" id="install"><div class="wrap">
+  <h2><span class="n">1</span><span data-i="t1">Installer sur le téléphone</span></h2>
+  <p class="sub" data-i="t1s">Pas de store : l’appli est une page web qui s’ajoute à l’écran d’accueil comme une vraie appli.</p>
+  <h3 data-i="ios">iPhone (Safari)</h3>
+  <ol class="steps" data-i="iosSteps">
+    <li>Ouvrez <a href="./">l’appli</a> dans <b>Safari</b>.</li>
+    <li>Touchez le bouton <b class="ui">Partager</b> (le carré avec une flèche vers le haut).</li>
+    <li>Choisissez <b class="ui">Sur l’écran d’accueil</b>, puis <b class="ui">Ajouter</b>.</li>
+  </ol>
+  <h3 data-i="android">Android (Chrome)</h3>
+  <ol class="steps" data-i="androidSteps">
+    <li>Ouvrez <a href="./">l’appli</a> dans <b>Chrome</b>.</li>
+    <li>Touchez le menu <b class="ui">⋮</b> en haut à droite.</li>
+    <li>Choisissez <b class="ui">Ajouter à l’écran d’accueil</b> (ou <b class="ui">Installer l’application</b>).</li>
+  </ol>
+  <div class="shot"><img data-img="home.jpg" alt="" data-i-alt="altHome" width="390" height="700"></div>
+  <div class="tip" data-i="tip1">💡 L’icône 🍼 apparaît sur l’écran d’accueil. Ouvrez toujours l’appli depuis cette icône.</div>
+</div></section>
+
+<!-- 2 -->
+<section class="ch" id="setup"><div class="wrap">
+  <h2><span class="n">2</span><span data-i="t2">Premiers réglages</span></h2>
+  <p class="sub" data-i="t2s">Touchez <b class="ui">⚙️ Réglages</b> en bas à droite.</p>
+  <ol class="steps" data-i="setupSteps">
+    <li><b>Langue</b> : Français, English ou Tiếng Việt.</li>
+    <li><b>Bébé</b> : son prénom et sa date de naissance.<small>La date de naissance sert aux repères selon l’âge : fièvre, nombre de couches par jour.</small></li>
+    <li><b>Intervenants</b> : les personnes qui s’occupent de bébé (par ex. Maman, Papa, Mamie). Chaque entrée indique qui l’a faite.</li>
+    <li><b>Lieu &amp; unités</b> : votre ville, pour la météo et le conseil « quoi mettre à bébé ».</li>
+  </ol>
+  <div class="pair">
+    <div class="shot"><img data-img="set-lang.jpg" alt="" data-i-alt="altLang" width="358" height="114"></div>
+    <div class="shot"><img data-img="set-baby.jpg" alt="" data-i-alt="altBaby" width="358" height="248"></div>
+  </div>
+</div></section>
+
+<!-- 3 -->
+<section class="ch" id="log"><div class="wrap">
+  <h2><span class="n">3</span><span data-i="t3">Noter au quotidien</span></h2>
+  <p class="sub" data-i="t3s">Tout se fait depuis l’écran <b class="ui">🏠 Accueil</b>, d’une main.</p>
+
+  <h3 data-i="bfT">🤱 Une tétée</h3>
+  <ol class="steps" data-i="bfSteps">
+    <li>Touchez <b class="ui">Début G</b> ou <b class="ui">Début D</b>.<small>Le ✦ indique le sein à proposer : celui qui n’a pas commencé la dernière fois.</small></li>
+    <li>Pour passer à l’autre sein : <b class="ui">⇄ Changer</b>. Pour un rot ou une pause : <b class="ui">⏸ Pause</b>.</li>
+    <li>À la fin : <b class="ui">■ Arrêter</b>. Le temps de chaque côté est enregistré.</li>
+  </ol>
+  <div class="pair">
+    <div class="shot small"><img data-img="bf-start.jpg" alt="" data-i-alt="altBfStart" width="173" height="150"></div>
+    <div class="shot small"><img data-img="bf-running.jpg" alt="" data-i-alt="altBfRun" width="173" height="215"></div>
+  </div>
+
+  <h3 data-i="dT">🧷 Une couche</h3>
+  <ol class="steps" data-i="dSteps">
+    <li>Dans <b>Saisie rapide</b>, touchez <b class="ui">🧷 Couche</b>.</li>
+    <li>Choisissez <b>Pipi</b>, <b>Caca</b> ou <b>Les deux</b>, puis la quantité et la couleur.<small>Un message explique la couleur choisie. Blanche, rouge ou noire après les premiers jours : appelez le médecin.</small></li>
+    <li>Touchez <b class="ui">Enregistrer</b> en bas.</li>
+  </ol>
+  <div class="shot"><img data-img="diaper.jpg" alt="" data-i-alt="altDiaper" width="390" height="410"></div>
+
+  <h3 data-i="vT">💊 La vitamine D</h3>
+  <p data-i="vP">Chaque matin, un rappel apparaît sur l’accueil jusqu’à ce que la dose soit notée. Touchez <b class="ui">Noter</b>, c’est tout. L’heure du rappel se change dans <b>Réglages → Rappels</b>.</p>
+  <div class="shot"><img data-img="vitd.jpg" alt="" data-i-alt="altVitd" width="358" height="51"></div>
+
+  <h3 data-i="lateT">⏱ Noté en retard, ou une erreur ?</h3>
+  <p data-i="lateP">Dans chaque fiche, l’heure se règle en un geste : <b class="ui">-5m</b> <b class="ui">-15m</b> <b class="ui">-30m</b> <b class="ui">-1h</b>… Pour corriger ou supprimer une entrée, ouvrez <b class="ui">📜 Journal</b> et touchez-la.</p>
+</div></section>
+
+<!-- 4 -->
+<section class="ch" id="sync"><div class="wrap">
+  <h2><span class="n">4</span><span data-i="t4">Connecter le deuxième téléphone</span></h2>
+  <p class="sub" data-i="t4s">Facultatif, environ 5 minutes, une seule fois. Les deux parents voient alors le même carnet. Les données passent par un Google Sheet qui vous appartient.</p>
+  <div class="tip" data-i="tip4">💻 C’est plus simple sur un ordinateur, avec le compte Google d’un des parents.</div>
+
+  <h3 data-i="g1T">Côté Google (une seule fois)</h3>
+  <ol class="steps" data-i="gSteps">
+    <li>Ouvrez <a href="https://sheets.google.com" target="_blank" rel="noopener">sheets.google.com</a> et créez une feuille <b>vierge</b>. Donnez-lui un nom, par ex. « Carnet bébé ».</li>
+    <li>Dans le menu : <b class="ui">Extensions</b> → <b class="ui">Apps Script</b>.</li>
+    <li>Effacez le code affiché, collez <a href="google-apps-script.gs" target="_blank">ce script</a> (tout le texte), puis touchez 💾 <b class="ui">Enregistrer</b>.</li>
+    <li><b class="ui">Déployer</b> → <b class="ui">Nouveau déploiement</b>. Cliquez sur ⚙️ à côté de « Sélectionner le type » → <b class="ui">Application Web</b>.</li>
+    <li>Réglez <b>Exécuter en tant que : Moi</b> et <b>Qui a accès : Tout le monde</b>, puis <b class="ui">Déployer</b>.</li>
+    <li>Google demande une autorisation : <b class="ui">Autoriser l’accès</b> → votre compte → <b class="ui">Paramètres avancés</b> → <b class="ui">Accéder à … (non sécurisé)</b> → <b class="ui">Autoriser</b>.<small>Cet avertissement est normal : c’est votre propre script, que Google n’a pas « vérifié ». Il ne peut lire que cette feuille.</small></li>
+    <li>Copiez l’<b>URL de l’application Web</b> (elle finit par <code>/exec</code>).</li>
+  </ol>
+  <div class="warn" data-i="warn4">Les libellés de Google peuvent varier légèrement selon la langue et la version.</div>
+
+  <h3 data-i="g2T">Côté appli</h3>
+  <ol class="steps" data-i="aSteps">
+    <li>Sur le premier téléphone : <b>Réglages → Synchronisation (Google Sheet)</b>, collez l’URL, puis <b class="ui">⟳ Synchroniser</b>. Vous devez voir <b>✓ Synchronisé</b>.</li>
+    <li>Touchez <b class="ui">Copier le lien</b> et envoyez-le au deuxième téléphone (SMS, WhatsApp…).</li>
+    <li>Sur le deuxième téléphone, ouvrez ce lien : il est connecté. Ajoutez-le à l’écran d’accueil (étape 1).</li>
+  </ol>
+  <div class="shot"><img data-img="sync.jpg" alt="" data-i-alt="altSync" width="358" height="538"></div>
+  <div class="warn" data-i="warn4b">🔑 Ce lien donne accès à votre carnet : ne le partagez qu’avec des personnes de confiance.</div>
+</div></section>
+
+<!-- 5 -->
+<section class="ch" id="kindle"><div class="wrap">
+  <h2><span class="n">5</span><span data-i="t5">Sur une liseuse Kindle</span></h2>
+  <p class="sub" data-i="t5s">Un écran doux pour la table de nuit : grands boutons, noir et blanc, sans animation.</p>
+  <ol class="steps" data-i="kSteps">
+    <li>Sur le premier téléphone, <b>Réglages → Synchronisation</b> → <b class="ui">Copier le lien</b>. Le lien est court, pour pouvoir le taper à la main.</li>
+    <li>Sur le Kindle : menu <b class="ui">⋮</b> → <b class="ui">Navigateur web</b>, puis tapez ce lien.</li>
+    <li>Dans l’appli : <b>Réglages → Mode liseuse</b> → <b class="ui">Activé</b>. Ajoutez la page aux favoris du navigateur.</li>
+    <li>Si l’heure affichée est fausse (les Kindle sont souvent réglés sur UTC) : <b>Réglages → Fuseau horaire</b> → <b class="ui">UTC+1</b> en hiver, <b class="ui">UTC+2</b> en été, pour la France.</li>
+  </ol>
+  <div class="pair">
+    <div class="shot"><img data-img="set-kindle.jpg" alt="" data-i-alt="altKindleSet" width="358" height="130"></div>
+    <div class="shot"><img data-img="set-tz.jpg" alt="" data-i-alt="altTz" width="358" height="342"></div>
+  </div>
+  <div class="shot"><img data-img="kindle.jpg" alt="" data-i-alt="altKindle" width="600" height="800"></div>
+</div></section>
+
+<!-- 6 -->
+<section class="ch" id="display"><div class="wrap">
+  <h2><span class="n">6</span><span data-i="t6">Écran de chevet</span></h2>
+  <p class="sub" data-i="t6s">Un ancien téléphone posé à l’horizontale, toujours allumé : il affiche depuis combien de temps bébé a mangé, et quel sein proposer. Rien à toucher, il se met à jour tout seul.</p>
+  <ol class="steps" data-i="dispSteps">
+    <li>Connectez ce téléphone au carnet : <b class="ui">Copier le lien écran</b> sur le premier téléphone, puis ouvrez le lien sur l’ancien. Ou, dans l’appli : <b>Réglages → Écran permanent</b> → <b class="ui">Ouvrir l’écran</b>.</li>
+    <li>Ajoutez la page aux favoris, tournez le téléphone à l’horizontale et touchez <b class="ui">⛶</b> pour le plein écran.</li>
+    <li>Branchez-le, et empêchez la mise en veille.<small>iPhone : Réglages → Luminosité et affichage → Verrouillage automatique → Jamais. Android : Paramètres → Affichage → Mise en veille de l’écran → le plus long.</small></li>
+  </ol>
+  <div class="shot"><img data-img="set-display.jpg" alt="" data-i-alt="altDispSet" width="358" height="160"></div>
+  <div class="shot wide"><img data-img="display.jpg" alt="" data-i-alt="altDisplay" width="844" height="390"></div>
+</div></section>
+
+<!-- 7 -->
+<section class="ch" id="help"><div class="wrap">
+  <h2><span class="n">7</span><span data-i="t7">En cas de souci</span></h2>
+  <dl class="faq" data-i="faq">
+    <dt>« Échec de la synchronisation » s’affiche en rouge</dt>
+    <dd>Vérifiez que le téléphone a internet, puis touchez <b class="ui">Réessayer</b>. Si ça continue : vérifiez que l’URL finit bien par <code>/exec</code>. Rien n’est perdu, les entrées restent sur le téléphone.</dd>
+    <dt>Pas de réseau à la maternité</dt>
+    <dd>Notez normalement. Un bandeau « Hors ligne » indique combien d’entrées attendent ; elles partent toutes seules au retour du réseau.</dd>
+    <dt>Les entrées de l’autre téléphone n’apparaissent pas</dt>
+    <dd>Les deux téléphones doivent avoir la même URL dans Réglages → Synchronisation. Touchez <b class="ui">⟳ Synchroniser</b> pour forcer la mise à jour.</dd>
+    <dt>L’heure est fausse sur le Kindle</dt>
+    <dd>Réglages → Fuseau horaire → UTC+1 (hiver) ou UTC+2 (été).</dd>
+    <dt>« Nouvelle version disponible »</dt>
+    <dd>Touchez <b class="ui">Mettre à jour</b> : l’appli se recharge, vos données restent.</dd>
+    <dt>Changer de téléphone, ou garder une copie</dt>
+    <dd>Avec la synchronisation, il suffit d’ouvrir le lien sur le nouveau téléphone. Sinon : Réglages → Sauvegarde &amp; partage → <b class="ui">⬇ Exporter sauvegarde</b>, puis <b class="ui">⬆ Importer sauvegarde</b> sur l’autre.</dd>
+  </dl>
+  <div class="shot"><img data-img="sync-fail.jpg" alt="" data-i-alt="altFail" width="390" height="260"></div>
+  <div class="warn" data-i="medical">⚕️ Les repères de l’appli (fièvre, couleur des selles, nombre de couches) sont des informations générales, pas un avis médical. En cas de doute, appelez votre médecin, votre sage-femme ou le 15.</div>
+  <a class="totop" href="#" data-i="top">↑ Haut de page</a>
+</div></section>
+
+<footer>
+  <div class="wrap">
+    <p data-i="foot1">Fait avec 💛 à Versailles par Taï &amp; Alex.</p>
+    <p><a href="about.html" data-i="navSite">Le site</a> · <a href="./" data-i="navApp">Ouvrir l’appli</a> · <a href="https://ko-fi.com/taidoan" target="_blank" rel="noopener" data-i="croissant">🥐 Nous offrir un croissant</a></p>
+  </div>
+</footer>
+
+<script>
+var T = {
+  en: {
+    navSite:'Website', navApp:'Open the app',
+    h1:'The step-by-step guide',
+    intro:'Everything you need to get started, with screenshots. About 2 minutes for the basics, 5 more to connect the second phone.',
+    toc1:'Install on your phone', toc2:'First settings', toc3:'Everyday logging', toc4:'Connect the second phone', toc5:'On a Kindle e-reader', toc6:'Bedside display', toc7:'Troubleshooting',
+    t1:'Install on your phone', t1s:'No app store: the app is a web page you add to your home screen like a real app.',
+    ios:'iPhone (Safari)',
+    iosSteps:'<li>Open <a href="./">the app</a> in <b>Safari</b>.</li><li>Tap the <b class="ui">Share</b> button (the square with an arrow pointing up).</li><li>Choose <b class="ui">Add to Home Screen</b>, then <b class="ui">Add</b>.</li>',
+    android:'Android (Chrome)',
+    androidSteps:'<li>Open <a href="./">the app</a> in <b>Chrome</b>.</li><li>Tap the <b class="ui">⋮</b> menu at the top right.</li><li>Choose <b class="ui">Add to Home screen</b> (or <b class="ui">Install app</b>).</li>',
+    tip1:'💡 The 🍼 icon appears on your home screen. Always open the app from that icon.',
+    t2:'First settings', t2s:'Tap <b class="ui">⚙️ Settings</b> at the bottom right.',
+    setupSteps:'<li><b>Language</b>: English, Français or Tiếng Việt.</li><li><b>Baby</b>: name and date of birth.<small>The date of birth drives the age-based guidance: fever, number of diapers per day.</small></li><li><b>Caregivers</b>: the people looking after baby (e.g. Mom, Dad, Grandma). Each entry records who did it.</li><li><b>Location &amp; units</b>: your town, for the weather and the “what to dress baby in” tip.</li>',
+    t3:'Everyday logging', t3s:'Everything happens on the <b class="ui">🏠 Home</b> screen, one-handed.',
+    bfT:'🤱 A breastfeed',
+    bfSteps:'<li>Tap <b class="ui">Start L</b> or <b class="ui">Start R</b>.<small>The ✦ marks the breast to offer: the one that didn’t start last time.</small></li><li>To change breast: <b class="ui">⇄ Switch</b>. For burping or a break: <b class="ui">⏸ Pause</b>.</li><li>When done: <b class="ui">■ Stop</b>. The time on each side is saved.</li>',
+    dT:'🧷 A diaper',
+    dSteps:'<li>In <b>Quick log</b>, tap <b class="ui">🧷 Diaper</b>.</li><li>Choose <b>Pee</b>, <b>Poop</b> or <b>Both</b>, then the amount and the colour.<small>A message explains the chosen colour. White, red, or black after the first days: call the doctor.</small></li><li>Tap <b class="ui">Save</b> at the bottom.</li>',
+    vT:'💊 Vitamin D',
+    vP:'Every morning a reminder appears on Home until the dose is logged. Tap <b class="ui">Log it</b>, that’s all. The reminder time is in <b>Settings → Reminders</b>.',
+    lateT:'⏱ Logged late, or made a mistake?',
+    lateP:'In each form the time is one tap away: <b class="ui">-5m</b> <b class="ui">-15m</b> <b class="ui">-30m</b> <b class="ui">-1h</b>… To fix or delete an entry, open <b class="ui">📜 Timeline</b> and tap it.',
+    t4:'Connect the second phone', t4s:'Optional, about 5 minutes, once. Both parents then see the same log. The data goes through a Google Sheet that belongs to you.',
+    tip4:'💻 It’s easier on a computer, with one parent’s Google account.',
+    g1T:'On Google’s side (once)',
+    gSteps:'<li>Open <a href="https://sheets.google.com" target="_blank" rel="noopener">sheets.google.com</a> and create a <b>blank</b> sheet. Name it, e.g. “Baby log”.</li><li>In the menu: <b class="ui">Extensions</b> → <b class="ui">Apps Script</b>.</li><li>Delete the code shown, paste <a href="google-apps-script.gs" target="_blank">this script</a> (all of it), then click 💾 <b class="ui">Save</b>.</li><li><b class="ui">Deploy</b> → <b class="ui">New deployment</b>. Click ⚙️ next to “Select type” → <b class="ui">Web app</b>.</li><li>Set <b>Execute as: Me</b> and <b>Who has access: Anyone</b>, then <b class="ui">Deploy</b>.</li><li>Google asks for permission: <b class="ui">Authorize access</b> → your account → <b class="ui">Advanced</b> → <b class="ui">Go to … (unsafe)</b> → <b class="ui">Allow</b>.<small>This warning is normal: it’s your own script, which Google hasn’t “verified”. It can only read this sheet.</small></li><li>Copy the <b>Web app URL</b> (it ends in <code>/exec</code>).</li>',
+    warn4:'Google’s wording may vary slightly by language and version.',
+    g2T:'In the app',
+    aSteps:'<li>On the first phone: <b>Settings → Cloud sync (Google Sheet)</b>, paste the URL, then <b class="ui">⟳ Sync now</b>. You should see <b>✓ Synced</b>.</li><li>Tap <b class="ui">Copy setup link</b> and send it to the second phone (text, WhatsApp…).</li><li>On the second phone, open that link: it’s connected. Add it to the home screen (step 1).</li>',
+    warn4b:'🔑 This link opens your log: only share it with people you trust.',
+    t5:'On a Kindle e-reader', t5s:'A gentle screen for the bedside: big buttons, black and white, no animation.',
+    kSteps:'<li>On the first phone, <b>Settings → Cloud sync</b> → <b class="ui">Copy setup link</b>. The link is short so you can type it by hand.</li><li>On the Kindle: <b class="ui">⋮</b> menu → <b class="ui">Web Browser</b>, then type the link.</li><li>In the app: <b>Settings → E-reader mode</b> → <b class="ui">On</b>. Bookmark the page in the browser.</li><li>If the time is wrong (Kindles are often set to UTC): <b>Settings → Time zone</b> → <b class="ui">UTC+1</b> in winter, <b class="ui">UTC+2</b> in summer, for France.</li>',
+    t6:'Bedside display', t6s:'An old phone lying sideways, always on: it shows how long since baby last ate, and which breast to offer. Nothing to touch, it updates on its own.',
+    dispSteps:'<li>Connect this phone to the log: <b class="ui">Copy display link</b> on the first phone, then open the link on the old one. Or, in the app: <b>Settings → Always-on display</b> → <b class="ui">Open display</b>.</li><li>Bookmark the page, turn the phone sideways and tap <b class="ui">⛶</b> for full screen.</li><li>Plug it in and stop it from going to sleep.<small>iPhone: Settings → Display &amp; Brightness → Auto-Lock → Never. Android: Settings → Display → Screen timeout → longest.</small></li>',
+    t7:'Troubleshooting',
+    faq:'<dt>“Sync failed” shows in red</dt><dd>Check the phone has internet, then tap <b class="ui">Retry</b>. If it continues: check the URL ends in <code>/exec</code>. Nothing is lost, entries stay on the phone.</dd><dt>No signal in the maternity ward</dt><dd>Log as usual. An “Offline” banner shows how many entries are waiting; they go out on their own when the network is back.</dd><dt>The other phone’s entries don’t show up</dt><dd>Both phones need the same URL in Settings → Cloud sync. Tap <b class="ui">⟳ Sync now</b> to force an update.</dd><dt>The time is wrong on the Kindle</dt><dd>Settings → Time zone → UTC+1 (winter) or UTC+2 (summer).</dd><dt>“Update available”</dt><dd>Tap <b class="ui">Refresh</b>: the app reloads, your data stays.</dd><dt>Changing phone, or keeping a copy</dt><dd>With sync, just open the link on the new phone. Otherwise: Settings → Backup &amp; share → <b class="ui">⬇ Export backup</b>, then <b class="ui">⬆ Import backup</b> on the other.</dd>',
+    medical:'⚕️ The app’s guidance (fever, stool colour, number of diapers) is general information, not medical advice. When in doubt, call your doctor, your midwife or emergency services.',
+    top:'↑ Back to top', foot1:'Made with 💛 in Versailles by Taï &amp; Alex.', croissant:'🥐 Buy us a croissant',
+    altHome:'The app’s home screen', altLang:'Language setting', altBaby:'Baby’s name and date of birth', altBfStart:'Breastfeeding: start left or right', altBfRun:'Breastfeeding timer running', altDiaper:'Logging a diaper', altVitd:'Vitamin D reminder', altSync:'Cloud sync settings', altKindleSet:'E-reader mode setting', altTz:'Time zone setting', altKindle:'The app on a Kindle', altDispSet:'Always-on display setting', altDisplay:'The bedside display', altFail:'Sync failed banner',
+    title:'Guide — Baby Care Tracker'
+  },
+  vi: {
+    navSite:'Trang web', navApp:'Mở ứng dụng',
+    h1:'Hướng dẫn từng bước',
+    intro:'Mọi thứ cần để bắt đầu, kèm ảnh chụp màn hình. Khoảng 2 phút cho phần cơ bản, thêm 5 phút để kết nối điện thoại thứ hai.',
+    toc1:'Cài đặt trên điện thoại', toc2:'Thiết lập ban đầu', toc3:'Ghi chép hằng ngày', toc4:'Kết nối điện thoại thứ hai', toc5:'Trên máy đọc sách Kindle', toc6:'Màn hình đầu giường', toc7:'Khi gặp sự cố',
+    t1:'Cài đặt trên điện thoại', t1s:'Không cần kho ứng dụng: đây là một trang web bạn thêm vào màn hình chính như một ứng dụng thật.',
+    ios:'iPhone (Safari)',
+    iosSteps:'<li>Mở <a href="./">ứng dụng</a> bằng <b>Safari</b>.</li><li>Chạm nút <b class="ui">Chia sẻ</b> (hình vuông có mũi tên hướng lên).</li><li>Chọn <b class="ui">Thêm vào MH chính</b>, rồi <b class="ui">Thêm</b>.</li>',
+    android:'Android (Chrome)',
+    androidSteps:'<li>Mở <a href="./">ứng dụng</a> bằng <b>Chrome</b>.</li><li>Chạm menu <b class="ui">⋮</b> ở góc trên bên phải.</li><li>Chọn <b class="ui">Thêm vào màn hình chính</b> (hoặc <b class="ui">Cài đặt ứng dụng</b>).</li>',
+    tip1:'💡 Biểu tượng 🍼 sẽ xuất hiện trên màn hình chính. Luôn mở ứng dụng từ biểu tượng đó.',
+    t2:'Thiết lập ban đầu', t2s:'Chạm <b class="ui">⚙️ Cài đặt</b> ở góc dưới bên phải.',
+    setupSteps:'<li><b>Ngôn ngữ</b>: Tiếng Việt, Français hoặc English.</li><li><b>Em bé</b>: tên và ngày sinh.<small>Ngày sinh dùng cho các gợi ý theo tuổi: sốt, số tã mỗi ngày.</small></li><li><b>Người chăm sóc</b>: những người chăm bé (ví dụ Mẹ, Bố, Bà). Mỗi mục ghi lại ai đã làm.</li><li><b>Vị trí &amp; đơn vị</b>: thành phố của bạn, để xem thời tiết và gợi ý “mặc gì cho bé”.</li>',
+    t3:'Ghi chép hằng ngày', t3s:'Mọi thứ đều ở màn hình <b class="ui">🏠 Trang chủ</b>, chỉ cần một tay.',
+    bfT:'🤱 Một cữ bú',
+    bfSteps:'<li>Chạm <b class="ui">Bắt đầu T</b> hoặc <b class="ui">Bắt đầu P</b>.<small>Dấu ✦ chỉ bên nên cho bú: bên không bắt đầu ở lần trước.</small></li><li>Để đổi bên: <b class="ui">⇄ Đổi bên</b>. Để cho bé ợ hoặc nghỉ: <b class="ui">⏸ Tạm dừng</b>.</li><li>Khi xong: <b class="ui">■ Dừng</b>. Thời gian mỗi bên được lưu lại.</li>',
+    dT:'🧷 Một lần thay tã',
+    dSteps:'<li>Trong <b>Ghi nhanh</b>, chạm <b class="ui">🧷 Tã</b>.</li><li>Chọn <b>Tè</b>, <b>Ị</b> hoặc <b>Cả hai</b>, rồi lượng và màu sắc.<small>Một dòng chữ giải thích màu đã chọn. Trắng, đỏ, hoặc đen sau những ngày đầu: hãy gọi bác sĩ.</small></li><li>Chạm <b class="ui">Lưu</b> ở cuối.</li>',
+    vT:'💊 Vitamin D',
+    vP:'Mỗi sáng, một lời nhắc hiện trên trang chủ cho đến khi liều được ghi lại. Chạm <b class="ui">Ghi lại</b> là xong. Giờ nhắc được chỉnh trong <b>Cài đặt → Nhắc nhở</b>.',
+    lateT:'⏱ Ghi muộn, hoặc ghi nhầm?',
+    lateP:'Trong mỗi phiếu, giờ được chỉnh chỉ bằng một chạm: <b class="ui">-5m</b> <b class="ui">-15m</b> <b class="ui">-30m</b> <b class="ui">-1h</b>… Để sửa hoặc xóa một mục, mở <b class="ui">📜 Nhật ký</b> và chạm vào mục đó.',
+    t4:'Kết nối điện thoại thứ hai', t4s:'Không bắt buộc, khoảng 5 phút, chỉ một lần. Sau đó cả bố và mẹ đều thấy cùng một cuốn sổ. Dữ liệu đi qua một Google Sheet của chính bạn.',
+    tip4:'💻 Làm trên máy tính sẽ dễ hơn, với tài khoản Google của bố hoặc mẹ.',
+    g1T:'Phía Google (chỉ một lần)',
+    gSteps:'<li>Mở <a href="https://sheets.google.com" target="_blank" rel="noopener">sheets.google.com</a> và tạo một bảng tính <b>trống</b>. Đặt tên, ví dụ “Sổ em bé”.</li><li>Trên menu: <b class="ui">Tiện ích mở rộng</b> → <b class="ui">Apps Script</b>.</li><li>Xóa đoạn mã đang có, dán <a href="google-apps-script.gs" target="_blank">đoạn mã này</a> (toàn bộ), rồi bấm 💾 <b class="ui">Lưu</b>.</li><li><b class="ui">Triển khai</b> → <b class="ui">Tùy chọn triển khai mới</b>. Bấm ⚙️ cạnh “Chọn loại” → <b class="ui">Ứng dụng web</b>.</li><li>Chọn <b>Thực thi với tư cách: Tôi</b> và <b>Người có quyền truy cập: Bất kỳ ai</b>, rồi <b class="ui">Triển khai</b>.</li><li>Google sẽ hỏi quyền: <b class="ui">Cấp quyền truy cập</b> → tài khoản của bạn → <b class="ui">Nâng cao</b> → <b class="ui">Truy cập … (không an toàn)</b> → <b class="ui">Cho phép</b>.<small>Cảnh báo này là bình thường: đây là đoạn mã của chính bạn, Google chưa “xác minh”. Nó chỉ đọc được bảng tính này.</small></li><li>Sao chép <b>URL ứng dụng web</b> (kết thúc bằng <code>/exec</code>).</li>',
+    warn4:'Tên các mục của Google có thể hơi khác tùy ngôn ngữ và phiên bản.',
+    g2T:'Trong ứng dụng',
+    aSteps:'<li>Trên điện thoại thứ nhất: <b>Cài đặt → Đồng bộ (Google Sheet)</b>, dán URL, rồi chạm <b class="ui">⟳ Đồng bộ ngay</b>. Bạn sẽ thấy <b>✓ Đã đồng bộ</b>.</li><li>Chạm <b class="ui">Sao chép liên kết</b> và gửi sang điện thoại thứ hai (tin nhắn, Zalo, WhatsApp…).</li><li>Trên điện thoại thứ hai, mở liên kết đó: thế là đã kết nối. Thêm vào màn hình chính (bước 1).</li>',
+    warn4b:'🔑 Liên kết này mở được sổ của bạn: chỉ chia sẻ với người tin cậy.',
+    t5:'Trên máy đọc sách Kindle', t5s:'Màn hình dịu nhẹ cho đầu giường: nút lớn, đen trắng, không hiệu ứng.',
+    kSteps:'<li>Trên điện thoại thứ nhất, <b>Cài đặt → Đồng bộ</b> → <b class="ui">Sao chép liên kết</b>. Liên kết ngắn để có thể gõ tay.</li><li>Trên Kindle: menu <b class="ui">⋮</b> → <b class="ui">Web Browser</b>, rồi gõ liên kết.</li><li>Trong ứng dụng: <b>Cài đặt → Chế độ máy đọc sách</b> → <b class="ui">Bật</b>. Lưu trang vào dấu trang của trình duyệt.</li><li>Nếu giờ hiển thị sai (Kindle thường để UTC): <b>Cài đặt → Múi giờ</b> → <b class="ui">UTC+1</b> vào mùa đông, <b class="ui">UTC+2</b> vào mùa hè, nếu ở Pháp (UTC+7 nếu ở Việt Nam).</li>',
+    t6:'Màn hình đầu giường', t6s:'Một chiếc điện thoại cũ đặt nằm ngang, luôn bật: cho biết bé ăn cách đây bao lâu và nên cho bú bên nào. Không cần chạm, tự cập nhật.',
+    dispSteps:'<li>Kết nối điện thoại này với sổ: chạm <b class="ui">Sao chép liên kết màn hình</b> trên điện thoại thứ nhất, rồi mở liên kết trên điện thoại cũ. Hoặc trong ứng dụng: <b>Cài đặt → Màn hình luôn bật</b> → <b class="ui">Mở màn hình</b>.</li><li>Lưu trang vào dấu trang, xoay điện thoại nằm ngang và chạm <b class="ui">⛶</b> để xem toàn màn hình.</li><li>Cắm sạc và tắt chế độ tự khóa.<small>iPhone: Cài đặt → Màn hình &amp; Độ sáng → Tự động khóa → Không bao giờ. Android: Cài đặt → Màn hình → Thời gian chờ màn hình → lâu nhất.</small></li>',
+    t7:'Khi gặp sự cố',
+    faq:'<dt>Hiện chữ đỏ “Đồng bộ thất bại”</dt><dd>Kiểm tra điện thoại có mạng, rồi chạm <b class="ui">Thử lại</b>. Nếu vẫn lỗi: kiểm tra URL có kết thúc bằng <code>/exec</code>. Không mất gì cả, các mục vẫn nằm trên điện thoại.</dd><dt>Không có sóng ở khoa sản</dt><dd>Cứ ghi bình thường. Dải “Mất kết nối” cho biết bao nhiêu mục đang chờ; chúng tự gửi khi có mạng lại.</dd><dt>Không thấy các mục từ điện thoại kia</dt><dd>Hai điện thoại phải có cùng URL trong Cài đặt → Đồng bộ. Chạm <b class="ui">⟳ Đồng bộ ngay</b> để cập nhật.</dd><dt>Giờ trên Kindle bị sai</dt><dd>Cài đặt → Múi giờ → UTC+1 (mùa đông) hoặc UTC+2 (mùa hè) nếu ở Pháp.</dd><dt>“Có bản cập nhật”</dt><dd>Chạm <b class="ui">Cập nhật</b>: ứng dụng tải lại, dữ liệu vẫn giữ nguyên.</dd><dt>Đổi điện thoại, hoặc giữ một bản sao</dt><dd>Nếu đã đồng bộ, chỉ cần mở liên kết trên điện thoại mới. Nếu không: Cài đặt → Sao lưu &amp; chia sẻ → <b class="ui">⬇ Xuất sao lưu</b>, rồi <b class="ui">⬆ Nhập sao lưu</b> trên máy kia.</dd>',
+    medical:'⚕️ Các gợi ý trong ứng dụng (sốt, màu phân, số tã) là thông tin chung, không phải lời khuyên y tế. Khi có nghi ngờ, hãy gọi bác sĩ, nữ hộ sinh hoặc cấp cứu.',
+    top:'↑ Lên đầu trang', foot1:'Làm với 💛 tại Versailles bởi Taï &amp; Alex.', croissant:'🍜 Mời chúng tôi một bát phở',
+    altHome:'Trang chủ của ứng dụng', altLang:'Cài đặt ngôn ngữ', altBaby:'Tên và ngày sinh của bé', altBfStart:'Cho bú: bắt đầu bên trái hoặc phải', altBfRun:'Đồng hồ cho bú đang chạy', altDiaper:'Ghi một lần thay tã', altVitd:'Nhắc vitamin D', altSync:'Cài đặt đồng bộ', altKindleSet:'Cài đặt chế độ máy đọc sách', altTz:'Cài đặt múi giờ', altKindle:'Ứng dụng trên Kindle', altDispSet:'Cài đặt màn hình luôn bật', altDisplay:'Màn hình đầu giường', altFail:'Dải báo đồng bộ thất bại',
+    title:'Hướng dẫn — Baby Care Tracker'
+  }
+};
+var FR = { title: document.title,
+  altHome:'L’écran d’accueil de l’appli', altLang:'Réglage de la langue', altBaby:'Prénom et date de naissance de bébé', altBfStart:'Allaitement : commencer à gauche ou à droite', altBfRun:'Minuteur de tétée en cours', altDiaper:'Noter une couche', altVitd:'Rappel de vitamine D', altSync:'Réglages de synchronisation', altKindleSet:'Réglage du mode liseuse', altTz:'Réglage du fuseau horaire', altKindle:'L’appli sur un Kindle', altDispSet:'Réglage de l’écran permanent', altDisplay:'L’écran de chevet', altFail:'Bandeau d’échec de synchronisation' };
+Array.prototype.forEach.call(document.querySelectorAll('[data-i]'), function(el){ var k=el.getAttribute('data-i'); if(FR[k]==null) FR[k]=el.innerHTML; });
+function setLang(lang){
+  var d = lang==='fr' ? FR : (T[lang]||FR);
+  Array.prototype.forEach.call(document.querySelectorAll('[data-i]'), function(el){ var k=el.getAttribute('data-i'); if(d[k]!=null) el.innerHTML=d[k]; });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-i-alt]'), function(el){ var k=el.getAttribute('data-i-alt'); if(d[k]!=null) el.setAttribute('alt', d[k]); });
+  // Screenshots exist in each language.
+  Array.prototype.forEach.call(document.querySelectorAll('img[data-img]'), function(el){ el.src='site/guide/'+lang+'/'+el.getAttribute('data-img'); });
+  document.title = d.title || FR.title;
+  document.documentElement.lang = lang;
+  Array.prototype.forEach.call(document.querySelectorAll('.lang button'), function(b){ b.classList.toggle('on', b.getAttribute('data-lang')===lang); });
+  try{ localStorage.setItem('bct.siteLang', lang); }catch(e){}
+}
+function initialLang(){
+  try{ var s=localStorage.getItem('bct.siteLang'); if(s) return s; }catch(e){}
+  try{ var a=JSON.parse(localStorage.getItem('bct.settings')||'{}'); if(a.lang && a.lang!=='en') return a.lang; }catch(e){}
+  var n=(navigator.language||'fr').slice(0,2).toLowerCase();
+  return n==='vi' ? 'vi' : n==='en' ? 'en' : 'fr';
+}
+Array.prototype.forEach.call(document.querySelectorAll('.lang button'), function(b){ b.addEventListener('click', function(){ setLang(b.getAttribute('data-lang')); }); });
+setLang(initialLang());
+</script>
+</body>
+</html>
