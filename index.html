@@ -262,9 +262,11 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.43';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.44';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = 'https://ko-fi.com/taidoan';
+// Public website shared by "Share the app with a friend" (never the sync link).
+const SITE_URL = 'https://doantientai.github.io/Baby-care-tracker-/about.html';
 /* ============================================================ Baby Care Tracker
    Single-file app. No build, no server. Data is stored in this browser
    (localStorage). General newborn-care guidance — not medical advice.
@@ -657,6 +659,9 @@ const FR = {
   'Sheet synced':'Sheet synchronisé','sync error':'erreur de synchro',
   'Getting the latest entries…':'Récupération des dernières entrées…',
   'Up to date':'À jour','Offline':'Hors ligne',
+  'Share the app with a friend':'Partager l’appli avec un ami',
+  'Baby Care Tracker: the baby log made by parents, for parents. Free, no ads, no account.':'Baby Care Tracker : le carnet de bébé fait par des parents, pour des parents. Gratuit, sans pub, sans compte.',
+  'Link copied ✓':'Lien copié ✓',
   'Sync failed':'Échec de la synchronisation',
   'Retry':'Réessayer',
   'Offline — the other phone’s latest entries may be missing':'Hors ligne — les dernières entrées de l’autre téléphone peuvent manquer',
@@ -814,6 +819,9 @@ const VI = {
   'Sheet synced':'Đã đồng bộ Sheet','sync error':'lỗi đồng bộ',
   'Getting the latest entries…':'Đang tải các mục mới nhất…',
   'Up to date':'Đã cập nhật','Offline':'Mất kết nối',
+  'Share the app with a friend':'Chia sẻ ứng dụng với bạn bè',
+  'Baby Care Tracker: the baby log made by parents, for parents. Free, no ads, no account.':'Baby Care Tracker: sổ theo dõi em bé do bố mẹ làm, cho bố mẹ. Miễn phí, không quảng cáo, không cần tài khoản.',
+  'Link copied ✓':'Đã sao chép liên kết ✓',
   'Sync failed':'Đồng bộ thất bại',
   'Retry':'Thử lại',
   'Offline — the other phone’s latest entries may be missing':'Mất kết nối — có thể thiếu các mục mới nhất từ điện thoại kia',
@@ -1436,6 +1444,10 @@ function viewHome(){
           list.slice().sort((a,b)=>b.at-a.at).slice(0,6).map(eventRow).join('')}
       </div>
     </div>
+
+    <div class="center" style="padding:6px 0 4px">
+      <button class="btn btn-ghost" data-act="share-app" style="font-size:.9rem">💌 ${t('Share the app with a friend')}</button>
+    </div>
   </div>`;
 }
 function eventRow(e){
@@ -1968,6 +1980,13 @@ document.addEventListener('click', (ev)=>{
     if(box){ box.value=url; box.style.display='block'; box.focus(); box.select&&box.select(); }
     if(navigator.share){ navigator.share({title:t('Baby Care Tracker'), url:url}).catch(()=>{}); }
     else { const okc=copyText(url); if(okc){ el.textContent=t('Copied ✓'); setTimeout(()=>{ if(el&&el.dataset.act===act) el.textContent=t(act==='share-display'?'Copy display link':'Copy setup link'); },1500); } }
+    return;
+  }
+  if(act==='share-app'){
+    // Shares the public website only — never the private sync link.
+    const txt=t('Baby Care Tracker: the baby log made by parents, for parents. Free, no ads, no account.');
+    if(navigator.share){ navigator.share({title:'Baby Care Tracker', text:txt, url:SITE_URL}).catch(()=>{}); return; }
+    if(copyText(txt+' '+SITE_URL)){ const lbl=el.innerHTML; el.textContent=t('Link copied ✓'); setTimeout(()=>{ if(el.isConnected) el.innerHTML=lbl; },1800); }
     return;
   }
   if(act==='pick-link'){ el.focus(); el.select&&el.select(); copyText(el.value); return; }
