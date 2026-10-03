@@ -173,6 +173,8 @@
     <li>Touchez <b class="ui">Enregistrer</b> en bas.</li>
   </ol>
   <div class="shot"><img data-img="diaper.jpg" alt="" data-i-alt="altDiaper" width="390" height="410"></div>
+  <div class="vid"><video data-vid="diaper" controls muted playsinline preload="none" width="390" height="712" data-i-aria="vidDiaper"></video>
+    <div class="vcap" data-i="vidDiaperCap">▶ La vidéo (27 s, sans son)</div></div>
 
   <h3 data-i="vT">💊 La vitamine D</h3>
   <p data-i="vP">Chaque matin, un rappel apparaît sur l’accueil jusqu’à ce que la dose soit notée. Touchez <b class="ui">Noter</b>, c’est tout. L’heure du rappel se change dans <b>Réglages → Rappels</b>.</p>
@@ -206,7 +208,8 @@
     <li>Touchez <b class="ui">Copier le lien</b> et envoyez-le au deuxième téléphone (SMS, WhatsApp…).</li>
     <li>Sur le deuxième téléphone, ouvrez ce lien : il est connecté. Ajoutez-le à l’écran d’accueil (étape 1).</li>
   </ol>
-  <div class="shot"><img data-img="sync.jpg" alt="" data-i-alt="altSync" width="358" height="538"></div>
+  <div class="vid"><video data-vid="sync" controls muted playsinline preload="none" width="390" height="712" data-i-aria="vidSync"></video>
+    <div class="vcap" data-i="vidSyncCap">▶ La vidéo (23 s, sans son)</div></div>
   <div class="warn" data-i="warn4b">🔑 Ce lien donne accès à votre carnet : ne le partagez qu’avec des personnes de confiance.</div>
 </div></section>
 
@@ -309,7 +312,7 @@ var T = {
     faq:'<dt>“Sync failed” shows in red</dt><dd>Check the phone has internet, then tap <b class="ui">Retry</b>. If it continues: check the URL ends in <code>/exec</code>. Nothing is lost, entries stay on the phone.</dd><dt>No signal in the maternity ward</dt><dd>Log as usual. An “Offline” banner shows how many entries are waiting; they go out on their own when the network is back.</dd><dt>The other phone’s entries don’t show up</dt><dd>Both phones need the same URL in Settings → Cloud sync. Tap <b class="ui">⟳ Sync now</b> to force an update.</dd><dt>The time is wrong on the Kindle</dt><dd>Settings → Time zone → UTC+1 (winter) or UTC+2 (summer).</dd><dt>“Update available”</dt><dd>Tap <b class="ui">Refresh</b>: the app reloads, your data stays.</dd><dt>Changing phone, or keeping a copy</dt><dd>With sync, just open the link on the new phone. Otherwise: Settings → Backup &amp; share → <b class="ui">⬇ Export backup</b>, then <b class="ui">⬆ Import backup</b> on the other.</dd>',
     medical:'⚕️ The app’s guidance (fever, stool colour, number of diapers) is general information, not medical advice. When in doubt, call your doctor, your midwife or emergency services.',
     top:'↑ Back to top', foot1:'Made with 💛 in Versailles by Taï &amp; Alex.', croissant:'🥐 Buy us a croissant',
-    vidFeedCap:'▶ The video (35 s, no sound)', vidFeed:'Video: logging a breastfeed',
+    vidFeedCap:'▶ The video (35 s, no sound)', vidFeed:'Video: logging a breastfeed', vidDiaperCap:'▶ The video (27 s, no sound)', vidDiaper:'Video: logging a diaper', vidSyncCap:'▶ The video (23 s, no sound)', vidSync:'Video: connecting the second phone',
     altHome:'The app’s home screen', altLang:'Language setting', altBaby:'Baby’s name and date of birth', altBfStart:'Breastfeeding: start left or right', altBfRun:'Breastfeeding timer running', altDiaper:'Logging a diaper', altVitd:'Vitamin D reminder', altSync:'Cloud sync settings', altKindleSet:'E-reader mode setting', altTz:'Time zone setting', altKindle:'The app on a Kindle', altDispSet:'Always-on display setting', altDisplay:'The bedside display', altFail:'Sync failed banner',
     title:'Guide — Baby Care Tracker'
   },
@@ -351,12 +354,12 @@ var T = {
     faq:'<dt>Hiện chữ đỏ “Đồng bộ thất bại”</dt><dd>Kiểm tra điện thoại có mạng, rồi chạm <b class="ui">Thử lại</b>. Nếu vẫn lỗi: kiểm tra URL có kết thúc bằng <code>/exec</code>. Không mất gì cả, các mục vẫn nằm trên điện thoại.</dd><dt>Không có sóng ở khoa sản</dt><dd>Cứ ghi bình thường. Dải “Mất kết nối” cho biết bao nhiêu mục đang chờ; chúng tự gửi khi có mạng lại.</dd><dt>Không thấy các mục từ điện thoại kia</dt><dd>Hai điện thoại phải có cùng URL trong Cài đặt → Đồng bộ. Chạm <b class="ui">⟳ Đồng bộ ngay</b> để cập nhật.</dd><dt>Giờ trên Kindle bị sai</dt><dd>Cài đặt → Múi giờ → UTC+1 (mùa đông) hoặc UTC+2 (mùa hè) nếu ở Pháp.</dd><dt>“Có bản cập nhật”</dt><dd>Chạm <b class="ui">Cập nhật</b>: ứng dụng tải lại, dữ liệu vẫn giữ nguyên.</dd><dt>Đổi điện thoại, hoặc giữ một bản sao</dt><dd>Nếu đã đồng bộ, chỉ cần mở liên kết trên điện thoại mới. Nếu không: Cài đặt → Sao lưu &amp; chia sẻ → <b class="ui">⬇ Xuất sao lưu</b>, rồi <b class="ui">⬆ Nhập sao lưu</b> trên máy kia.</dd>',
     medical:'⚕️ Các gợi ý trong ứng dụng (sốt, màu phân, số tã) là thông tin chung, không phải lời khuyên y tế. Khi có nghi ngờ, hãy gọi bác sĩ, nữ hộ sinh hoặc cấp cứu.',
     top:'↑ Lên đầu trang', foot1:'Làm với 💛 tại Versailles bởi Taï &amp; Alex.', croissant:'🍜 Mời chúng tôi một bát phở',
-    vidFeedCap:'▶ Video (35 giây, không có tiếng)', vidFeed:'Video: ghi một cữ bú',
+    vidFeedCap:'▶ Video (35 giây, không có tiếng)', vidFeed:'Video: ghi một cữ bú', vidDiaperCap:'▶ Video (27 giây, không có tiếng)', vidDiaper:'Video: ghi một lần thay tã', vidSyncCap:'▶ Video (23 giây, không có tiếng)', vidSync:'Video: kết nối điện thoại thứ hai',
     altHome:'Trang chủ của ứng dụng', altLang:'Cài đặt ngôn ngữ', altBaby:'Tên và ngày sinh của bé', altBfStart:'Cho bú: bắt đầu bên trái hoặc phải', altBfRun:'Đồng hồ cho bú đang chạy', altDiaper:'Ghi một lần thay tã', altVitd:'Nhắc vitamin D', altSync:'Cài đặt đồng bộ', altKindleSet:'Cài đặt chế độ máy đọc sách', altTz:'Cài đặt múi giờ', altKindle:'Ứng dụng trên Kindle', altDispSet:'Cài đặt màn hình luôn bật', altDisplay:'Màn hình đầu giường', altFail:'Dải báo đồng bộ thất bại',
     title:'Hướng dẫn — Baby Care Tracker'
   }
 };
-var FR = { title: document.title, vidFeed:'Vidéo : noter une tétée',
+var FR = { title: document.title, vidFeed:'Vidéo : noter une tétée', vidDiaper:'Vidéo : noter une couche', vidSync:'Vidéo : connecter le deuxième téléphone',
   altHome:'L’écran d’accueil de l’appli', altLang:'Réglage de la langue', altBaby:'Prénom et date de naissance de bébé', altBfStart:'Allaitement : commencer à gauche ou à droite', altBfRun:'Minuteur de tétée en cours', altDiaper:'Noter une couche', altVitd:'Rappel de vitamine D', altSync:'Réglages de synchronisation', altKindleSet:'Réglage du mode liseuse', altTz:'Réglage du fuseau horaire', altKindle:'L’appli sur un Kindle', altDispSet:'Réglage de l’écran permanent', altDisplay:'L’écran de chevet', altFail:'Bandeau d’échec de synchronisation' };
 Array.prototype.forEach.call(document.querySelectorAll('[data-i]'), function(el){ var k=el.getAttribute('data-i'); if(FR[k]==null) FR[k]=el.innerHTML; });
 function setLang(lang){
