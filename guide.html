@@ -59,6 +59,9 @@
   .shot img{border-radius:14px;border:1px solid var(--line);box-shadow:0 8px 24px rgba(15,23,42,.10);max-width:min(100%,360px)}
   .shot.wide img{max-width:100%}
   .shot.small img{max-width:min(100%,300px)}
+  .vid{margin:16px auto 6px;text-align:center}
+  .vid video{display:block;margin:0 auto;width:min(100%,300px);height:auto;border-radius:18px;border:1px solid var(--line);box-shadow:0 8px 24px rgba(15,23,42,.12);background:#e0f2fe}
+  .vcap{color:var(--muted);font-size:.85rem;margin-top:6px}
   .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
   .pair .shot{margin-top:0}
   @media (max-width:560px){ .pair{grid-template-columns:1fr} }
@@ -154,12 +157,14 @@
   <ol class="steps" data-i="bfSteps">
     <li>Touchez <b class="ui">Début G</b> ou <b class="ui">Début D</b>.<small>Le ✦ indique le sein à proposer : celui qui n’a pas commencé la dernière fois.</small></li>
     <li>Pour passer à l’autre sein : <b class="ui">⇄ Changer</b>. Pour un rot ou une pause : <b class="ui">⏸ Pause</b>.</li>
-    <li>À la fin : <b class="ui">■ Arrêter</b>. Le temps de chaque côté est enregistré.</li>
+    <li>À la fin : <b class="ui">■ Arrêter</b>, vérifiez, puis <b class="ui">Enregistrer</b>. Le temps de chaque côté est enregistré.</li>
   </ol>
   <div class="pair">
     <div class="shot small"><img data-img="bf-start.jpg" alt="" data-i-alt="altBfStart" width="173" height="150"></div>
     <div class="shot small"><img data-img="bf-running.jpg" alt="" data-i-alt="altBfRun" width="173" height="215"></div>
   </div>
+  <div class="vid"><video data-vid="feed" controls muted playsinline preload="none" width="390" height="712" aria-label="" data-i-aria="vidFeed"></video>
+    <div class="vcap" data-i="vidFeedCap">▶ La vidéo (35 s, sans son)</div></div>
 
   <h3 data-i="dT">🧷 Une couche</h3>
   <ol class="steps" data-i="dSteps">
@@ -281,7 +286,7 @@ var T = {
     setupSteps:'<li><b>Language</b>: English, Français or Tiếng Việt.</li><li><b>Baby</b>: name and date of birth.<small>The date of birth drives the age-based guidance: fever, number of diapers per day.</small></li><li><b>Caregivers</b>: the people looking after baby (e.g. Mom, Dad, Grandma). Each entry records who did it.</li><li><b>Location &amp; units</b>: your town, for the weather and the “what to dress baby in” tip.</li>',
     t3:'Everyday logging', t3s:'Everything happens on the <b class="ui">🏠 Home</b> screen, one-handed.',
     bfT:'🤱 A breastfeed',
-    bfSteps:'<li>Tap <b class="ui">Start L</b> or <b class="ui">Start R</b>.<small>The ✦ marks the breast to offer: the one that didn’t start last time.</small></li><li>To change breast: <b class="ui">⇄ Switch</b>. For burping or a break: <b class="ui">⏸ Pause</b>.</li><li>When done: <b class="ui">■ Stop</b>. The time on each side is saved.</li>',
+    bfSteps:'<li>Tap <b class="ui">Start L</b> or <b class="ui">Start R</b>.<small>The ✦ marks the breast to offer: the one that didn’t start last time.</small></li><li>To change breast: <b class="ui">⇄ Switch</b>. For burping or a break: <b class="ui">⏸ Pause</b>.</li><li>When done: <b class="ui">■ Stop</b>, check, then <b class="ui">Save</b>. The time on each side is saved.</li>',
     dT:'🧷 A diaper',
     dSteps:'<li>In <b>Quick log</b>, tap <b class="ui">🧷 Diaper</b>.</li><li>Choose <b>Pee</b>, <b>Poop</b> or <b>Both</b>, then the amount and the colour.<small>A message explains the chosen colour. White, red, or black after the first days: call the doctor.</small></li><li>Tap <b class="ui">Save</b> at the bottom.</li>',
     vT:'💊 Vitamin D',
@@ -304,6 +309,7 @@ var T = {
     faq:'<dt>“Sync failed” shows in red</dt><dd>Check the phone has internet, then tap <b class="ui">Retry</b>. If it continues: check the URL ends in <code>/exec</code>. Nothing is lost, entries stay on the phone.</dd><dt>No signal in the maternity ward</dt><dd>Log as usual. An “Offline” banner shows how many entries are waiting; they go out on their own when the network is back.</dd><dt>The other phone’s entries don’t show up</dt><dd>Both phones need the same URL in Settings → Cloud sync. Tap <b class="ui">⟳ Sync now</b> to force an update.</dd><dt>The time is wrong on the Kindle</dt><dd>Settings → Time zone → UTC+1 (winter) or UTC+2 (summer).</dd><dt>“Update available”</dt><dd>Tap <b class="ui">Refresh</b>: the app reloads, your data stays.</dd><dt>Changing phone, or keeping a copy</dt><dd>With sync, just open the link on the new phone. Otherwise: Settings → Backup &amp; share → <b class="ui">⬇ Export backup</b>, then <b class="ui">⬆ Import backup</b> on the other.</dd>',
     medical:'⚕️ The app’s guidance (fever, stool colour, number of diapers) is general information, not medical advice. When in doubt, call your doctor, your midwife or emergency services.',
     top:'↑ Back to top', foot1:'Made with 💛 in Versailles by Taï &amp; Alex.', croissant:'🥐 Buy us a croissant',
+    vidFeedCap:'▶ The video (35 s, no sound)', vidFeed:'Video: logging a breastfeed',
     altHome:'The app’s home screen', altLang:'Language setting', altBaby:'Baby’s name and date of birth', altBfStart:'Breastfeeding: start left or right', altBfRun:'Breastfeeding timer running', altDiaper:'Logging a diaper', altVitd:'Vitamin D reminder', altSync:'Cloud sync settings', altKindleSet:'E-reader mode setting', altTz:'Time zone setting', altKindle:'The app on a Kindle', altDispSet:'Always-on display setting', altDisplay:'The bedside display', altFail:'Sync failed banner',
     title:'Guide — Baby Care Tracker'
   },
@@ -322,7 +328,7 @@ var T = {
     setupSteps:'<li><b>Ngôn ngữ</b>: Tiếng Việt, Français hoặc English.</li><li><b>Em bé</b>: tên và ngày sinh.<small>Ngày sinh dùng cho các gợi ý theo tuổi: sốt, số tã mỗi ngày.</small></li><li><b>Người chăm sóc</b>: những người chăm bé (ví dụ Mẹ, Bố, Bà). Mỗi mục ghi lại ai đã làm.</li><li><b>Vị trí &amp; đơn vị</b>: thành phố của bạn, để xem thời tiết và gợi ý “mặc gì cho bé”.</li>',
     t3:'Ghi chép hằng ngày', t3s:'Mọi thứ đều ở màn hình <b class="ui">🏠 Trang chủ</b>, chỉ cần một tay.',
     bfT:'🤱 Một cữ bú',
-    bfSteps:'<li>Chạm <b class="ui">Bắt đầu T</b> hoặc <b class="ui">Bắt đầu P</b>.<small>Dấu ✦ chỉ bên nên cho bú: bên không bắt đầu ở lần trước.</small></li><li>Để đổi bên: <b class="ui">⇄ Đổi bên</b>. Để cho bé ợ hoặc nghỉ: <b class="ui">⏸ Tạm dừng</b>.</li><li>Khi xong: <b class="ui">■ Dừng</b>. Thời gian mỗi bên được lưu lại.</li>',
+    bfSteps:'<li>Chạm <b class="ui">Bắt đầu T</b> hoặc <b class="ui">Bắt đầu P</b>.<small>Dấu ✦ chỉ bên nên cho bú: bên không bắt đầu ở lần trước.</small></li><li>Để đổi bên: <b class="ui">⇄ Đổi bên</b>. Để cho bé ợ hoặc nghỉ: <b class="ui">⏸ Tạm dừng</b>.</li><li>Khi xong: <b class="ui">■ Dừng</b>, kiểm tra, rồi <b class="ui">Lưu</b>. Thời gian mỗi bên được lưu lại.</li>',
     dT:'🧷 Một lần thay tã',
     dSteps:'<li>Trong <b>Ghi nhanh</b>, chạm <b class="ui">🧷 Tã</b>.</li><li>Chọn <b>Tè</b>, <b>Ị</b> hoặc <b>Cả hai</b>, rồi lượng và màu sắc.<small>Một dòng chữ giải thích màu đã chọn. Trắng, đỏ, hoặc đen sau những ngày đầu: hãy gọi bác sĩ.</small></li><li>Chạm <b class="ui">Lưu</b> ở cuối.</li>',
     vT:'💊 Vitamin D',
@@ -345,17 +351,21 @@ var T = {
     faq:'<dt>Hiện chữ đỏ “Đồng bộ thất bại”</dt><dd>Kiểm tra điện thoại có mạng, rồi chạm <b class="ui">Thử lại</b>. Nếu vẫn lỗi: kiểm tra URL có kết thúc bằng <code>/exec</code>. Không mất gì cả, các mục vẫn nằm trên điện thoại.</dd><dt>Không có sóng ở khoa sản</dt><dd>Cứ ghi bình thường. Dải “Mất kết nối” cho biết bao nhiêu mục đang chờ; chúng tự gửi khi có mạng lại.</dd><dt>Không thấy các mục từ điện thoại kia</dt><dd>Hai điện thoại phải có cùng URL trong Cài đặt → Đồng bộ. Chạm <b class="ui">⟳ Đồng bộ ngay</b> để cập nhật.</dd><dt>Giờ trên Kindle bị sai</dt><dd>Cài đặt → Múi giờ → UTC+1 (mùa đông) hoặc UTC+2 (mùa hè) nếu ở Pháp.</dd><dt>“Có bản cập nhật”</dt><dd>Chạm <b class="ui">Cập nhật</b>: ứng dụng tải lại, dữ liệu vẫn giữ nguyên.</dd><dt>Đổi điện thoại, hoặc giữ một bản sao</dt><dd>Nếu đã đồng bộ, chỉ cần mở liên kết trên điện thoại mới. Nếu không: Cài đặt → Sao lưu &amp; chia sẻ → <b class="ui">⬇ Xuất sao lưu</b>, rồi <b class="ui">⬆ Nhập sao lưu</b> trên máy kia.</dd>',
     medical:'⚕️ Các gợi ý trong ứng dụng (sốt, màu phân, số tã) là thông tin chung, không phải lời khuyên y tế. Khi có nghi ngờ, hãy gọi bác sĩ, nữ hộ sinh hoặc cấp cứu.',
     top:'↑ Lên đầu trang', foot1:'Làm với 💛 tại Versailles bởi Taï &amp; Alex.', croissant:'🍜 Mời chúng tôi một bát phở',
+    vidFeedCap:'▶ Video (35 giây, không có tiếng)', vidFeed:'Video: ghi một cữ bú',
     altHome:'Trang chủ của ứng dụng', altLang:'Cài đặt ngôn ngữ', altBaby:'Tên và ngày sinh của bé', altBfStart:'Cho bú: bắt đầu bên trái hoặc phải', altBfRun:'Đồng hồ cho bú đang chạy', altDiaper:'Ghi một lần thay tã', altVitd:'Nhắc vitamin D', altSync:'Cài đặt đồng bộ', altKindleSet:'Cài đặt chế độ máy đọc sách', altTz:'Cài đặt múi giờ', altKindle:'Ứng dụng trên Kindle', altDispSet:'Cài đặt màn hình luôn bật', altDisplay:'Màn hình đầu giường', altFail:'Dải báo đồng bộ thất bại',
     title:'Hướng dẫn — Baby Care Tracker'
   }
 };
-var FR = { title: document.title,
+var FR = { title: document.title, vidFeed:'Vidéo : noter une tétée',
   altHome:'L’écran d’accueil de l’appli', altLang:'Réglage de la langue', altBaby:'Prénom et date de naissance de bébé', altBfStart:'Allaitement : commencer à gauche ou à droite', altBfRun:'Minuteur de tétée en cours', altDiaper:'Noter une couche', altVitd:'Rappel de vitamine D', altSync:'Réglages de synchronisation', altKindleSet:'Réglage du mode liseuse', altTz:'Réglage du fuseau horaire', altKindle:'L’appli sur un Kindle', altDispSet:'Réglage de l’écran permanent', altDisplay:'L’écran de chevet', altFail:'Bandeau d’échec de synchronisation' };
 Array.prototype.forEach.call(document.querySelectorAll('[data-i]'), function(el){ var k=el.getAttribute('data-i'); if(FR[k]==null) FR[k]=el.innerHTML; });
 function setLang(lang){
   var d = lang==='fr' ? FR : (T[lang]||FR);
   Array.prototype.forEach.call(document.querySelectorAll('[data-i]'), function(el){ var k=el.getAttribute('data-i'); if(d[k]!=null) el.innerHTML=d[k]; });
   Array.prototype.forEach.call(document.querySelectorAll('[data-i-alt]'), function(el){ var k=el.getAttribute('data-i-alt'); if(d[k]!=null) el.setAttribute('alt', d[k]); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-i-aria]'), function(el){ var k=el.getAttribute('data-i-aria'); if(d[k]!=null) el.setAttribute('aria-label', d[k]); });
+  // Videos too: swap source and poster, keep it stopped until the reader taps play.
+  Array.prototype.forEach.call(document.querySelectorAll('video[data-vid]'), function(v){ var n=v.getAttribute('data-vid'); v.poster='site/video/'+n+'-'+lang+'.png'; v.src='site/video/'+n+'-'+lang+'.webm'; });
   // Screenshots exist in each language.
   Array.prototype.forEach.call(document.querySelectorAll('img[data-img]'), function(el){ el.src='site/guide/'+lang+'/'+el.getAttribute('data-img'); });
   document.title = d.title || FR.title;
