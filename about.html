@@ -199,15 +199,15 @@
         <li>Créez un Google Sheet, puis <b>Extensions → Apps Script</b>.</li>
         <li>Collez-y <a href="google-apps-script.gs">ce script</a> et enregistrez.</li>
         <li><b>Déployer → Nouveau déploiement → Application Web</b> — Exécuter en tant que : <i>moi</i> ; Accès : <i>tout le monde</i>.</li>
-        <li>Copiez l’adresse qui finit par <code>/exec</code> dans l’appli : <b>Réglages → Synchronisation (Google Sheet)</b>.</li>
+        <li>Copiez l’adresse qui finit par <code>/exec</code> dans l’appli : <b>Réglages → Partage entre téléphones</b>.</li>
         <li>Sur ce téléphone, touchez <b>Copier le lien</b> et ouvrez ce lien sur le deuxième téléphone : il est connecté.</li>
       </ol>
     </details>
     <details>
       <summary data-i="kTitle">Sur une liseuse ou un écran de chevet</summary>
       <ol data-i="kSteps">
-        <li><b>Kindle</b> : ouvrez l’appli dans le navigateur, puis <b>Réglages → Mode liseuse</b>.</li>
-        <li><b>Écran de chevet</b> : sur un ancien téléphone, <b>Réglages → Écran permanent → Ouvrir l’écran</b>, puis mettez la page en favori et laissez le téléphone branché.</li>
+        <li><b>Kindle</b> : ouvrez l’appli dans le navigateur, puis <b>Réglages → Appareils → Mode liseuse</b>.</li>
+        <li><b>Écran de chevet</b> : sur un ancien téléphone, <b>Réglages → Appareils → Écran permanent → Ouvrir l’écran</b>, puis mettez la page en favori et laissez le téléphone branché.</li>
         <li>Pour les connecter au même carnet, utilisez <b>Copier le lien</b> / <b>Copier le lien écran</b> : le lien est court, pour pouvoir le taper à la main.</li>
       </ol>
     </details>
@@ -279,9 +279,9 @@ var T = {
     s2:'In <b>Settings</b>, enter your baby’s name and date of birth.<small>The date of birth drives the age-based guidance (fever, number of diapers).</small>',
     s3:'You’re ready.<small>Everything works offline, even in a maternity room with no signal.</small>',
     shareTitle:'Share between two phones (5 min, optional)',
-    shareSteps:'<li>Create a Google Sheet, then <b>Extensions → Apps Script</b>.</li><li>Paste <a href="google-apps-script.gs">this script</a> and save.</li><li><b>Deploy → New deployment → Web app</b> — Execute as: <i>Me</i>; Who has access: <i>Anyone</i>.</li><li>Copy the address ending in <code>/exec</code> into the app: <b>Settings → Cloud sync (Google Sheet)</b>.</li><li>On that phone, tap <b>Copy setup link</b> and open the link on the second phone: it’s connected.</li>',
+    shareSteps:'<li>Create a Google Sheet, then <b>Extensions → Apps Script</b>.</li><li>Paste <a href="google-apps-script.gs">this script</a> and save.</li><li><b>Deploy → New deployment → Web app</b> — Execute as: <i>Me</i>; Who has access: <i>Anyone</i>.</li><li>Copy the address ending in <code>/exec</code> into the app: <b>Settings → Sharing between phones</b>.</li><li>On that phone, tap <b>Copy setup link</b> and open the link on the second phone: it’s connected.</li>',
     kTitle:'On an e-reader or a bedside display',
-    kSteps:'<li><b>Kindle</b>: open the app in the browser, then <b>Settings → E-reader mode</b>.</li><li><b>Bedside display</b>: on an old phone, <b>Settings → Always-on display → Open display</b>, then bookmark the page and keep the phone plugged in.</li><li>To connect them to the same log, use <b>Copy setup link</b> / <b>Copy display link</b>: the link is short so you can type it by hand.</li>',
+    kSteps:'<li><b>Kindle</b>: open the app in the browser, then <b>Settings → Devices → E-reader mode</b>.</li><li><b>Bedside display</b>: on an old phone, <b>Settings → Devices → Always-on display → Open display</b>, then bookmark the page and keep the phone plugged in.</li><li>To connect them to the same log, use <b>Copy setup link</b> / <b>Copy display link</b>: the link is short so you can type it by hand.</li>',
     storyTitle:'💛 Our story',
     p1:'Summer 2026, in the middle of a heatwave, at the Versailles maternity ward (Hôpital André Mignot). Two fans running, the windows wide open, and our daughter A. just born.',
     p2:'It’s 3am. We write everything on the sheet the nurses gave us and in our phone notes, but it soon isn’t enough: which breast last time? How long ago? What colour was the poop?',
@@ -321,9 +321,9 @@ var T = {
     s2:'Trong <b>Cài đặt</b>, nhập tên và ngày sinh của bé.<small>Ngày sinh dùng cho các gợi ý theo tuổi (sốt, số tã mỗi ngày).</small>',
     s3:'Xong rồi.<small>Mọi thứ hoạt động không cần mạng, kể cả trong phòng sinh không có sóng.</small>',
     shareTitle:'Chia sẻ giữa hai điện thoại (5 phút, không bắt buộc)',
-    shareSteps:'<li>Tạo một Google Sheet, rồi <b>Tiện ích mở rộng → Apps Script</b>.</li><li>Dán <a href="google-apps-script.gs">đoạn mã này</a> và lưu.</li><li><b>Triển khai → Tùy chọn triển khai mới → Ứng dụng web</b> — Thực thi với tư cách: <i>Tôi</i>; Người có quyền truy cập: <i>Bất kỳ ai</i>.</li><li>Sao chép địa chỉ kết thúc bằng <code>/exec</code> vào ứng dụng: <b>Cài đặt → Đồng bộ (Google Sheet)</b>.</li><li>Trên điện thoại này, chạm <b>Sao chép liên kết</b> và mở liên kết đó trên điện thoại thứ hai: thế là đã kết nối.</li>',
+    shareSteps:'<li>Tạo một Google Sheet, rồi <b>Tiện ích mở rộng → Apps Script</b>.</li><li>Dán <a href="google-apps-script.gs">đoạn mã này</a> và lưu.</li><li><b>Triển khai → Tùy chọn triển khai mới → Ứng dụng web</b> — Thực thi với tư cách: <i>Tôi</i>; Người có quyền truy cập: <i>Bất kỳ ai</i>.</li><li>Sao chép địa chỉ kết thúc bằng <code>/exec</code> vào ứng dụng: <b>Cài đặt → Chia sẻ giữa các điện thoại</b>.</li><li>Trên điện thoại này, chạm <b>Sao chép liên kết</b> và mở liên kết đó trên điện thoại thứ hai: thế là đã kết nối.</li>',
     kTitle:'Trên máy đọc sách hoặc màn hình đầu giường',
-    kSteps:'<li><b>Kindle</b>: mở ứng dụng trong trình duyệt, rồi <b>Cài đặt → Chế độ máy đọc sách</b>.</li><li><b>Màn hình đầu giường</b>: trên một điện thoại cũ, <b>Cài đặt → Màn hình luôn bật → Mở màn hình</b>, rồi lưu trang vào dấu trang và cắm sạc.</li><li>Để kết nối vào cùng một cuốn sổ, dùng <b>Sao chép liên kết</b> / <b>Sao chép liên kết màn hình</b>: liên kết ngắn để có thể gõ tay.</li>',
+    kSteps:'<li><b>Kindle</b>: mở ứng dụng trong trình duyệt, rồi <b>Cài đặt → Thiết bị → Chế độ máy đọc sách</b>.</li><li><b>Màn hình đầu giường</b>: trên một điện thoại cũ, <b>Cài đặt → Thiết bị → Màn hình luôn bật → Mở màn hình</b>, rồi lưu trang vào dấu trang và cắm sạc.</li><li>Để kết nối vào cùng một cuốn sổ, dùng <b>Sao chép liên kết</b> / <b>Sao chép liên kết màn hình</b>: liên kết ngắn để có thể gõ tay.</li>',
     storyTitle:'💛 Câu chuyện của chúng tôi',
     p1:'Mùa hè 2026, giữa đợt nắng nóng, tại khoa sản Versailles (Hôpital André Mignot). Hai chiếc quạt chạy không ngừng, cửa sổ mở toang, và con gái A. của chúng tôi vừa chào đời.',
     p2:'3 giờ sáng. Chúng tôi ghi mọi thứ vào tờ giấy các cô y tá đưa và vào ghi chú điện thoại, nhưng chẳng mấy chốc đã không đủ: lần trước bú bên nào? Cách đây bao lâu? Phân màu gì?',
