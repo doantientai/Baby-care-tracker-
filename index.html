@@ -31,6 +31,40 @@
     --label:#7c8aa3; --info-bg:#0e2a3a; --info-ink:#bae6fd; --ev-active:#1b2436;
     --nav-bg:rgba(17,24,39,.96); --daycap:linear-gradient(#0b1220,#0b1220dd);
   }
+  /* Night: warm and dim between 21:00 and 07:00, like the bedside display. */
+  :root[data-theme="night"]{
+    color-scheme: dark;
+    --brand:#e7b072; --brand-d:#f1c48f; --bg:#171310; --ink:#efe6da; --muted:#b3a596;
+    --line:#3a3029; --card:#211b17; --card-border:#2e2620; --pink:#c97f94; --pink-l:#35262a; --pink-ink:#eab0c0;
+    --indigo:#8f84bd; --indigo-l:#29243a; --indigo-ink:#d0c7ee;
+    --good:#8fc7a0; --good-l:#1d2a21; --good-ink:#b9dfc3; --warn:#e7b072; --warn-l:#33271a; --warn-ink:#f1c48f;
+    --bad:#e08e86; --bad-l:#3a201d; --bad-ink:#f0b5ae;
+    --field-bg:#1c1713; --ghost-bg:#2b241e; --ghost-ink:#e6dccf; --chip-bg:#211b17; --chip-ink:#d6cabb;
+    --label:#8a7d6e; --info-bg:#2b2219; --info-ink:#e9cfa6; --ev-active:#2a221d;
+    --nav-bg:rgba(23,19,16,.96); --daycap:linear-gradient(#171310,#171310dd);
+  }
+  /* Home: the feed card (answers "when did she last eat, which side?") */
+  .hero-feed .hf-top{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+  .hero-feed .hf-since{min-width:0}
+  .hero-feed .hf-big{font-family:ui-rounded,'SF Pro Rounded',system-ui,sans-serif;font-size:2.6rem;font-weight:700;line-height:1.05;letter-spacing:-.02em;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+  .hero-feed.late .hf-big{color:var(--warn)}
+  .hero-feed .hf-none{font-size:1.05rem;font-weight:600;margin:8px 0 2px}
+  .hero-feed .hf-next{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .hero-feed .hf-sides{display:flex;gap:8px}
+  .hero-feed .hf-sd{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:1.15rem;background:var(--ghost-bg);color:var(--muted)}
+  .hero-feed .hf-sd.on{background:var(--pink);color:#fff;box-shadow:0 0 0 4px var(--pink-l)}
+  .hero-feed .hf-go{margin-top:14px;background:var(--pink);color:#fff;padding:15px;font-size:1.05rem}
+  .hero-feed .hf-alt{display:block;margin:8px auto 0;background:none;border:none;color:var(--muted);font:inherit;font-size:.88rem;text-decoration:underline;cursor:pointer;padding:4px 10px}
+  /* Home: one-tap diapers */
+  .dq-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+  .dq-b{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px;border-radius:14px;border:1px solid var(--card-border);background:var(--ghost-bg);color:var(--ink);font:inherit;font-size:1.35rem;cursor:pointer;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+  .dq-b span{font-size:.82rem;font-weight:700}
+  .dq-b:active{transform:scale(.97)}
+  /* Toast with Undo */
+  #toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));transform:translate(-50%,10px);z-index:45;max-width:calc(100% - 32px);display:flex;align-items:center;gap:14px;background:#0f172a;color:#fff;border-radius:14px;padding:10px 12px 10px 16px;font-size:.92rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+  #toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+  #toast button{background:none;border:none;color:#7dd3fc;font:inherit;font-weight:800;padding:6px 4px;cursor:pointer}
+  :root[data-kindle="1"] #toast{background:#000;transition:none}
   *{box-sizing:border-box}
   html,body{height:100%}
   body{margin:0;background:var(--bg);color:var(--ink);
@@ -274,7 +308,7 @@
 
 <script>
 "use strict";
-const APP_VERSION = '2026-06-29.46';   // bumped on each deploy to trigger the update banner
+const APP_VERSION = '2026-06-29.47';   // bumped on each deploy to trigger the update banner
 // Pay-what-you-want link (e.g. Ko-fi). Empty = the support prompt and Settings card stay hidden.
 const SUPPORT_URL = 'https://ko-fi.com/taidoan';
 // Public website shared by "Share the app with a friend" (never the sync link).
@@ -307,6 +341,7 @@ const DEFAULT_SETTINGS = {
   storyHidden: false,    // the "Our story" link during feeds was dismissed (✕)
   kindle: false,
   tzOffset: null,   // null = use this device's own clock/zone; else fixed UTC offset in minutes
+  nightAuto: true,  // warm, dim colours from 21:00 to 07:00
 };
 function loadJSON(key, fallback){ try{ const r = localStorage.getItem(key); return r ? JSON.parse(r) : fallback; }catch(e){ return fallback; } }
 function saveJSON(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
@@ -376,7 +411,9 @@ function copyText(s){
 function saveSettings(patch){ settings = Object.assign({}, settings, patch); saveJSON(LS.settings, settings); applyTheme(); render(); }
 
 // Theme: 'system' follows the OS; 'light'/'dark' force it.
+function isNightNow(){ const h=tzShift(Date.now()).getHours(); return h>=21 || h<7; }
 function resolvedTheme(){
+  if(settings.nightAuto!==false && isNightNow()) return 'night';
   if(settings.theme==='light'||settings.theme==='dark') return settings.theme;
   return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
 }
@@ -388,7 +425,7 @@ function applyTheme(){
   if(k) document.documentElement.setAttribute('data-kindle', '1');
   else document.documentElement.removeAttribute('data-kindle');
   const meta = document.querySelector('meta[name="theme-color"]');
-  if(meta) meta.setAttribute('content', k ? '#ffffff' : (r==='dark' ? '#0b1220' : '#0ea5e9'));
+  if(meta) meta.setAttribute('content', k ? '#ffffff' : (r==='night' ? '#171310' : r==='dark' ? '#0b1220' : '#0ea5e9'));
 }
 if(window.matchMedia){
   try{ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ()=>{ if(settings.theme==='system') applyTheme(); }); }catch(e){}
@@ -552,7 +589,7 @@ const EN = {
   syncSending_one:'Sending 1 entry…', syncSending_other:'Sending {n} entries…',
   syncPending_one:'1 entry not sent yet', syncPending_other:'{n} entries not sent yet',
   syncOffline_one:'Offline — 1 entry will be sent when you’re back online', syncOffline_other:'Offline — {n} entries will be sent when you’re back online',
-  ageShort_d:'{n}d', ageShort_w:'{n}w', setVitD:'Vitamin D at {time}',
+  ageShort_d:'{n}d', ageShort_w:'{n}w', setVitD:'Vitamin D at {time}', sinceM:'{m} min', sinceH:'{h}h {m}', diaperLogged:'🧷 Diaper logged: {kind}',
   occ_weight:'🎉 {name} is back to birth weight!',
   occ_month:'🎂 {name} is 1 month old! Well done on this first month.',
   occ_days100:'💯 100 days with {name}!',
@@ -581,7 +618,7 @@ const FR = {
   syncSending_one:'Envoi d’1 entrée…', syncSending_other:'Envoi de {n} entrées…',
   syncPending_one:'1 entrée pas encore envoyée', syncPending_other:'{n} entrées pas encore envoyées',
   syncOffline_one:'Hors ligne — 1 entrée sera envoyée au retour du réseau', syncOffline_other:'Hors ligne — {n} entrées seront envoyées au retour du réseau',
-  ageShort_d:'{n} j', ageShort_w:'{n} sem.', setVitD:'Vitamine D à {time}',
+  ageShort_d:'{n} j', ageShort_w:'{n} sem.', setVitD:'Vitamine D à {time}', sinceM:'{m} min', sinceH:'{h} h {m}', diaperLogged:'🧷 Couche notée : {kind}',
   occ_weight:'🎉 {name} a retrouvé son poids de naissance !',
   occ_month:'🎂 {name} a 1 mois ! Bravo pour ce premier mois.',
   occ_days100:'💯 100 jours avec {name} !',
@@ -671,6 +708,18 @@ const FR = {
   'Sheet synced':'Sheet synchronisé','sync error':'erreur de synchro',
   'Getting the latest entries…':'Récupération des dernières entrées…',
   'Up to date':'À jour','Offline':'Hors ligne',
+  'No feed yet':'Pas encore de repas',
+  'Start on the left':'Commencer à gauche',
+  'Start on the right':'Commencer à droite',
+  'or left':'ou à gauche',
+  'or right':'ou à droite',
+  'Diaper — one tap':'Couche — un appui',
+  'Hold for details':'Appui long : détails',
+  'Undo':'Annuler',
+  'Undone':'Annulé',
+  'Night mode':'Mode nuit',
+  'Warm, dim colours at night, like the bedside display.':'Couleurs chaudes et douces la nuit, comme l’écran de chevet.',
+  'Automatic, 9pm–7am':'Automatique, 21 h – 7 h',
   'Baby & family':'Bébé & famille',
   'Sharing between phones':'Partage entre téléphones',
   'Reminders & tracking':'Rappels & suivi',
@@ -752,7 +801,7 @@ const VI = {
   syncSending_one:'Đang gửi 1 mục…', syncSending_other:'Đang gửi {n} mục…',
   syncPending_one:'1 mục chưa được gửi', syncPending_other:'{n} mục chưa được gửi',
   syncOffline_one:'Mất kết nối — 1 mục sẽ được gửi khi có mạng lại', syncOffline_other:'Mất kết nối — {n} mục sẽ được gửi khi có mạng lại',
-  ageShort_d:'{n} ngày', ageShort_w:'{n} tuần', setVitD:'Vitamin D lúc {time}',
+  ageShort_d:'{n} ngày', ageShort_w:'{n} tuần', setVitD:'Vitamin D lúc {time}', sinceM:'{m} phút', sinceH:'{h} giờ {m}', diaperLogged:'🧷 Đã ghi tã: {kind}',
   occ_weight:'🎉 {name} đã lấy lại cân nặng lúc sinh!',
   occ_month:'🎂 Chúc mừng đầy tháng {name}! Bạn đã làm rất tốt.',
   occ_days100:'💯 100 ngày bên {name}!',
@@ -842,6 +891,18 @@ const VI = {
   'Sheet synced':'Đã đồng bộ Sheet','sync error':'lỗi đồng bộ',
   'Getting the latest entries…':'Đang tải các mục mới nhất…',
   'Up to date':'Đã cập nhật','Offline':'Mất kết nối',
+  'No feed yet':'Chưa có cữ ăn nào',
+  'Start on the left':'Bắt đầu bên trái',
+  'Start on the right':'Bắt đầu bên phải',
+  'or left':'hoặc bên trái',
+  'or right':'hoặc bên phải',
+  'Diaper — one tap':'Tã — chạm một lần',
+  'Hold for details':'Giữ lâu: chi tiết',
+  'Undo':'Hoàn tác',
+  'Undone':'Đã hoàn tác',
+  'Night mode':'Chế độ đêm',
+  'Warm, dim colours at night, like the bedside display.':'Màu ấm, dịu vào ban đêm, giống màn hình đầu giường.',
+  'Automatic, 9pm–7am':'Tự động, 21h–7h',
   'Baby & family':'Em bé & gia đình',
   'Sharing between phones':'Chia sẻ giữa các điện thoại',
   'Reminders & tracking':'Nhắc nhở & theo dõi',
@@ -1413,7 +1474,6 @@ function viewHome(){
   const now=Date.now();
   const target=expectedWet();
 
-  const bfCard=bfCardHtml();
   const slCard = sl
     ? `<button class="btn btn-block" data-act="sleep-stop" style="background:var(--indigo);color:#fff;margin-top:8px;flex-direction:column;padding:12px"><span class="tabular" style="font-weight:800;font-size:1.05rem">${fmtDur((now-sl.startedAt)/1000)}</span><span class="tiny" style="opacity:.9">${t('tap to stop')}</span></button>`
     : `<button class="btn btn-block" data-act="sleep-start" style="background:var(--indigo-l);color:var(--indigo-ink);margin-top:8px;padding:14px">😴 ${t('Start sleep')}</button>`;
@@ -1437,6 +1497,12 @@ function viewHome(){
 
     ${occasionCardHtml()}
 
+    ${feedHeroHtml(feedGapBanner)}
+
+    ${diaperQuickHtml()}
+
+    ${settings.showSleep!==false?`<div class="card pad-s"><div class="label" style="margin:0">${t('Sleep')}</div>${slCard}</div>`:''}
+
     <div class="card pad">
       <div class="between">
         <div><div class="label" style="margin:0">${t('Outside')}</div><div class="small muted">${esc(settings.locationLabel)}</div></div>
@@ -1446,10 +1512,7 @@ function viewHome(){
       ${weatherCache?`<div class="banner info" style="margin-top:8px">${(()=>{const o=outfitAdvice(weatherCache.t);return o.e+' '+t('Going out')+' : '+t(o.key);})()}</div>`:''}
     </div>
 
-    ${settings.showSleep!==false?`<div class="grid g2">
-      <div class="card pad-s"><div class="label" style="margin:0">${t('Breastfeeding')}</div>${bfCard}</div>
-      <div class="card pad-s"><div class="label" style="margin:0">${t('Sleep')}</div>${slCard}</div>
-    </div>`:`<div class="card pad-s"><div class="label" style="margin:0">${t('Breastfeeding')}</div>${bfCard}</div>`}
+
 
     <div>
       <div class="section-title">${t('Quick log')}</div>
@@ -1467,8 +1530,6 @@ function viewHome(){
         ${settings.showSleep!==false?`<div class="card pad-s stat"><div class="label" style="margin:0">${t('Sleep')}</div><div class="v">${fmtDur(s.sleepSec)}</div></div>`:''}
         <div class="card pad-s stat"><div class="label" style="margin:0">${t('Breast time')}</div><div class="v">${fmtDur(s.bfSec)}</div>${s.bfCount?`<div class="tiny muted">${s.bfCount} × · ${t('avg')} ${fmtDur(s.bfSec/s.bfCount)}</div>`:''}</div>
       </div>
-      ${feedGapBanner}
-      ${lastFeed?`<div class="banner pink" style="margin-top:12px">${t('nextFeed',{side:'<b>'+tl(sug==='left'?'Left':'Right')+'</b>',last:tl(lastSide==='left'?'Left':'Right')})}</div>`:''}
     </div>
 
     <div>
@@ -1483,6 +1544,63 @@ function viewHome(){
       <button class="btn btn-ghost" data-act="share-app" style="font-size:.9rem">💌 ${t('Share the app with a friend')}</button>
     </div>
   </div>`;
+}
+// The feed card at the top of Home: time since the last feed (breast or bottle),
+// the breast to offer, and one big button to start it. Becomes the live timer
+// while a feed is running.
+function feedHeroHtml(gapBanner){
+  if(getTimer('breastfeed')) return `<div class="card pad hero-feed"><div class="label" style="margin:0">${t('Breastfeeding')}</div>${bfCardHtml()}</div>`;
+  const now=Date.now();
+  const lastBf=lastOfType('breastfeed'), sug=nextSide(lastBf?lastBf.data.side:null), other=sug==='left'?'right':'left';
+  const last=events.filter(e=>e.type==='breastfeed'||e.type==='bottle').sort((a,b)=>b.at-a.at)[0];
+  const L=t('Start L').slice(-1), R=t('Start R').slice(-1);
+  let big='', meta=t('No feed yet');
+  if(last){
+    const mins=Math.max(0,Math.floor((now-last.at)/60000));
+    big = mins<60 ? t('sinceM',{m:mins}) : t('sinceH',{h:Math.floor(mins/60),m:String(mins%60).padStart(2,'0')});
+    if(last.type==='breastfeed'){ const b=bfSecOf(last); meta=clock(last.at)+' · '+L+' '+fmtDur(b.l)+' · '+R+' '+fmtDur(b.r); }
+    else meta=clock(last.at)+' · 🍼 '+((last.data&&last.data.volumeMl)||0)+' ml';
+  }
+  return `<div class="card pad hero-feed${gapBanner?' late':''}">
+    <div class="hf-top">
+      <div class="hf-since"><div class="label" style="margin:0">${t('Since last feed')}</div>
+        ${big?`<div class="hf-big">${big}</div><div class="small muted">${meta}</div>`:`<div class="hf-none">${meta}</div>`}</div>
+      <div class="hf-next"><div class="label" style="margin:0">${t('Next side')}</div>
+        <div class="hf-sides"><span class="hf-sd ${sug==='left'?'on':''}">${L}</span><span class="hf-sd ${sug==='right'?'on':''}">${R}</span></div></div>
+    </div>
+    ${gapBanner||''}
+    <button class="btn btn-block hf-go" data-act="bf-start" data-side="${sug}">▶ ${t(sug==='left'?'Start on the left':'Start on the right')}</button>
+    <button class="hf-alt" data-act="bf-start" data-side="${other}">${t(other==='left'?'or left':'or right')}</button>
+  </div>`;
+}
+// One-tap diapers: a tap logs it (amount "average") with an Undo toast; a long
+// press opens the full form (colour, texture…).
+function diaperQuickHtml(){
+  return `<div class="card pad-s">
+    <div class="between"><div class="label" style="margin:0">🧷 ${t('Diaper — one tap')}</div><div class="tiny muted">${t('Hold for details')}</div></div>
+    <div class="dq-row">
+      <button class="dq-b" data-qd="pee">💧<span>${t('Pee')}</span></button>
+      <button class="dq-b" data-qd="poop">💩<span>${t('Poop')}</span></button>
+      <button class="dq-b" data-qd="both">💧💩<span>${t('Both')}</span></button>
+    </div>
+  </div>`;
+}
+function quickDiaper(kind){
+  const e=addEvent({type:'diaper', at:Date.now(), caregiver:defaultCaregiver('diaper'), data:Object.assign(defaultData('diaper'),{kind:kind, amount:'average'})});
+  try{ if(navigator.vibrate) navigator.vibrate(15); }catch(x){}
+  render();
+  const label=t(kind==='pee'?'Pee':kind==='poop'?'Poop':'Both').toLowerCase();
+  showToast(t('diaperLogged',{kind:label}), t('Undo'), ()=>{ deleteEvent(e.id); render(); showToast(t('Undone')); });
+}
+let toastTimer=null;
+function showToast(msg, actLabel, onAct){
+  let el=document.getElementById('toast');
+  if(!el){ el=document.createElement('div'); el.id='toast'; el.setAttribute('role','status'); document.body.appendChild(el); }
+  setHTML(el, '<span>'+msg+'</span>'+(actLabel?'<button type="button">'+actLabel+'</button>':''));
+  el.className='on';
+  const b=el.querySelector('button');
+  if(b) b.onclick=()=>{ clearTimeout(toastTimer); el.className=''; if(onAct) onAct(); };
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>{ el.className=''; }, actLabel?6000:2000);
 }
 function eventRow(e){
   const m=META[e.type]; const warn=eventConcerning(e);
@@ -1757,6 +1875,12 @@ function settingsSection(id){
     </div>
 `;
   if(id==='display') return `
+    <div class="card pad">
+      <h2 style="margin-bottom:4px">🌙 ${t('Night mode')}</h2>
+      <div class="tiny muted" style="margin-bottom:12px">${t('Warm, dim colours at night, like the bedside display.')}</div>
+      <div class="between"><span class="small">${t('Automatic, 9pm–7am')}</span>
+        <button class="chip ${settings.nightAuto!==false?'on':''}" data-act="toggle-night">${settings.nightAuto!==false?t('On'):t('Off')}</button></div>
+    </div>
     <div class="card pad">
       <div class="between"><h2>${t('Language')}</h2>
         <div class="chips"><button class="chip ${settings.lang==='en'?'on':''}" data-lang="en">English</button><button class="chip ${settings.lang==='fr'?'on':''}" data-lang="fr">Français</button><button class="chip ${settings.lang==='vi'?'on':''}" data-lang="vi">Tiếng Việt</button></div>
@@ -2072,6 +2196,7 @@ document.addEventListener('click', (ev)=>{
   if(act==='fs'){ toggleFs(); return; }
   if(act==='toggle-feedgap') return saveSettings({ feedGapEnabled: !settings.feedGapEnabled });
   if(act==='toggle-sleep') return saveSettings({ showSleep: settings.showSleep===false });
+  if(act==='toggle-night') return saveSettings({ nightAuto: settings.nightAuto===false });
   if(act==='toggle-kindle') return saveSettings({ kindle: !settings.kindle });
   if(act==='set-tz'){ const v=el.dataset.tz; return saveSettings({ tzOffset: v===''?null:parseInt(v,10) }); }
   if(act==='toggle-vitd') return saveSettings({ vitDEnabled: !settings.vitDEnabled });
@@ -2082,6 +2207,14 @@ document.addEventListener('click', (ev)=>{
   if(act==='support-link'){ try{ window.open(SUPPORT_URL,'_blank','noopener'); }catch(e){} return saveSettings({ supportOpened:true }); }
   if(act==='log-vitd'){ addEvent({type:'medication', at:Date.now(), caregiver:settings.currentCaregiver, data:{name:t('Vitamin D'), dose:'400 IU'}}); render(); return; }
 });
+
+// One-tap diaper buttons: tap = log now, long press = full form.
+let qdTimer=null, qdLong=false;
+document.addEventListener('pointerdown', ev=>{ const b=ev.target.closest('[data-qd]'); if(!b) return; qdLong=false; clearTimeout(qdTimer);
+  qdTimer=setTimeout(()=>{ qdLong=true; try{ if(navigator.vibrate) navigator.vibrate(25); }catch(x){} openSheet('diaper',null,{data:{kind:b.dataset.qd}}); },550); });
+['pointerup','pointercancel','pointerleave'].forEach(n=>document.addEventListener(n, ()=>clearTimeout(qdTimer), true));
+document.addEventListener('contextmenu', ev=>{ if(ev.target.closest('[data-qd]')) ev.preventDefault(); });
+document.addEventListener('click', ev=>{ const b=ev.target.closest('[data-qd]'); if(!b) return; if(qdLong){ qdLong=false; return; } quickDiaper(b.dataset.qd); });
 
 // text / number / datetime inputs (no full re-render to preserve focus)
 document.addEventListener('input', (ev)=>{
@@ -2111,6 +2244,8 @@ document.addEventListener('input', (ev)=>{
 
 // live tick for running timers on Home
 setInterval(()=>{ if(kindleOn()||DISPLAY) return; if(state.tab==='home' && !state.sheet && (getTimer('breastfeed')||getTimer('sleep'))) render(); }, 1000);
+// Keep "since last feed" current, and switch night colours on/off on time.
+setInterval(()=>{ applyTheme(); if(!kindleOn() && !DISPLAY && state.tab==='home' && !state.sheet && !getTimer('breastfeed') && !getTimer('sleep')) render(); }, 30000);
 
 // Always-on display: refresh the counters/clock, and pull other devices' entries.
 if(DISPLAY){
